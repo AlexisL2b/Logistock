@@ -1,14 +1,24 @@
-import { Link } from "react-router"
+import { Link, Route, Router, Routes } from "react-router"
 import LoginPage from "../loginPage/LoginPage"
 import { Box, Button } from "@mui/material"
 import Menu from "../../reusable-ui/Menu"
 import DashboardIcon from "@mui/icons-material/Dashboard"
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart"
+import CategoryIcon from "@mui/icons-material/Category"
+
+import Orders from "./orders/Orders"
+import Categories from "./catégories/Categories"
+import Home from "./home/Home"
 
 export default function Dashboard() {
   const links = [
-    { path: "/dashboard", label: "Dashboard", icon: <DashboardIcon /> },
-    { path: "/orders", label: "Orders", icon: <ShoppingCartIcon /> },
+    { path: "/dashboard/home", label: "Dashboard", icon: <DashboardIcon /> },
+    { path: "/dashboard/orders", label: "Orders", icon: <ShoppingCartIcon /> },
+    {
+      path: "/dashboard/categories",
+      label: "Categories",
+      icon: <CategoryIcon />,
+    },
   ]
   return (
     <Box sx={{ height: "100vh" }}>
@@ -20,7 +30,6 @@ export default function Dashboard() {
         }}
         className="dashboardContainer"
       >
-        {/* Barre latérale */}
         <Box
           sx={{
             borderRadius: 2,
@@ -35,7 +44,6 @@ export default function Dashboard() {
           <Menu links={links} />
         </Box>
 
-        {/* Zone principale */}
         <Box
           sx={{
             flex: 1, // Prend tout l'espace restant
@@ -44,20 +52,11 @@ export default function Dashboard() {
           }}
           className="dashboardMain"
         >
-          <Link to="/">
-            <Button
-              sx={{
-                marginTop: 2,
-                color: "primary.contrastText",
-                backgroundColor: "primary.main",
-                "&:hover": {
-                  backgroundColor: "primary.dark",
-                },
-              }}
-            >
-              Déconnexion
-            </Button>
-          </Link>
+          <Routes>
+            <Route path="home" element={<Home />} /> {/* Chemin relatif */}
+            <Route path="orders" element={<Orders />} />
+            <Route path="categories" element={<Categories />} />
+          </Routes>
         </Box>
       </Box>
     </Box>

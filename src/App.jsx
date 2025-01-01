@@ -9,6 +9,7 @@ import theme from "./themes"
 import Dashboard from "./components/pages/dashboard/Dashboard"
 import PasswordForgot from "./components/pages/passwordForgot/PasswordForgot"
 import ErrorPage from "./components/pages/error/ErrorPage"
+import Home from "./components/pages/dashboard/home/Home"
 
 function App() {
   const [count, setCount] = useState(0)
@@ -19,9 +20,10 @@ function App() {
       <ThemeProvider theme={theme}>
         <Routes>
           <Route path="/" element={<LoginPage />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/*" element={<Dashboard />} />
           <Route path="/passwordforgot" element={<PasswordForgot />} />
-          <Route path="*" element={<ErrorPage />} />
+          <Route path="*" element={<ErrorPage />} />*
+          <Route path="/test" element={<Home />} />
         </Routes>
       </ThemeProvider>
     </>
