@@ -1,33 +1,31 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react"
+import reactLogo from "./assets/react.svg"
+import viteLogo from "/vite.svg"
+import { Route, Routes } from "react-router"
+import "./App.css"
+import LoginPage from "./components/pages/loginPage/LoginPage"
+import { ThemeProvider, CssBaseline } from "@mui/material"
+import theme from "./themes"
+import Dashboard from "./components/pages/dashboard/Dashboard"
+import PasswordForgot from "./components/pages/passwordForgot/PasswordForgot"
+import ErrorPage from "./components/pages/error/ErrorPage"
+import Home from "./components/pages/dashboard/home/Home"
 
 function App() {
   const [count, setCount] = useState(0)
+  console.log("Thème chargé :", theme)
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <ThemeProvider theme={theme}>
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/dashboard/*" element={<Dashboard />} />
+          <Route path="/passwordforgot" element={<PasswordForgot />} />
+          <Route path="*" element={<ErrorPage />} />*
+          <Route path="/test" element={<Home />} />
+        </Routes>
+      </ThemeProvider>
     </>
   )
 }
