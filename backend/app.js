@@ -1,20 +1,58 @@
 import express from "express"
-import bodyParser from "body-parser"
 import cors from "cors"
+import bodyParser from "body-parser"
 import dotenv from "dotenv"
 import connectDB from "./config/db.js"
-import productRoutes from "./routes/productRoutes.js"
 
+// Import des routes
+import categoryRoutes from "./routes/categoryRoutes.js"
+import productRoutes from "./routes/productRoutes.js"
+import supplierRoutes from "./routes/supplierRoutes.js"
+import salesPointRoutes from "./routes/salesPointRoutes.js"
+import stockLogRoutes from "./routes/stockLogRoutes.js"
+import transporterRoutes from "./routes/transporterRoutes.js"
+import userRoutes from "./routes/userRoutes.js"
+import orderRoutes from "./routes/orderRoutes.js"
+import orderDetailsRoutes from "./routes/orderDetailsRoutes.js"
+import orderShipmentRoutes from "./routes/orderShipmentRoutes.js"
+
+// Configuration de l'application
 dotenv.config()
 connectDB()
 
 const app = express()
+
+// Middleware
 app.use(cors())
 app.use(bodyParser.json())
 
-// Routes
+// Définition des routes
+app.use("/api/categories", categoryRoutes)
 app.use("/api/products", productRoutes)
+app.use("/api/suppliers", supplierRoutes)
+app.use("/api/sales_points", salesPointRoutes)
+app.use("/api/stock_logs", stockLogRoutes)
+app.use("/api/transporters", transporterRoutes)
+app.use("/api/users", userRoutes)
+app.use("/api/orders", orderRoutes)
+app.use("/api/order_details", orderDetailsRoutes)
+app.use("/api/order_shipments", orderShipmentRoutes)
 
-// Lancer le serveur
+// Gestion des routes non trouvées
+app.use((req, res, next) => {
+  res.status(404).json({ message: "Route non trouvée" })
+})
+
+// Middleware global pour la gestion des erreurs
+app.use((err, req, res, next) => {
+  console.error(err.stack)
+  res
+    .status(500)
+    .json({ message: "Une erreur interne est survenue", error: err.message })
+})
+
+// Lancement du serveur
 const PORT = process.env.PORT || 5000
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+app.listen(PORT, () => {
+  console.log(`Serveur en cours d'exécution sur le port ${PORT}`)
+})
