@@ -1,33 +1,43 @@
-import React, { useState } from "react"
-import Form from "../../../reusable-ui/Form"
-import { Box, Button, ButtonGroup } from "@mui/material"
+import React, { useEffect, useState } from "react"
+import { Box } from "@mui/material"
+import axiosInstance from "../../../../axiosConfig"
+import EnhancedTable from "../../../reusable-ui/EnhancedTable"
 
 export default function Categories() {
-  const [isVisible, setIsVisible] = useState("synthèse")
+  const [categories, setCategories] = useState([])
 
-  const handleVisible = (e, activeContent) => {
-    e.preventDefault()
-    setIsVisible(activeContent)
+  // Fonction pour recharger les données
+  const fetchCategories = () => {
+    axiosInstance
+      .get("/categories") // URL relative correcte si axiosInstance est bien configuré
+      .then((response) => {
+        setCategories(response.data) // Mise à jour des catégories dans le state
+        console.log("Catégories récupérées :", response.data)
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la récupération des catégories :", error)
+      })
   }
-  const handleSubmit = () => {
-    console.log("Je viens de sumbit mon form")
+
+  // Chargement initial des catégories
+  useEffect(() => {
+    fetchCategories()
+  }, [])
+
+  // Callback pour gérer les changements de données
+  const handleDataChange = () => {
+    console.log("Les données ont changé, rechargement...")
+    fetchCategories() // Rechargez les données lorsque le callback est déclenché
   }
+
   return (
     <Box>
-      <ButtonGroup
-        disableElevation
-        variant="contained"
-        aria-label="Disabled button group"
-      >
-        <Button onClick={(e) => handleVisible(e, "ajout")}>Ajouter</Button>
-        <Button onClick={(e) => handleVisible(e, "synthèse")}>Synthèse</Button>
-      </ButtonGroup>
-      {isVisible == "ajout" ? (
-        <Form action="submit" onSubmit={handleSubmit} />
-      ) : (
-        ""
-      )}
-      {isVisible == "synthèse" ? <p>Je suis une synthèse</p> : ""}
+      {/* Passez le callback à EnhancedTable */}
+      <EnhancedTable
+        data={categories}
+        coll={"categories"}
+        onDataChange={handleDataChange}
+      />
     </Box>
   )
 }

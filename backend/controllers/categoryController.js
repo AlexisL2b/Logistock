@@ -3,6 +3,7 @@ import Category from "../models/categoryModel.js"
 // Récupérer toutes les catégories
 export const getAllCategories = async (req, res) => {
   try {
+    console.log("Requête reçue pour récupérer les catégories")
     const categories = await Category.find()
     res.json(categories)
   } catch (error) {
