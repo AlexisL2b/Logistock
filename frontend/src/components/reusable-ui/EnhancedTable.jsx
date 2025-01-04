@@ -103,6 +103,17 @@ export default function EnhancedTable({ data, coll, onDataChange }) {
   const [openModal, setOpenModal] = useState(false)
   const [selectedRow, setSelectedRow] = useState(null)
 
+  // Générer un objet vide basé sur la structure
+  const generateEmptyObject = () => {
+    if (data.length === 0) return {}
+    const firstItem = data[0]
+    const emptyObject = {}
+    Object.keys(firstItem).forEach((key) => {
+      emptyObject[key] = key === "_id" ? undefined : "" // `_id` reste vide
+    })
+    return emptyObject
+  }
+
   const headCells = data.length
     ? Object.keys(data[0]).map((key) => ({
         id: key,
@@ -172,8 +183,14 @@ export default function EnhancedTable({ data, coll, onDataChange }) {
     }
   }
 
-  const handleOpenModal = (row) => {
+  const handleOpenModalForEdit = (row) => {
     setSelectedRow(row)
+    setOpenModal(true)
+  }
+
+  const handleOpenModalForAdd = () => {
+    const emptyObject = generateEmptyObject()
+    setSelectedRow(emptyObject)
     setOpenModal(true)
   }
 
@@ -183,26 +200,26 @@ export default function EnhancedTable({ data, coll, onDataChange }) {
 
   const handleModalSubmit = async (updatedData) => {
     try {
-      if (!updatedData._id) {
-        alert("Erreur : ID non trouvé !")
-        return
+      if (updatedData._id) {
+        await axios.put(
+          `http://localhost:5000/api/${coll}/${updatedData._id}`,
+          updatedData
+        )
+        console.log("Données mises à jour :", updatedData)
+      } else {
+        await axios.post(`http://localhost:5000/api/${coll}`, updatedData)
+        console.log("Nouvelle donnée ajoutée :", updatedData)
       }
 
-      const response = await axios.put(
-        `http://localhost:5000/api/${coll}/${updatedData._id}`,
-        updatedData
-      )
-      console.log("Données mises à jour :", response.data)
-
-      alert("Mise à jour réussie !")
+      alert("Opération réussie !")
       setOpenModal(false)
 
       if (onDataChange) {
         onDataChange()
       }
     } catch (error) {
-      console.error("Erreur lors de la mise à jour :", error)
-      alert("Erreur lors de la mise à jour !")
+      console.error("Erreur lors de l'opération :", error)
+      alert("Erreur lors de l'opération !")
     }
   }
 
@@ -267,7 +284,7 @@ export default function EnhancedTable({ data, coll, onDataChange }) {
                       </TableCell>
                     ))}
                     <TableCell>
-                      <IconButton onClick={() => handleOpenModal(row)}>
+                      <IconButton onClick={() => handleOpenModalForEdit(row)}>
                         <EditIcon />
                       </IconButton>
                     </TableCell>
@@ -300,9 +317,18 @@ export default function EnhancedTable({ data, coll, onDataChange }) {
         control={<Switch checked={dense} onChange={handleChangeDense} />}
         label="Dense padding"
       />
-      <Button variant="contained" color="error" onClick={handleDelete}>
-        Supprimer
-      </Button>
+      <Box sx={{ display: "flex", gap: 2 }}>
+        <Button variant="contained" color="error" onClick={handleDelete}>
+          Supprimer
+        </Button>
+        <Button
+          variant="contained"
+          color="success"
+          onClick={handleOpenModalForAdd}
+        >
+          Ajouter
+        </Button>
+      </Box>
 
       {/* Intégration du modal */}
       {selectedRow && (
