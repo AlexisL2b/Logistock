@@ -13,7 +13,6 @@ import Home from "./components/pages/dashboard/home/Home"
 
 function App() {
   const [count, setCount] = useState(0)
-  console.log("Thème chargé :", theme)
 
   return (
     <>

@@ -1,0 +1,8 @@
+1. Gerer les conflicts entre produit/categorie ect.
+    ex: Si un produit a une categorie "meuble", et que je supprime la categorie meuble gérer ce cas
+
+2. Ajouter des listes déroulante pour donner acces lors des modification/ajout aux différentes dépendance.
+    ex: Pour un produit si je veux le modifier dans la section categorie, un liste déroulante sera présente avec les categories disponibles dans ma collection
+
+3. Validitée de champs des formulaires:
+    dans chaque volet, implémenter une validation des différents champs de formulaire.

@@ -28,7 +28,7 @@ export default function BasicModal({
   const [formData, setFormData] = useState(objectData)
 
   useEffect(() => {
-    setFormData(objectData) // Mettre à jour les données du formulaire lorsque `objectData` change
+    setFormData(objectData) // Mettre à jour les données du formulaire lorsque objectData change
   }, [objectData])
 
   const handleInputChange = (e) => {
@@ -41,7 +41,8 @@ export default function BasicModal({
 
   const handleSubmit = () => {
     onSubmit(formData) // Appelle la fonction onSubmit avec les données du formulaire
-    onClose() // Ferme la modal après soumission
+    onClose()
+    console.log(formData) // Ferme la modal après soumission
   }
 
   return (
@@ -59,17 +60,18 @@ export default function BasicModal({
           component="form"
           sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}
         >
-          {Object.keys(formData).map((key) => (
-            <TextField
-              key={key}
-              label={key.charAt(0).toUpperCase() + key.slice(1)} // Capitalisation du label
-              name={key}
-              value={formData[key]} // Affiche la valeur actuelle
-              onChange={handleInputChange} // Met à jour l'état local lorsque l'utilisateur modifie le champ
-              fullWidth
-              disabled={key === "_id"} // Désactive le champ si la clé est "_id"
-            />
-          ))}
+          {Object.keys(formData)
+            .filter((key) => key !== "_id" && key !== "__v") // Filtrer les clés _id et __v
+            .map((key) => (
+              <TextField
+                key={key}
+                label={key.charAt(0).toUpperCase() + key.slice(1)} // Capitalisation du label
+                name={key}
+                value={formData[key]} // Affiche la valeur actuelle
+                onChange={handleInputChange} // Met à jour l'état local lorsque l'utilisateur modifie le champ
+                fullWidth
+              />
+            ))}
           <Button
             variant="contained"
             color="primary"

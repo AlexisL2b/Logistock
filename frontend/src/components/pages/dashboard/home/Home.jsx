@@ -12,7 +12,6 @@ export default function home() {
       .get("/categories") // URL relative correcte si axiosInstance est bien configuré
       .then((response) => {
         setCategories(response.data) // Mise à jour des catégories dans le state
-        console.log("Catégories récupérées :", response.data)
       })
       .catch((error) => {
         console.error("Erreur lors de la récupération des catégories :", error)
