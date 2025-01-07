@@ -25,53 +25,50 @@ export default function BasicModal({
   onSubmit,
   title = "Modifier l'élément",
   objectData = {},
-  dropdownData = {}, // Objet pour hydrater les dropdowns
+  dropdownData = {},
 }) {
   const [formData, setFormData] = useState(objectData)
 
   useEffect(() => {
-    // Si objectData est vide, initialise un objet avec des champs par défaut
-    const initialData = objectData || {}
+    const initialData = { ...objectData }
+    Object.keys(objectData).forEach((key) => {
+      if (
+        objectData[key] &&
+        typeof objectData[key] === "object" &&
+        objectData[key]._id
+      ) {
+        initialData[key] = objectData[key]._id // Remplacer l'objet par l'ID
+      }
+    })
     setFormData(initialData)
   }, [objectData])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    setFormData((prevFormData) => {
-      const updatedFormData = {
-        ...prevFormData,
-        [name]: value,
-      }
-      console.log("Updated formData:", updatedFormData) // Debug
-      return updatedFormData
-    })
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }))
   }
 
   const handleSubmit = () => {
-    console.log("Form data submitted:", formData) // Debug
-    onSubmit(formData) // Appelle la fonction onSubmit avec les données du formulaire
-    onClose() // Ferme la modal après soumission
+    onSubmit(formData)
+    onClose()
   }
 
   const findDropdownKey = (key) => {
-    // Basé sur une relation dynamique entre les noms de clés
-    const keyMapping = {
-      categorie_id: "/categories",
-      fournisseur_id: "/suppliers",
-    }
-
-    return keyMapping[key] || null // Retourne la clé correspondante ou null si aucune correspondance
+    const baseKey = key.replace("_id", "").toLowerCase().trim()
+    return (
+      Object.keys(dropdownData).find((dropdownKey) =>
+        dropdownKey.toLowerCase().includes(baseKey)
+      ) || null
+    )
   }
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description"
-    >
+    <Modal open={open} onClose={onClose} aria-labelledby="modal-modal-title">
       <Box sx={style}>
-        <Typography id="modal-modal-title" variant="h6" component="h2">
+        <Typography id="modal-modal-title" variant="h6">
           {title}
         </Typography>
         <Box
@@ -79,16 +76,20 @@ export default function BasicModal({
           sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}
         >
           {Object.keys(formData)
-            .filter((key) => key !== "_id" && key !== "__v") // Filtrer les clés _id et __v
+            .filter((key) => key !== "_id" && key !== "__v")
             .map((key) => {
-              const dropdownKey = findDropdownKey(key) // Trouvez dynamiquement la clé dans dropdownData
+              const dropdownKey = findDropdownKey(key)
+              console.log("DropdownKey for", key, ":", dropdownKey)
 
-              if (key.endsWith("_id") && dropdownData[dropdownKey]) {
+              if (key.endsWith("_id") && dropdownKey) {
                 return (
                   <TextField
                     select
                     key={key}
-                    label={key.charAt(0).toUpperCase() + key.slice(1)}
+                    label={
+                      key.charAt(0).toUpperCase() +
+                      key.slice(1).replace("_id", "")
+                    }
                     name={key}
                     value={formData[key] || ""}
                     onChange={handleInputChange}
@@ -102,20 +103,20 @@ export default function BasicModal({
                   </TextField>
                 )
               } else if (key.endsWith("_id")) {
-                // Si la clé existe mais pas dans dropdownData
+                console.warn(`No dropdown data found for key: ${key}`)
                 return (
                   <TextField
                     key={key}
-                    label={key.charAt(0).toUpperCase() + key.slice(1)}
-                    name={key}
-                    value="Clé manquante dans dropdownData"
+                    label={`${
+                      key.charAt(0).toUpperCase() + key.slice(1)
+                    } (Aucune correspondance)`}
+                    value={formData[key] || ""}
                     disabled
                     fullWidth
                   />
                 )
               }
 
-              // Sinon, retournez un champ TextField normal
               return (
                 <TextField
                   key={key}

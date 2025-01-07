@@ -1,4 +1,6 @@
 import Category from "../models/categoryModel.js"
+import Product from "../models/productModel.js"
+import mongoose from "mongoose"
 
 // Récupérer toutes les catégories
 export const getAllCategories = async (req, res) => {
@@ -68,6 +70,17 @@ export const updateCategory = async (req, res) => {
 // Supprimer une catégorie par ID
 export const deleteCategory = async (req, res) => {
   try {
+    const categoryId = new mongoose.Types.ObjectId(req.params.id)
+    console.log(categoryId)
+    const associatedProducts = await Product.find({ categorie_id: categoryId })
+    console.log("associatedProducts:", associatedProducts)
+    console.log("categoryId:", categoryId)
+    if (associatedProducts.length > 0) {
+      const noms = associatedProducts.map((product) => product.nom).join(",")
+      return res.status(400).json({
+        message: `Impossible de supprimer la catégorie, elle est associée aux produits suivants : ${noms}`,
+      })
+    }
     const deletedCategory = await Category.findByIdAndDelete(req.params.id)
     if (!deletedCategory)
       return res.status(404).json({ message: "Catégorie introuvable" })

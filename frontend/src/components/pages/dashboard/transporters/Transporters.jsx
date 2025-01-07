@@ -39,6 +39,7 @@ export default function transporters() {
         data={transporters}
         coll={"transporters"}
         onDataChange={handleDataChange}
+        headerMapping={{}}
       />
     </Box>
   )

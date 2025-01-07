@@ -39,6 +39,7 @@ export default function salesPoints() {
         data={salesPoints}
         coll={"sales_points"}
         onDataChange={handleDataChange}
+        headerMapping={{}}
       />
     </Box>
   )

@@ -5,7 +5,7 @@ export const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find()
       .populate("categorie_id", "nom") // Remplace categorie_id par le champ `nom` de la catégorie
-      .populate("fournisseur_id", "nom") // Remplace fournisseur_id par le champ `nom` du fournisseur
+      .populate("supplier_id", "nom") // Remplace fournisseur_id par le champ `nom` du fournisseur
 
     res.json(products)
   } catch (error) {

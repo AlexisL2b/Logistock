@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo } from "react"
 import PropTypes from "prop-types"
 import Box from "@mui/material/Box"
 import Table from "@mui/material/Table"
@@ -14,10 +14,10 @@ import Checkbox from "@mui/material/Checkbox"
 import FormControlLabel from "@mui/material/FormControlLabel"
 import Switch from "@mui/material/Switch"
 import EditIcon from "@mui/icons-material/Edit"
-import { Button, IconButton } from "@mui/material"
+import { Alert, Button, IconButton, Snackbar } from "@mui/material"
 import axios from "axios"
-import BasicModal from "./BasicModal"
-import ModalDependancies from "./ModalDependancies"
+import ModalDependancies from "./ModalDependancies" // Import du composant modal
+import { useEffect } from "react"
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1
@@ -92,25 +92,30 @@ EnhancedTableHead.propTypes = {
   headCells: PropTypes.array.isRequired,
 }
 
-export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
+export default function EnhancedTable({
+  data,
+  coll,
+  onDataChange,
+  endpoints,
+  headerMapping,
+}) {
+  const [message, setMessage] = useState("") // Stocke le message d'erreur
+  const [showAlert, setShowAlert] = useState(false) // Gère la visibilité de l'alerte
+  const [severity, setSeverity] = useState("")
   const [order, setOrder] = useState("asc")
   const [orderBy, setOrderBy] = useState(Object.keys(data[0] || [])[0] || "")
   const [selected, setSelected] = useState([])
   const [page, setPage] = useState(0)
   const [dense, setDense] = useState(false)
   const [rowsPerPage, setRowsPerPage] = useState(5)
-  const [dropdownData, setDropdownData] = useState({}) // État pour les données des listes déroulantes
-  const [openModal, setOpenModal] = useState(false)
-  const [selectedRow, setSelectedRow] = useState(null)
-
-  // Récupérer les données pour chaque endpoint et les stocker dans dropdownData
+  const [dropdownData, setDropdownData] = useState({})
   useEffect(() => {
     const fetchDropdownData = async () => {
       try {
         const fetchedData = {}
         for (const endpoint of endpoints) {
           const response = await axios.get("/api" + endpoint)
-          fetchedData[endpoint] = response.data // Associez les données au nom du endpoint
+          fetchedData[endpoint] = response.data
         }
         setDropdownData(fetchedData)
       } catch (error) {
@@ -125,19 +130,29 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
       fetchDropdownData()
     }
   }, [endpoints])
-
-  // endpoints.forEach((endpoint) => {
-  console.log(dropdownData)
-  // })
-
   const headCells = data.length
     ? Object.keys(data[0]).map((key) => ({
         id: key,
         numeric: typeof data[0][key] === "number",
         disablePadding: false,
-        label: key.charAt(0).toUpperCase() + key.slice(1),
+        label: headerMapping[key] || key.charAt(0).toUpperCase() + key.slice(1), // Utilise headerMapping pour les labels
       }))
     : []
+
+  // État pour gérer la modal
+  const [openModal, setOpenModal] = useState(false)
+  const [selectedRow, setSelectedRow] = useState(null)
+
+  // Générer un objet vide basé sur la structure
+  const generateEmptyObject = () => {
+    if (data.length === 0) return {}
+    const firstItem = data[0]
+    const emptyObject = {}
+    Object.keys(firstItem).forEach((key) => {
+      emptyObject[key] = key === "_id" ? undefined : "" // `_id` reste vide
+    })
+    return emptyObject
+  }
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc"
@@ -161,37 +176,6 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
         : [...prevSelected, id]
     )
   }
-  const handleDelete = async () => {
-    try {
-      if (selected.length === 0) {
-        alert("Aucun élément sélectionné pour suppression !")
-        return
-      }
-
-      const confirmation = window.confirm(
-        `Êtes-vous sûr de vouloir supprimer ${selected.length} élément(s) ?`
-      )
-      if (!confirmation) return
-
-      for (const id of selected) {
-        const url = `http://localhost:5000/api/${coll}/${id}`
-        console.log("DELETE URL:", url) // Debug
-
-        await axios.delete(url)
-        console.log(`Élément avec l'ID ${id} supprimé`)
-      }
-
-      alert("Suppression réussie !")
-      setSelected([])
-
-      if (onDataChange) {
-        onDataChange() // Rafraîchir les données après suppression
-      }
-    } catch (error) {
-      console.error("Erreur lors de la suppression :", error.response || error)
-      alert("Erreur lors de la suppression !")
-    }
-  }
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage)
@@ -204,6 +188,45 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
 
   const handleChangeDense = (event) => {
     setDense(event.target.checked)
+  }
+
+  const handleDelete = async () => {
+    try {
+      if (selected.length === 0) {
+        alert("Aucun élément sélectionné pour suppression !")
+        return
+      }
+
+      for (const id of selected) {
+        const res = await axios.delete(
+          `http://localhost:5000/api/${coll}/${id}`
+        )
+        console.log(`Élément avec l'ID ${id} supprimé`)
+        setMessage(res.data.message)
+        setSeverity("success")
+        setShowAlert(true)
+      }
+
+      setSelected([])
+
+      if (onDataChange) {
+        onDataChange()
+      }
+    } catch (error) {
+      if (error.response) {
+        setMessage(
+          error.response.data.message || "Erreur lors de la suppression."
+        )
+        setSeverity("error")
+        setShowAlert(true)
+      } else if (error.request) {
+        alert(
+          "Impossible de contacter le serveur. Vérifiez votre connexion réseau."
+        )
+      } else {
+        alert("Une erreur s'est produite : " + error.message)
+      }
+    }
   }
 
   const handleOpenModalForEdit = (row) => {
@@ -221,38 +244,17 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
     setOpenModal(false)
   }
 
-  const generateEmptyObject = () => {
-    if (data.length === 0) return {}
-    const firstItem = data[0] // Utilise la première ligne comme modèle
-    const emptyObject = {}
-    Object.keys(firstItem).forEach((key) => {
-      emptyObject[key] = "" // Initialise tous les champs avec une chaîne vide
-    })
-    return emptyObject
-  }
-
   const handleModalSubmit = async (updatedData) => {
     try {
-      // Remplacez les chaînes vides par null
-      const cleanedData = Object.keys(updatedData).reduce((acc, key) => {
-        acc[key] = updatedData[key] === "" ? null : updatedData[key]
-        return acc
-      }, {})
-
-      console.log("Données nettoyées :", cleanedData)
-
-      if (cleanedData._id) {
-        const url = `http://localhost:5000/api/${coll}/${cleanedData._id}`
-        console.log("PUT URL:", url)
-
-        await axios.put(url, cleanedData)
-        console.log("Données mises à jour :", cleanedData)
+      if (updatedData._id) {
+        await axios.put(
+          `http://localhost:5000/api/${coll}/${updatedData._id}`,
+          updatedData
+        )
+        console.log("Données mises à jour :", updatedData)
       } else {
-        const url = `http://localhost:5000/api/${coll}`
-        console.log("POST URL:", url)
-
-        await axios.post(url, cleanedData)
-        console.log("Nouvelle donnée ajoutée :", cleanedData)
+        await axios.post(`http://localhost:5000/api/${coll}`, updatedData)
+        console.log("Nouvelle donnée ajoutée :", updatedData)
       }
 
       alert("Opération réussie !")
@@ -262,14 +264,13 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
         onDataChange()
       }
     } catch (error) {
-      console.error("Erreur lors de l'opération :", error.response || error)
-      if (error.response?.status === 404) {
-        alert("Ressource non trouvée. Vérifiez l'URL ou l'identifiant.")
-      } else {
-        alert("Erreur lors de l'opération !")
-      }
+      console.error("Erreur lors de l'opération :", error)
+      alert("Erreur lors de l'opération !")
     }
   }
+
+  const emptyRows =
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0
 
   const visibleRows = useMemo(
     () =>
@@ -283,11 +284,7 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <TableContainer>
-          <Table
-            sx={{ minWidth: 750 }}
-            aria-labelledby="tableTitle"
-            size={dense ? "small" : "medium"}
-          >
+          <Table sx={{ minWidth: 750 }} size={dense ? "small" : "medium"}>
             <EnhancedTableHead
               numSelected={selected.length}
               order={order}
@@ -298,49 +295,29 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
               headCells={headCells}
             />
             <TableBody>
-              {visibleRows.map((row) => {
-                const isItemSelected = selected.includes(row._id)
-
-                return (
-                  <TableRow
-                    hover
-                    role="checkbox"
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
-                    key={row._id}
-                    selected={isItemSelected}
-                  >
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        color="primary"
-                        checked={isItemSelected}
-                        onChange={() => handleRowSelect(row._id)}
-                        inputProps={{
-                          "aria-labelledby": `enhanced-table-checkbox-${row._id}`,
-                        }}
-                      />
+              {visibleRows.map((row) => (
+                <TableRow key={row._id}>
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      color="primary"
+                      checked={selected.includes(row._id)}
+                      onChange={() => handleRowSelect(row._id)}
+                    />
+                  </TableCell>
+                  {headCells.map((cell) => (
+                    <TableCell key={cell.id}>
+                      {typeof row[cell.id] === "object" && row[cell.id] !== null
+                        ? row[cell.id].nom || "N/A"
+                        : row[cell.id]}
                     </TableCell>
-                    {headCells.map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        align={cell.numeric ? "right" : "left"}
-                      >
-                        {typeof row[cell.id] === "object" &&
-                        row[cell.id] !== null
-                          ? row[cell.id].nom || "N/A" // Si c'est un objet, affichez la propriété "nom"
-                          : row[cell.id]}{" "}
-                        {/* Sinon, affichez directement la valeur */}
-                      </TableCell>
-                    ))}
-
-                    <TableCell>
-                      <IconButton onClick={() => handleOpenModalForEdit(row)}>
-                        <EditIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
+                  ))}
+                  <TableCell>
+                    <IconButton onClick={() => handleOpenModalForEdit(row)}>
+                      <EditIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </TableContainer>
@@ -350,19 +327,25 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
           count={data.length}
           rowsPerPage={rowsPerPage}
           page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
+          onPageChange={(event, newPage) => setPage(newPage)}
+          onRowsPerPageChange={(event) =>
+            setRowsPerPage(parseInt(event.target.value, 10))
+          }
         />
       </Paper>
       <FormControlLabel
-        control={<Switch checked={dense} onChange={handleChangeDense} />}
+        control={
+          <Switch
+            checked={dense}
+            onChange={(event) => setDense(event.target.checked)}
+          />
+        }
         label="Dense padding"
       />
       <Box sx={{ display: "flex", gap: 2 }}>
         <Button variant="contained" color="error" onClick={handleDelete}>
           Supprimer
         </Button>
-
         <Button
           variant="contained"
           color="success"
@@ -371,14 +354,16 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
           Ajouter
         </Button>
       </Box>
-
       {selectedRow && (
         <ModalDependancies
           open={openModal}
           onClose={handleCloseModal}
-          onSubmit={handleModalSubmit}
           objectData={selectedRow}
-          dropdownData={dropdownData} // Pass dropdown data to the modal
+          dropdownData={dropdownData}
+          onSubmit={(updatedData) => {
+            handleModalSubmit(updatedData)
+            setOpenModal(false)
+          }}
         />
       )}
     </Box>
@@ -387,7 +372,8 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
 
 EnhancedTable.propTypes = {
   data: PropTypes.array.isRequired,
-  coll: PropTypes.string,
+  coll: PropTypes.string.isRequired,
   onDataChange: PropTypes.func,
   endpoints: PropTypes.arrayOf(PropTypes.string).isRequired,
+  headerMapping: PropTypes.object, // Correspondance clé -> libellé
 }

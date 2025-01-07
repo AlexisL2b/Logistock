@@ -29,6 +29,11 @@ export default function products() {
     console.log("Les données ont changé, rechargement...")
     fetchProducts() // Rechargez les données lorsque le callback est déclenché
   }
+  const headerMapping = {
+    supplier_id: "Fournisseur",
+    categorie_id: "Categorie",
+    quantite_stock: "Quantité",
+  }
 
   return (
     <Box>
@@ -37,6 +42,7 @@ export default function products() {
         coll={"products"}
         onDataChange={handleDataChange}
         endpoints={["/categories", "/suppliers"]}
+        headerMapping={headerMapping}
       />
     </Box>
   )

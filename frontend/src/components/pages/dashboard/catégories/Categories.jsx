@@ -28,6 +28,10 @@ export default function Categories() {
     console.log("Les données ont changé, rechargement...")
     fetchCategories() // Rechargez les données lorsque le callback est déclenché
   }
+  const headerMapping = {
+    supplier_id: "Fournisseur",
+    categorie_id: "Categorie",
+  }
 
   return (
     <Box>
@@ -36,6 +40,8 @@ export default function Categories() {
         data={categories}
         coll={"categories"}
         onDataChange={handleDataChange}
+        headerMapping={headerMapping}
+        endpoints={["/supplier", "/categories"]}
       />
     </Box>
   )

@@ -39,6 +39,7 @@ export default function Suppliers() {
         data={suppliers}
         coll={"suppliers"}
         onDataChange={handleDataChange}
+        headerMapping={{}}
       />
     </Box>
   )

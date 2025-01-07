@@ -14,7 +14,7 @@ import Checkbox from "@mui/material/Checkbox"
 import FormControlLabel from "@mui/material/FormControlLabel"
 import Switch from "@mui/material/Switch"
 import EditIcon from "@mui/icons-material/Edit"
-import { Button, IconButton } from "@mui/material"
+import { Alert, Button, IconButton, Snackbar } from "@mui/material"
 import axios from "axios"
 import BasicModal from "./BasicModal" // Import du composant modal
 
@@ -91,13 +91,23 @@ EnhancedTableHead.propTypes = {
   headCells: PropTypes.array.isRequired,
 }
 
-export default function EnhancedTable({ data, coll, onDataChange }) {
+export default function EnhancedTable({
+  data,
+  coll,
+  onDataChange,
+  endpoints,
+  headerMapping,
+}) {
+  const [message, setMessage] = useState("") // Stocke le message d'erreur
+  const [showAlert, setShowAlert] = useState(false) // Gère la visibilité de l'alerte
+  const [severity, setSeverity] = useState("")
   const [order, setOrder] = useState("asc")
   const [orderBy, setOrderBy] = useState(Object.keys(data[0] || [])[0] || "")
   const [selected, setSelected] = useState([])
   const [page, setPage] = useState(0)
   const [dense, setDense] = useState(false)
   const [rowsPerPage, setRowsPerPage] = useState(5)
+  const [dropdownData, setDropdownData] = useState({})
 
   // État pour gérer la modal
   const [openModal, setOpenModal] = useState(false)
@@ -167,19 +177,34 @@ export default function EnhancedTable({ data, coll, onDataChange }) {
       }
 
       for (const id of selected) {
-        await axios.delete(`http://localhost:5000/api/${coll}/${id}`)
+        const res = await axios.delete(
+          `http://localhost:5000/api/${coll}/${id}`
+        )
         console.log(`Élément avec l'ID ${id} supprimé`)
+        setMessage(res.data.message)
+        setSeverity("success")
+        setShowAlert(true)
       }
 
-      alert("Suppression réussie !")
       setSelected([])
 
       if (onDataChange) {
         onDataChange()
       }
     } catch (error) {
-      console.error("Erreur lors de la suppression :", error)
-      alert("Erreur lors de la suppression !")
+      if (error.response) {
+        setMessage(
+          error.response.data.message || "Erreur lors de la suppression."
+        )
+        setSeverity("error")
+        setShowAlert(true)
+      } else if (error.request) {
+        alert(
+          "Impossible de contacter le serveur. Vérifiez votre connexion réseau."
+        )
+      } else {
+        alert("Une erreur s'est produite : " + error.message)
+      }
     }
   }
 
@@ -238,11 +263,7 @@ export default function EnhancedTable({ data, coll, onDataChange }) {
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <TableContainer>
-          <Table
-            sx={{ minWidth: 750 }}
-            aria-labelledby="tableTitle"
-            size={dense ? "small" : "medium"}
-          >
+          <Table sx={{ minWidth: 750 }} size={dense ? "small" : "medium"}>
             <EnhancedTableHead
               numSelected={selected.length}
               order={order}
@@ -253,53 +274,29 @@ export default function EnhancedTable({ data, coll, onDataChange }) {
               headCells={headCells}
             />
             <TableBody>
-              {visibleRows.map((row) => {
-                const isItemSelected = selected.includes(row._id)
-
-                return (
-                  <TableRow
-                    hover
-                    role="checkbox"
-                    aria-checked={isItemSelected}
-                    tabIndex={-1}
-                    key={row._id}
-                    selected={isItemSelected}
-                  >
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        color="primary"
-                        checked={isItemSelected}
-                        onChange={() => handleRowSelect(row._id)}
-                        inputProps={{
-                          "aria-labelledby": `enhanced-table-checkbox-${row._id}`,
-                        }}
-                      />
+              {visibleRows.map((row) => (
+                <TableRow key={row._id}>
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      color="primary"
+                      checked={selected.includes(row._id)}
+                      onChange={() => handleRowSelect(row._id)}
+                    />
+                  </TableCell>
+                  {headCells.map((cell) => (
+                    <TableCell key={cell.id}>
+                      {typeof row[cell.id] === "object" && row[cell.id] !== null
+                        ? row[cell.id].nom || "N/A"
+                        : row[cell.id]}
                     </TableCell>
-                    {headCells.map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        align={cell.numeric ? "right" : "left"}
-                      >
-                        {row[cell.id]}
-                      </TableCell>
-                    ))}
-                    <TableCell>
-                      <IconButton onClick={() => handleOpenModalForEdit(row)}>
-                        <EditIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-              {emptyRows > 0 && (
-                <TableRow
-                  style={{
-                    height: (dense ? 33 : 53) * emptyRows,
-                  }}
-                >
-                  <TableCell colSpan={headCells.length + 1} />
+                  ))}
+                  <TableCell>
+                    <IconButton onClick={() => handleOpenModalForEdit(row)}>
+                      <EditIcon />
+                    </IconButton>
+                  </TableCell>
                 </TableRow>
-              )}
+              ))}
             </TableBody>
           </Table>
         </TableContainer>
@@ -309,12 +306,19 @@ export default function EnhancedTable({ data, coll, onDataChange }) {
           count={data.length}
           rowsPerPage={rowsPerPage}
           page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
+          onPageChange={(event, newPage) => setPage(newPage)}
+          onRowsPerPageChange={(event) =>
+            setRowsPerPage(parseInt(event.target.value, 10))
+          }
         />
       </Paper>
       <FormControlLabel
-        control={<Switch checked={dense} onChange={handleChangeDense} />}
+        control={
+          <Switch
+            checked={dense}
+            onChange={(event) => setDense(event.target.checked)}
+          />
+        }
         label="Dense padding"
       />
       <Box sx={{ display: "flex", gap: 2 }}>
@@ -329,16 +333,26 @@ export default function EnhancedTable({ data, coll, onDataChange }) {
           Ajouter
         </Button>
       </Box>
-
-      {/* Intégration du modal */}
       {selectedRow && (
-        <BasicModal
+        <ModalDependancies
           open={openModal}
           onClose={handleCloseModal}
-          onSubmit={handleModalSubmit}
           objectData={selectedRow}
+          dropdownData={dropdownData}
+          onSubmit={(updatedData) => {
+            handleModalSubmit(updatedData)
+            setOpenModal(false)
+          }}
         />
       )}
     </Box>
   )
+}
+
+EnhancedTable.propTypes = {
+  data: PropTypes.array.isRequired,
+  coll: PropTypes.string.isRequired,
+  onDataChange: PropTypes.func,
+  endpoints: PropTypes.arrayOf(PropTypes.string).isRequired,
+  headerMapping: PropTypes.object, // Correspondance clé -> libellé
 }

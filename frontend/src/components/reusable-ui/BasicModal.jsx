@@ -4,6 +4,7 @@ import Button from "@mui/material/Button"
 import Typography from "@mui/material/Typography"
 import Modal from "@mui/material/Modal"
 import TextField from "@mui/material/TextField"
+import MenuItem from "@mui/material/MenuItem"
 import PropTypes from "prop-types"
 
 const style = {
@@ -24,25 +25,42 @@ export default function BasicModal({
   onSubmit,
   title = "Modifier l'élément",
   objectData = {},
+  dropdownData = {}, // Objet pour hydrater les dropdowns
 }) {
   const [formData, setFormData] = useState(objectData)
 
   useEffect(() => {
-    setFormData(objectData) // Mettre à jour les données du formulaire lorsque objectData change
+    // Si objectData est vide, initialise un objet avec des champs par défaut
+    const initialData = objectData || {}
+    setFormData(initialData)
   }, [objectData])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value,
-    }))
+    setFormData((prevFormData) => {
+      const updatedFormData = {
+        ...prevFormData,
+        [name]: value,
+      }
+      console.log("Updated formData:", updatedFormData) // Debug
+      return updatedFormData
+    })
   }
 
   const handleSubmit = () => {
+    console.log("Form data submitted:", formData) // Debug
     onSubmit(formData) // Appelle la fonction onSubmit avec les données du formulaire
-    onClose()
-    console.log(formData) // Ferme la modal après soumission
+    onClose() // Ferme la modal après soumission
+  }
+
+  const findDropdownKey = (key) => {
+    // Basé sur une relation dynamique entre les noms de clés
+    const keyMapping = {
+      categorie_id: "/categories",
+      fournisseur_id: "/suppliers",
+    }
+
+    return keyMapping[key] || null // Retourne la clé correspondante ou null si aucune correspondance
   }
 
   return (
@@ -62,16 +80,53 @@ export default function BasicModal({
         >
           {Object.keys(formData)
             .filter((key) => key !== "_id" && key !== "__v") // Filtrer les clés _id et __v
-            .map((key) => (
-              <TextField
-                key={key}
-                label={key.charAt(0).toUpperCase() + key.slice(1)} // Capitalisation du label
-                name={key}
-                value={formData[key]} // Affiche la valeur actuelle
-                onChange={handleInputChange} // Met à jour l'état local lorsque l'utilisateur modifie le champ
-                fullWidth
-              />
-            ))}
+            .map((key) => {
+              const dropdownKey = findDropdownKey(key) // Trouvez dynamiquement la clé dans dropdownData
+
+              if (key.endsWith("_id") && dropdownData[dropdownKey]) {
+                return (
+                  <TextField
+                    select
+                    key={key}
+                    label={key.charAt(0).toUpperCase() + key.slice(1)}
+                    name={key}
+                    value={formData[key] || ""}
+                    onChange={handleInputChange}
+                    fullWidth
+                  >
+                    {dropdownData[dropdownKey]?.map((item) => (
+                      <MenuItem key={item._id} value={item._id}>
+                        {item.nom}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )
+              } else if (key.endsWith("_id")) {
+                // Si la clé existe mais pas dans dropdownData
+                return (
+                  <TextField
+                    key={key}
+                    label={key.charAt(0).toUpperCase() + key.slice(1)}
+                    name={key}
+                    value="Clé manquante dans dropdownData"
+                    disabled
+                    fullWidth
+                  />
+                )
+              }
+
+              // Sinon, retournez un champ TextField normal
+              return (
+                <TextField
+                  key={key}
+                  label={key.charAt(0).toUpperCase() + key.slice(1)}
+                  name={key}
+                  value={formData[key] || ""}
+                  onChange={handleInputChange}
+                  fullWidth
+                />
+              )
+            })}
           <Button
             variant="contained"
             color="primary"
@@ -92,4 +147,5 @@ BasicModal.propTypes = {
   onSubmit: PropTypes.func.isRequired, // Obligatoire
   title: PropTypes.string, // Facultatif (a une valeur par défaut)
   objectData: PropTypes.object, // Facultatif (a une valeur par défaut)
+  dropdownData: PropTypes.object, // Nouvel objet pour gérer les dropdowns
 }
