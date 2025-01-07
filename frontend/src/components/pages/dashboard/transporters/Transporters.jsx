@@ -11,8 +11,8 @@ export default function transporters() {
     axiosInstance
       .get("/transporters") // URL relative correcte si axiosInstance est bien configuré
       .then((response) => {
-        setTransporters(response.data) // Mise à jour des fournisseurs dans le state
-        console.log("Fournisseur récupérées :", response.data)
+        setTransporters(response.data.data) // Mise à jour des fournisseurs dans le state
+        console.log("Fournisseur récupérées :", response.data.data)
       })
       .catch((error) => {
         console.error(

@@ -11,8 +11,8 @@ export default function salesPoints() {
     axiosInstance
       .get("/sales_points ") // URL relative correcte si axiosInstance est bien configuré
       .then((response) => {
-        setSalesPoints(response.data) // Mise à jour des points de ventes dans le state
-        console.log("points de ventes récupérées :", response.data)
+        setSalesPoints(response.data.data) // Mise à jour des points de ventes dans le state
+        console.log("points de ventes récupérées :", response.data.data)
       })
       .catch((error) => {
         console.error(

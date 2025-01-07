@@ -95,19 +95,17 @@ export default function EnhancedTable({
   data,
   coll,
   onDataChange,
-  endpoints,
   headerMapping,
 }) {
-  const [message, setMessage] = useState("") // Stocke le message d'erreur
-  const [showAlert, setShowAlert] = useState(false) // Gère la visibilité de l'alerte
-  const [severity, setSeverity] = useState("")
   const [order, setOrder] = useState("asc")
   const [orderBy, setOrderBy] = useState(Object.keys(data[0] || [])[0] || "")
   const [selected, setSelected] = useState([])
   const [page, setPage] = useState(0)
   const [dense, setDense] = useState(false)
   const [rowsPerPage, setRowsPerPage] = useState(5)
-  const [dropdownData, setDropdownData] = useState({})
+  const [message, setMessage] = useState("") // Stocke le message d'erreur
+  const [showAlert, setShowAlert] = useState(false) // Gère la visibilité de l'alerte
+  const [severity, setSeverity] = useState("")
 
   // État pour gérer la modal
   const [openModal, setOpenModal] = useState(false)
@@ -129,7 +127,7 @@ export default function EnhancedTable({
         id: key,
         numeric: typeof data[0][key] === "number",
         disablePadding: false,
-        label: key.charAt(0).toUpperCase() + key.slice(1),
+        label: headerMapping[key] || key.charAt(0).toUpperCase() + key.slice(1), // Utilise headerMapping pour les labels
       }))
     : []
 
@@ -226,31 +224,45 @@ export default function EnhancedTable({
   const handleModalSubmit = async (updatedData) => {
     try {
       if (updatedData._id) {
-        await axios.put(
+        const res = await axios.put(
           `http://localhost:5000/api/${coll}/${updatedData._id}`,
           updatedData
         )
-        console.log("Données mises à jour :", updatedData)
+        setMessage(res.data.message || "Opération réussie")
+        setSeverity("success")
+        setShowAlert(true)
+
+        console.log(`http://localhost:5000/api/${coll}/${updatedData._id}`)
+        // console.log("Réponse de mise à jour :", res)
       } else {
-        await axios.post(`http://localhost:5000/api/${coll}`, updatedData)
-        console.log("Nouvelle donnée ajoutée :", updatedData)
+        const res = await axios.post(
+          `http://localhost:5000/api/${coll}`,
+          updatedData
+        )
+        setMessage(res.data.message || "Opération réussie")
+        setSeverity("success")
+        setShowAlert(true)
+        console.log("Réponse d'ajout :", res)
       }
 
-      alert("Opération réussie !")
-      setOpenModal(false)
-
+      // Déclenchement de la mise à jour des données
       if (onDataChange) {
         onDataChange()
       }
     } catch (error) {
       console.error("Erreur lors de l'opération :", error)
-      alert("Erreur lors de l'opération !")
+
+      // Gestion des erreurs et affichage du message
+      setMessage(
+        error.response?.data?.message || "Erreur lors de la modification."
+      )
+      setSeverity("error")
+      setShowAlert(true)
     }
   }
 
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0
-
   const visibleRows = useMemo(
     () =>
       [...data]
@@ -261,9 +273,32 @@ export default function EnhancedTable({
 
   return (
     <Box sx={{ width: "100%" }}>
+      {/* {showAlert && (
+        <Alert severity="error" onClose={() => setShowAlert(false)}>
+          {errorMessage}
+        </Alert>
+      )} */}
+      <Snackbar
+        open={showAlert}
+        autoHideDuration={6000}
+        onClose={() => setShowAlert(false)}
+      >
+        <Alert
+          onClose={() => setShowAlert(false)}
+          severity={severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <TableContainer>
-          <Table sx={{ minWidth: 750 }} size={dense ? "small" : "medium"}>
+          <Table
+            sx={{ minWidth: 750 }}
+            aria-labelledby="tableTitle"
+            size={dense ? "small" : "medium"}
+          >
             <EnhancedTableHead
               numSelected={selected.length}
               order={order}
@@ -274,29 +309,53 @@ export default function EnhancedTable({
               headCells={headCells}
             />
             <TableBody>
-              {visibleRows.map((row) => (
-                <TableRow key={row._id}>
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      color="primary"
-                      checked={selected.includes(row._id)}
-                      onChange={() => handleRowSelect(row._id)}
-                    />
-                  </TableCell>
-                  {headCells.map((cell) => (
-                    <TableCell key={cell.id}>
-                      {typeof row[cell.id] === "object" && row[cell.id] !== null
-                        ? row[cell.id].nom || "N/A"
-                        : row[cell.id]}
+              {visibleRows.map((row) => {
+                const isItemSelected = selected.includes(row._id)
+
+                return (
+                  <TableRow
+                    hover
+                    role="checkbox"
+                    aria-checked={isItemSelected}
+                    tabIndex={-1}
+                    key={row._id}
+                    selected={isItemSelected}
+                  >
+                    <TableCell padding="checkbox">
+                      <Checkbox
+                        color="primary"
+                        checked={isItemSelected}
+                        onChange={() => handleRowSelect(row._id)}
+                        inputProps={{
+                          "aria-labelledby": `enhanced-table-checkbox-${row._id}`,
+                        }}
+                      />
                     </TableCell>
-                  ))}
-                  <TableCell>
-                    <IconButton onClick={() => handleOpenModalForEdit(row)}>
-                      <EditIcon />
-                    </IconButton>
-                  </TableCell>
+                    {headCells.map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        align={cell.numeric ? "right" : "left"}
+                      >
+                        {row[cell.id]}
+                      </TableCell>
+                    ))}
+                    <TableCell>
+                      <IconButton onClick={() => handleOpenModalForEdit(row)}>
+                        <EditIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+              {emptyRows > 0 && (
+                <TableRow
+                  style={{
+                    height: (dense ? 33 : 53) * emptyRows,
+                  }}
+                >
+                  <TableCell colSpan={headCells.length + 1} />
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -306,19 +365,12 @@ export default function EnhancedTable({
           count={data.length}
           rowsPerPage={rowsPerPage}
           page={page}
-          onPageChange={(event, newPage) => setPage(newPage)}
-          onRowsPerPageChange={(event) =>
-            setRowsPerPage(parseInt(event.target.value, 10))
-          }
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
       <FormControlLabel
-        control={
-          <Switch
-            checked={dense}
-            onChange={(event) => setDense(event.target.checked)}
-          />
-        }
+        control={<Switch checked={dense} onChange={handleChangeDense} />}
         label="Dense padding"
       />
       <Box sx={{ display: "flex", gap: 2 }}>
@@ -333,26 +385,16 @@ export default function EnhancedTable({
           Ajouter
         </Button>
       </Box>
+
+      {/* Intégration du modal */}
       {selectedRow && (
-        <ModalDependancies
+        <BasicModal
           open={openModal}
           onClose={handleCloseModal}
+          onSubmit={handleModalSubmit}
           objectData={selectedRow}
-          dropdownData={dropdownData}
-          onSubmit={(updatedData) => {
-            handleModalSubmit(updatedData)
-            setOpenModal(false)
-          }}
         />
       )}
     </Box>
   )
-}
-
-EnhancedTable.propTypes = {
-  data: PropTypes.array.isRequired,
-  coll: PropTypes.string.isRequired,
-  onDataChange: PropTypes.func,
-  endpoints: PropTypes.arrayOf(PropTypes.string).isRequired,
-  headerMapping: PropTypes.object, // Correspondance clé -> libellé
 }

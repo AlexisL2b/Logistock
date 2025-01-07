@@ -11,7 +11,7 @@ export default function Categories() {
     axiosInstance
       .get("/categories") // URL relative correcte si axiosInstance est bien configuré
       .then((response) => {
-        setCategories(response.data) // Mise à jour des catégories dans le state
+        setCategories(response.data.data) // Mise à jour des catégories dans le state
       })
       .catch((error) => {
         console.error("Erreur lors de la récupération des catégories :", error)
@@ -31,6 +31,8 @@ export default function Categories() {
   const headerMapping = {
     supplier_id: "Fournisseur",
     categorie_id: "Categorie",
+    _id: "Id",
+    __v: "Version",
   }
 
   return (
@@ -41,7 +43,6 @@ export default function Categories() {
         coll={"categories"}
         onDataChange={handleDataChange}
         headerMapping={headerMapping}
-        endpoints={["/supplier", "/categories"]}
       />
     </Box>
   )
