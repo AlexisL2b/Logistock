@@ -80,6 +80,7 @@ export default function LoginForm() {
         Se connecter
       </Button>
       <Link to="/dashboard"> Vers dashboard</Link>
+      <Link to="/signup"> Inscription</Link>
     </Box>
   )
 }
