@@ -10,10 +10,10 @@ import Dashboard from "./components/pages/dashboard/Dashboard"
 import PasswordForgot from "./components/pages/passwordForgot/PasswordForgot"
 import ErrorPage from "./components/pages/error/ErrorPage"
 import Home from "./components/pages/dashboard/home/Home"
+import SignUpPage from "./components/pages/signupPage/SignUpPage"
 
 function App() {
   const [count, setCount] = useState(0)
-  console.log("Thème chargé :", theme)
 
   return (
     <>
@@ -22,8 +22,8 @@ function App() {
           <Route path="/" element={<LoginPage />} />
           <Route path="/dashboard/*" element={<Dashboard />} />
           <Route path="/passwordforgot" element={<PasswordForgot />} />
-          <Route path="*" element={<ErrorPage />} />*
-          <Route path="/test" element={<Home />} />
+          <Route path="*" element={<ErrorPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
         </Routes>
       </ThemeProvider>
     </>

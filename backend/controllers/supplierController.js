@@ -1,3 +1,5 @@
+import mongoose from "mongoose"
+import Product from "../models/productModel.js"
 import Supplier from "../models/supplierModel.js"
 
 export const getAllSuppliers = async (req, res) => {
@@ -5,12 +7,10 @@ export const getAllSuppliers = async (req, res) => {
     const suppliers = await Supplier.find()
     res.json(suppliers)
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Erreur lors de la récupération des fournisseurs",
-        error,
-      })
+    res.status(500).json({
+      message: "Erreur lors de la récupération des fournisseurs",
+      error,
+    })
   }
 }
 
@@ -61,13 +61,36 @@ export const updateSupplier = async (req, res) => {
 
 export const deleteSupplier = async (req, res) => {
   try {
+    // Convertir l'ID en ObjectId
+    const supplierId = new mongoose.Types.ObjectId(req.params.id)
+
+    // Vérifier si des produits sont associés au fournisseur
+    const associatedProducts = await Product.find({
+      fournisseur_id: supplierId,
+    })
+    console.log("associatedProducts:", associatedProducts)
+    console.log("supplierId:", supplierId)
+
+    if (associatedProducts.length > 0) {
+      // Créer une liste des noms des produits associés
+      const noms = associatedProducts.map((product) => product.nom).join(",")
+      return res.status(400).json({
+        message: `Impossible de supprimer le fournisseur, il est associé aux produits suivants : ${noms}`,
+      })
+    }
+
+    // Supprimer le fournisseur
     const deletedSupplier = await Supplier.findByIdAndDelete(req.params.id)
-    if (!deletedSupplier)
+    if (!deletedSupplier) {
       return res.status(404).json({ message: "Fournisseur introuvable" })
+    }
+
     res.json({ message: "Fournisseur supprimé avec succès" })
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Erreur lors de la suppression du fournisseur", error })
+    console.error("Erreur lors de la suppression du fournisseur :", error)
+    res.status(500).json({
+      message: "Erreur lors de la suppression du fournisseur",
+      error,
+    })
   }
 }

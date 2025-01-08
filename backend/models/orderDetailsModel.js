@@ -25,6 +25,6 @@ const orderDetailsSchema = new mongoose.Schema(
   { collection: "orders_details" }
 )
 
-const OrderDetails = mongoose.model("OrderDetails", orderDetailsSchema)
+const OrderDetails = mongoose.model("orders_details", orderDetailsSchema)
 
 export default OrderDetails

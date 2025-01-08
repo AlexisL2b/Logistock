@@ -15,11 +15,22 @@ import userRoutes from "./routes/userRoutes.js"
 import orderRoutes from "./routes/orderRoutes.js"
 import orderDetailsRoutes from "./routes/orderDetailsRoutes.js"
 import orderShipmentRoutes from "./routes/orderShipmentRoutes.js"
+import authRoutes from "./routes/authRoutes.js"
+import admin from "./config/firebase.js"
 
 // Configuration de l'application
 dotenv.config()
 connectDB()
 
+// try {
+//   const user = await admin.auth().createUser({
+//     email: "test@example.com",
+//     password: "securepassword",
+//   })
+//   console.log("Utilisateur créé avec succès :", user)
+// } catch (error) {
+//   console.error("Erreur lors de la création de l'utilisateur :", error.message)
+// }
 const app = express()
 
 // Middleware
@@ -27,10 +38,14 @@ app.use(cors())
 app.use(bodyParser.json())
 
 // Définition des routes
+app.use("/api/auth", authRoutes)
 app.use("/api/categories", categoryRoutes)
 app.use("/api/products", productRoutes)
 app.use("/api/suppliers", supplierRoutes)
+console.log("Fichier salesPointRoutes chargé")
+
 app.use("/api/sales_points", salesPointRoutes)
+
 app.use("/api/stock_logs", stockLogRoutes)
 app.use("/api/transporters", transporterRoutes)
 app.use("/api/users", userRoutes)

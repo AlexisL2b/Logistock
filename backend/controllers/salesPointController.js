@@ -4,7 +4,10 @@ import SalesPoint from "../models/salesPointModel.js"
 export const getAllSalesPoints = async (req, res) => {
   try {
     const salesPoints = await SalesPoint.find()
-    res.json(salesPoints)
+    res.json({
+      message: "Points de vente récupérés avec succès",
+      data: salesPoints,
+    })
   } catch (error) {
     res.status(500).json({
       message: "Erreur lors de la récupération des points de vente",
@@ -17,9 +20,13 @@ export const getAllSalesPoints = async (req, res) => {
 export const getSalesPointById = async (req, res) => {
   try {
     const salesPoint = await SalesPoint.findById(req.params.id)
-    if (!salesPoint)
+    if (!salesPoint) {
       return res.status(404).json({ message: "Point de vente introuvable" })
-    res.json(salesPoint)
+    }
+    res.json({
+      message: "Point de vente récupéré avec succès",
+      data: salesPoint,
+    })
   } catch (error) {
     res.status(500).json({
       message: "Erreur lors de la récupération du point de vente",
@@ -33,7 +40,10 @@ export const addSalesPoint = async (req, res) => {
   try {
     const newSalesPoint = new SalesPoint(req.body)
     const savedSalesPoint = await newSalesPoint.save()
-    res.status(201).json(savedSalesPoint)
+    res.status(201).json({
+      message: "Point de vente ajouté avec succès",
+      data: savedSalesPoint,
+    })
   } catch (error) {
     res.status(500).json({
       message: "Erreur lors de l'ajout du point de vente",
@@ -53,9 +63,13 @@ export const updateSalesPoint = async (req, res) => {
         runValidators: true, // Valide les champs avant de les enregistrer
       }
     )
-    if (!updatedSalesPoint)
+    if (!updatedSalesPoint) {
       return res.status(404).json({ message: "Point de vente introuvable" })
-    res.json(updatedSalesPoint)
+    }
+    res.json({
+      message: "Point de vente mis à jour avec succès",
+      data: updatedSalesPoint,
+    })
   } catch (error) {
     res.status(500).json({
       message: "Erreur lors de la mise à jour du point de vente",
@@ -68,9 +82,13 @@ export const updateSalesPoint = async (req, res) => {
 export const deleteSalesPoint = async (req, res) => {
   try {
     const deletedSalesPoint = await SalesPoint.findByIdAndDelete(req.params.id)
-    if (!deletedSalesPoint)
+    if (!deletedSalesPoint) {
       return res.status(404).json({ message: "Point de vente introuvable" })
-    res.json({ message: "Point de vente supprimé avec succès" })
+    }
+    res.json({
+      message: "Point de vente supprimé avec succès",
+      data: deletedSalesPoint,
+    })
   } catch (error) {
     res.status(500).json({
       message: "Erreur lors de la suppression du point de vente",

@@ -2,7 +2,16 @@ import mongoose from "mongoose"
 
 const userSchema = new mongoose.Schema(
   {
+    firebaseUid: {
+      type: String,
+      required: true,
+    },
+
     nom: {
+      type: String,
+      required: true,
+    },
+    adresse: {
       type: String,
       required: true,
     },
@@ -15,18 +24,17 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
-    mot_de_passe: {
-      type: String,
-      required: true,
-    },
-    role: {
-      type: String,
-      enum: ["gestionnaire", "acheteur", "logisticien"],
-      required: true,
+
+    role_id: {
+      type: mongoose.Schema.Types.ObjectId,
+
+      ref: "Role",
     },
     point_vente_id: {
       type: mongoose.Schema.Types.ObjectId,
+
       ref: "SalesPoint",
+      required: true,
     },
   },
   { timestamps: true }

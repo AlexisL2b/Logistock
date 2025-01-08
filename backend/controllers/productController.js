@@ -1,17 +1,20 @@
 import Product from "../models/productModel.js"
 
 // Récupérer tous les produits
-export const getProducts = async (req, res) => {
+export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find() // Récupère tous les produits depuis MongoDB
-    res.status(200).json(products) // Retourne les produits sous forme de JSON
+    const products = await Product.find()
+      .populate("categorie_id", "nom") // Remplace categorie_id par le champ `nom` de la catégorie
+      .populate("supplier_id", "nom") // Remplace fournisseur_id par le champ `nom` du fournisseur
+
+    res.json(products)
   } catch (error) {
+    console.error("Erreur lors de la récupération des produits :", error)
     res
       .status(500)
-      .json({ message: "Erreur lors de la récupération des produits", error })
+      .json({ message: "Erreur lors de la récupération des produits" })
   }
 }
-
 // Récupérer un produit par ID
 export const getProductById = async (req, res) => {
   try {

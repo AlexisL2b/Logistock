@@ -1,8 +1,66 @@
 import { Box, TextField, Typography, Button } from "@mui/material"
-import React from "react"
-import { Link } from "react-router"
+import React, { useState } from "react"
+import { getAuth, signInWithCustomToken } from "firebase/auth"
+import { useNavigate } from "react-router" // Remplace Link pour la navigation
+import axios from "axios"
 
 export default function LoginForm() {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const navigate = useNavigate()
+
+  const handleLogin = async () => {
+    try {
+      // Étape 1 : Appeler l'API /login pour obtenir le token Firebase
+      const loginRes = await axios.post(
+        "http://localhost:5000/api/auth/login",
+        {
+          email,
+          password,
+        }
+      )
+
+      const { token } = loginRes.data
+
+      // Stocker le token Firebase dans le localStorage
+      localStorage.setItem("authToken", token)
+
+      // Étape 2 : Authentification avec Firebase pour obtenir l'ID Token
+      const auth = getAuth()
+      const userCredential = await signInWithCustomToken(auth, token)
+      const idToken = await userCredential.user.getIdToken()
+
+      // Stocker l'ID Token pour les requêtes futures
+      localStorage.setItem("idToken", idToken)
+
+      // Étape 3 : Appeler l'API /profile pour récupérer les informations utilisateur depuis MongoDB
+      const profileRes = await axios.get(
+        "http://localhost:5000/api/auth/profile",
+        {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        }
+      )
+
+      const user = profileRes.data.user
+      console.log("Informations utilisateur MongoDB :", user)
+
+      // Étape 4 : Redirection en fonction du rôle
+      if (user.role_id === "677cf977b39853e4a17727e0") {
+        navigate("/admin-dashboard")
+      } else if (user.role_id === "677cf977b39853e4a17727e3") {
+        navigate("/user-dashboard")
+      } else {
+        navigate("/unknown-role")
+      }
+    } catch (err) {
+      console.error("Erreur lors de la connexion :", err)
+      setError("Connexion échouée. Veuillez vérifier vos identifiants.")
+    }
+  }
+
   return (
     <Box
       sx={{
@@ -18,53 +76,60 @@ export default function LoginForm() {
       <Typography variant="h5" color="primary" gutterBottom>
         Connexion
       </Typography>
+      {error && (
+        <Typography color="error" variant="body2" gutterBottom>
+          {error}
+        </Typography>
+      )}
       <TextField
         label="Email"
         variant="outlined"
         fullWidth
         margin="normal"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
         sx={{
           "& .MuiOutlinedInput-root": {
             "& fieldset": {
-              borderWidth: "2px", // Épaisseur de la bordure
-              borderColor: "white", // Couleur de la bordure
+              borderWidth: "2px",
+              borderColor: "white",
             },
             "&:hover fieldset": {
-              borderWidth: "2px", // Épaisseur au survol
-              borderColor: "secondary.main", // Couleur au survol
+              borderWidth: "2px",
+              borderColor: "secondary.main",
             },
             "&.Mui-focused fieldset": {
-              borderWidth: "3px", // Épaisseur lorsqu'il est focalisé
-              borderColor: "secondary.main", // Couleur lorsqu'il est focalisé
+              borderWidth: "3px",
+              borderColor: "secondary.main",
             },
           },
         }}
       />
       <TextField
-        sx={{
-          "& .MuiOutlinedInput-root": {
-            "& fieldset": {
-              borderWidth: "2px", // Épaisseur de la bordure
-              borderColor: "white", // Couleur de la bordure
-            },
-            "&:hover fieldset": {
-              borderWidth: "2px", // Épaisseur au survol
-              borderColor: "secondary.main", // Couleur au survol
-            },
-            "&.Mui-focused fieldset": {
-              borderWidth: "3px", // Épaisseur lorsqu'il est focalisé
-              borderColor: "secondary.main", // Couleur lorsqu'il est focalisé
-            },
-          },
-        }}
         label="Mot de passe"
         type="password"
         variant="outlined"
         fullWidth
         margin="normal"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        sx={{
+          "& .MuiOutlinedInput-root": {
+            "& fieldset": {
+              borderWidth: "2px",
+              borderColor: "white",
+            },
+            "&:hover fieldset": {
+              borderWidth: "2px",
+              borderColor: "secondary.main",
+            },
+            "&.Mui-focused fieldset": {
+              borderWidth: "3px",
+              borderColor: "secondary.main",
+            },
+          },
+        }}
       />
-      <Link to="/passwordforgot"> Mot de passe oublié?</Link>
-
       <Button
         variant="contained"
         fullWidth
@@ -76,10 +141,10 @@ export default function LoginForm() {
             backgroundColor: "primary.dark",
           },
         }}
+        onClick={handleLogin}
       >
         Se connecter
       </Button>
-      <Link to="/dashboard"> Vers dashboard</Link>
     </Box>
   )
 }

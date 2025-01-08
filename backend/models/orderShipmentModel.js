@@ -26,6 +26,6 @@ const orderShipmentSchema = new mongoose.Schema(
   { collection: "order_shipments" }
 )
 
-const OrderShipment = mongoose.model("OrderShipment", orderShipmentSchema)
+const OrderShipment = mongoose.model("order_shipments", orderShipmentSchema)
 
 export default OrderShipment

@@ -14,7 +14,7 @@ export default function LoginPage() {
         overflow: "hidden", // Empêche les débordements éventuels
         "&::before": {
           content: '""', // Nécessaire pour afficher le pseudo-élément
-          background: `url('/public/assets/FirstPage/FirstPage.jpg') rgba(0, 0, 0, 0.7)`, // Image et overlay
+          background: `url('/assets/FirstPage/FirstPage.jpg') rgba(0, 0, 0, 0.7)`, // Image et overlay
           backgroundSize: "cover", // Image couvrant tout l'espace
           backgroundPosition: "center", // Image centrée
           backgroundBlendMode: "darken", // Mélange l'image avec la couleur

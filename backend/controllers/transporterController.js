@@ -4,7 +4,10 @@ import Transporter from "../models/transporterModel.js"
 export const getAllTransporters = async (req, res) => {
   try {
     const transporters = await Transporter.find()
-    res.json(transporters)
+    res.json({
+      message: "Transporteurs récupérés avec succès",
+      data: transporters,
+    })
   } catch (error) {
     res.status(500).json({
       message: "Erreur lors de la récupération des transporteurs",
@@ -17,9 +20,13 @@ export const getAllTransporters = async (req, res) => {
 export const getTransporterById = async (req, res) => {
   try {
     const transporter = await Transporter.findById(req.params.id)
-    if (!transporter)
+    if (!transporter) {
       return res.status(404).json({ message: "Transporteur introuvable" })
-    res.json(transporter)
+    }
+    res.json({
+      message: "Transporteur récupéré avec succès",
+      data: transporter,
+    })
   } catch (error) {
     res.status(500).json({
       message: "Erreur lors de la récupération du transporteur",
@@ -33,7 +40,10 @@ export const addTransporter = async (req, res) => {
   try {
     const newTransporter = new Transporter(req.body)
     const savedTransporter = await newTransporter.save()
-    res.status(201).json(savedTransporter)
+    res.status(201).json({
+      message: "Transporteur ajouté avec succès",
+      data: savedTransporter,
+    })
   } catch (error) {
     res.status(500).json({
       message: "Erreur lors de l'ajout du transporteur",
@@ -53,9 +63,13 @@ export const updateTransporter = async (req, res) => {
         runValidators: true, // Valide les champs avant de les enregistrer
       }
     )
-    if (!updatedTransporter)
+    if (!updatedTransporter) {
       return res.status(404).json({ message: "Transporteur introuvable" })
-    res.json(updatedTransporter)
+    }
+    res.json({
+      message: "Transporteur mis à jour avec succès",
+      data: updatedTransporter,
+    })
   } catch (error) {
     res.status(500).json({
       message: "Erreur lors de la mise à jour du transporteur",
@@ -70,9 +84,13 @@ export const deleteTransporter = async (req, res) => {
     const deletedTransporter = await Transporter.findByIdAndDelete(
       req.params.id
     )
-    if (!deletedTransporter)
+    if (!deletedTransporter) {
       return res.status(404).json({ message: "Transporteur introuvable" })
-    res.json({ message: "Transporteur supprimé avec succès" })
+    }
+    res.json({
+      message: "Transporteur supprimé avec succès",
+      data: deletedTransporter,
+    })
   } catch (error) {
     res.status(500).json({
       message: "Erreur lors de la suppression du transporteur",

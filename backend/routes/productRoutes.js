@@ -1,6 +1,6 @@
 import express from "express"
 import {
-  getProducts,
+  getAllProducts,
   getProductById,
   addProduct,
   updateProduct,
@@ -10,7 +10,7 @@ import {
 const router = express.Router()
 
 // Route pour récupérer tous les produits
-router.get("/", getProducts)
+router.get("/", getAllProducts)
 
 // Route pour récupérer un produit par ID
 router.get("/:id", getProductById)

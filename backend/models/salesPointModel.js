@@ -15,6 +15,6 @@ const salesPointSchema = new mongoose.Schema(
   { collection: "sales_points" }
 )
 
-const SalesPoint = mongoose.model("SalesPoint", salesPointSchema)
+const SalesPoint = mongoose.model("sales_points", salesPointSchema)
 
 export default SalesPoint

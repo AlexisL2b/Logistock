@@ -1,10 +1,16 @@
 import Category from "../models/categoryModel.js"
+import Product from "../models/productModel.js"
+import mongoose from "mongoose"
 
 // Récupérer toutes les catégories
 export const getAllCategories = async (req, res) => {
   try {
+    console.log("Requête reçue pour récupérer les catégories")
     const categories = await Category.find()
-    res.json(categories)
+    res.json({
+      message: "Catégories récupérées avec succès",
+      data: categories,
+    })
   } catch (error) {
     res.status(500).json({
       message: "Erreur lors de la récupération des catégories",
@@ -17,9 +23,13 @@ export const getAllCategories = async (req, res) => {
 export const getCategoryById = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id)
-    if (!category)
+    if (!category) {
       return res.status(404).json({ message: "Catégorie introuvable" })
-    res.json(category)
+    }
+    res.json({
+      message: "Catégorie récupérée avec succès",
+      data: category,
+    })
   } catch (error) {
     res.status(500).json({
       message: "Erreur lors de la récupération de la catégorie",
@@ -33,7 +43,10 @@ export const addCategory = async (req, res) => {
   try {
     const newCategory = new Category(req.body)
     const savedCategory = await newCategory.save()
-    res.status(201).json(savedCategory)
+    res.status(201).json({
+      message: "Catégorie ajoutée avec succès",
+      data: savedCategory,
+    })
   } catch (error) {
     res.status(500).json({
       message: "Erreur lors de l'ajout de la catégorie",
@@ -53,13 +66,26 @@ export const updateCategory = async (req, res) => {
         runValidators: true, // Valide les champs avant de les enregistrer
       }
     )
-    if (!updatedCategory)
+
+    if (!updatedCategory) {
       return res.status(404).json({ message: "Catégorie introuvable" })
-    res.json(updatedCategory)
+    }
+
+    console.log("Réponse envoyée :", {
+      message: "Catégorie mise à jour avec succès",
+      data: updatedCategory,
+    })
+
+    res.json({
+      message: "Catégorie mise à jour avec succès",
+      data: updatedCategory,
+    })
   } catch (error) {
+    console.error("Erreur lors de la mise à jour :", error)
+
     res.status(500).json({
       message: "Erreur lors de la mise à jour de la catégorie",
-      error,
+      error: error.message || error,
     })
   }
 }
@@ -67,10 +93,25 @@ export const updateCategory = async (req, res) => {
 // Supprimer une catégorie par ID
 export const deleteCategory = async (req, res) => {
   try {
+    const categoryId = new mongoose.Types.ObjectId(req.params.id)
+    console.log(categoryId)
+    const associatedProducts = await Product.find({ categorie_id: categoryId })
+    console.log("associatedProducts:", associatedProducts)
+    console.log("categoryId:", categoryId)
+    if (associatedProducts.length > 0) {
+      const noms = associatedProducts.map((product) => product.nom).join(",")
+      return res.status(400).json({
+        message: `Impossible de supprimer la catégorie, elle est associée aux produits suivants : ${noms}`,
+      })
+    }
     const deletedCategory = await Category.findByIdAndDelete(req.params.id)
-    if (!deletedCategory)
+    if (!deletedCategory) {
       return res.status(404).json({ message: "Catégorie introuvable" })
-    res.json({ message: "Catégorie supprimée avec succès" })
+    }
+    res.json({
+      message: "Catégorie supprimée avec succès",
+      data: deletedCategory,
+    })
   } catch (error) {
     res.status(500).json({
       message: "Erreur lors de la suppression de la catégorie",

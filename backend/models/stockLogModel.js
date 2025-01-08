@@ -25,6 +25,6 @@ const stockLogSchema = new mongoose.Schema(
   { collection: "stock_log" }
 )
 
-const StockLog = mongoose.model("StockLog", stockLogSchema)
+const StockLog = mongoose.model("stock_log", stockLogSchema)
 
 export default StockLog

@@ -2,13 +2,18 @@ import mongoose from "mongoose"
 const productSchema = new mongoose.Schema(
   {
     nom: { type: String, required: true },
-    description: { type: String },
+    description: { type: String, required: true },
     prix: { type: Number, required: true },
-    quantite_stock: { type: Number, default: 0 },
-    categorie_id: { type: mongoose.Schema.Types.ObjectId, ref: "categories" },
-    fournisseur_id: {
+    quantite_stock: { type: Number, required: true },
+    categorie_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "fournisseurs",
+      ref: "Category",
+      required: true,
+    },
+    supplier_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Supplier",
+      required: true,
     },
   },
   { collection: "products" } // Force le nom de la collection

@@ -15,8 +15,8 @@ const theme = createTheme({
       contrastText: "#1D1B18", // Texte foncé pour contraste
     },
     text: {
-      primary: "#FFF3E6", // Texte accessible (Accessible text 12)
-      secondary: "#FFB380", // Texte moins prioritaire (Accessible text 11)
+      primary: "#331E0B", // Texte accessible (Accessible text 12)
+      secondary: "#FB6A0025", // Texte moins prioritaire (Accessible text 11)
     },
     divider: "#7A5340", // Couleur pour les bordures et séparateurs (Border 7)
     action: {
