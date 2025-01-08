@@ -49,7 +49,7 @@ PREVOIR UN DASHBOARD POUR CHAQUE TYPE D'UTILISATEUR
                 b. un dashboard ou il peut modifié son profil, consulté ses commandes en cours ou passée
 
 
-
+@ A FAIRE-> Lorsque je supprime un role, créer une vue pour rediriger un utilisateur sans rôle 
 
 
 

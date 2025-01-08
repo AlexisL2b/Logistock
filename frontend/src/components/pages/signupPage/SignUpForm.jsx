@@ -14,6 +14,8 @@ import {
   FormControl,
 } from "@mui/material"
 import axiosInstance from "../../../axiosConfig"
+import axios from "axios"
+import User from "../../../../../backend/models/userModel"
 // Assurez-vous que votre instance axios est correctement configurée
 
 const FormulaireInscription = () => {
@@ -48,10 +50,28 @@ const FormulaireInscription = () => {
   }, [])
   console.log("////////////////////", salesPoints)
   // Fonction appelée lors de la soumission du formulaire
-  const onSubmit = (data) => {
-    console.log("Données soumises :", data)
-  }
 
+  const onSubmit = async (data) => {
+    try {
+      console.log("Données soumises :", data)
+
+      // Envoyer les données au backend
+      const res = await axios.post(
+        "http://localhost:5000/api/auth/register",
+        data
+      )
+
+      console.log("Réponse du backend :", res.data)
+
+      // Afficher un message de succès ou rediriger
+      alert("Inscription réussie !")
+    } catch (error) {
+      console.error("Erreur lors de l'inscription :", error)
+
+      // Afficher un message d'erreur à l'utilisateur
+      alert("Une erreur est survenue. Veuillez réessayer.")
+    }
+  }
   // Récupérer la valeur actuelle du mot de passe pour la validation de confirmation
   const password = watch("password")
 
