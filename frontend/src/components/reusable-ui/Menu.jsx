@@ -1,58 +1,35 @@
 import React from "react"
 import PropTypes from "prop-types"
-import Box from "@mui/material/Box"
 import List from "@mui/material/List"
 import ListItem from "@mui/material/ListItem"
 import ListItemButton from "@mui/material/ListItemButton"
 import ListItemIcon from "@mui/material/ListItemIcon"
 import ListItemText from "@mui/material/ListItemText"
-import { Link } from "react-router"
 
-function Menu({ links }) {
+export default function Menu({ links, onLinkClick }) {
   return (
-    <Box
-      sx={{
-        width: 250,
-        backgroundColor: "background.paper",
-        borderRadius: 2,
-        borderTopLeftRadius: 0,
-        borderBottomLeftRadius: 0,
-        boxShadow: 1,
-        p: 2,
-      }}
-    >
-      <List>
-        {links.map((link, index) => (
-          <ListItem key={index} disablePadding>
-            <ListItemButton
-              component={Link}
-              to={link.path}
-              sx={{
-                borderRadius: 1,
-                "&:hover": {
-                  backgroundColor: "primary.light",
-                  color: "white",
-                },
-              }}
-            >
-              <ListItemIcon>{link.icon}</ListItemIcon>
-              <ListItemText primary={link.label} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </Box>
+    <List>
+      {links.map(({ path, label, icon }, index) => (
+        <ListItem key={index} disablePadding>
+          <ListItemButton onClick={() => onLinkClick(path)}>
+            {/* Icône */}
+            {icon && <ListItemIcon>{icon}</ListItemIcon>}
+            {/* Libellé */}
+            <ListItemText primary={label} />
+          </ListItemButton>
+        </ListItem>
+      ))}
+    </List>
   )
 }
 
 Menu.propTypes = {
   links: PropTypes.arrayOf(
     PropTypes.shape({
-      path: PropTypes.string.isRequired,
-      label: PropTypes.string.isRequired,
-      icon: PropTypes.node.isRequired,
+      path: PropTypes.string.isRequired, // Chemin unique du lien
+      label: PropTypes.string.isRequired, // Texte du lien
+      icon: PropTypes.node, // Icône du lien
     })
   ).isRequired,
+  onLinkClick: PropTypes.func.isRequired, // Fonction appelée sur clic
 }
-
-export default Menu
