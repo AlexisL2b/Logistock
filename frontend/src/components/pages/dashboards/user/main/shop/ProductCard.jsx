@@ -8,43 +8,32 @@ import AddToCartButton from "./AddToCartButton"
 import { useDispatch, useSelector } from "react-redux"
 import {
   addToCart,
-  updateQuantity,
+  decrementFromCart,
 } from "../../../../../../redux/slices/cartSlice"
-import {
-  decreaseStock,
-  increaseStock,
-} from "../../../../../../redux/slices/productsSlice"
 
 export default function ProductCard({ product }) {
   const dispatch = useDispatch()
-
-  // Récupère la quantité actuelle du produit dans le panier depuis Redux
+  const cartItem = useSelector((state) =>
+    state.cart.items.find((item) => item.produit_id === product._id)
+  )
   const quantity = useSelector(
     (state) =>
-      state.cart.items.find((item) => item._id === product._id)?.quantity || 0
+      state.cart.items.find((item) => item.produit_id === product._id)
+        ?.quantity || 0
   )
-  const stock = useSelector(
-    (state) =>
-      state.products.items.find((item) => item._id === product._id)
-        ?.quantite_stock
-  )
-  // Ajouter une unité au panier
-  const handleAdd = () => {
-    if (stock > 0) {
-      dispatch(addToCart(product)) // Ajoute le produit au panier
-      dispatch(decreaseStock({ productId: product._id }))
-      // Réduit le stock
-    } else {
-      console.warn("Stock épuisé pour ce produit !")
+  const handleAddToCart = () => {
+    dispatch(addToCart({ produit_id: product._id, detailsProduit: product }))
+  }
+
+  const handleDecrement = () => {
+    if (cartItem?.quantity > 0) {
+      dispatch(decrementFromCart(product._id))
     }
   }
-
-  // Retirer une unité du panier
-  const handleRemove = () => {
-    dispatch(updateQuantity({ productId: product._id })) // Retire du panier
-    dispatch(increaseStock({ productId: product._id })) // Rétablit le stock
-  }
-
+  console.log(
+    `[ProductCard] Quantité du produit ${product._id} dans le panier :`,
+    quantity
+  )
   return (
     <Card>
       <CardActionArea
@@ -62,19 +51,19 @@ export default function ProductCard({ product }) {
           <Typography variant="h4" component="div">
             {product.nom}
           </Typography>
-          <Typography variant="h1" component="div">
-            {product.categorie_id?.nom || "Catégorie inconnue"}
+          <Typography variant="h6" component="div">
+            {product.categorie_id?.nom || "Catégorie inconnue"} -{" "}
             {product.supplier_id?.nom || "Fournisseur inconnu"}
           </Typography>
           <Typography variant="body2" color="text.secondary">
             {product.description}
+            <br />
             {`Prix : ${product.prix} €`}
           </Typography>
-          {/* Bouton contrôlé par le parent */}
           <AddToCartButton
             quantity={quantity}
-            onAdd={handleAdd}
-            onRemove={handleRemove}
+            onAdd={handleAddToCart}
+            onRemove={handleDecrement}
           />
         </CardContent>
       </CardActionArea>

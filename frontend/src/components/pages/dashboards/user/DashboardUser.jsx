@@ -1,19 +1,40 @@
 import React, { useState } from "react"
-import { Box } from "@mui/material"
+import { Box, Button, Modal, Typography } from "@mui/material"
 import Menu from "../../../reusable-ui/Menu" // Importez votre composant Menu
 import Main from "./main/Main" // Import du composant Main
 import AccountCircleIcon from "@mui/icons-material/AccountCircle"
 import BarChartIcon from "@mui/icons-material/BarChart"
-import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket"
+import LocalShippingIcon from "@mui/icons-material/LocalShipping"
 import Profile from "./main/profile/Profile"
-import Analytics from "./main/analytics/Analytics"
-import Basket from "./main/basket/Basket"
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart"
 import Shop from "./main/shop/Shop"
+import CartModal from "./cart/CartModal"
+import { useDispatch, useSelector } from "react-redux"
+import {
+  addToCart,
+  decrementFromCart,
+  removeFromCart,
+} from "../../../../redux/slices/cartSlice"
+import Orders from "./main/order/Orders"
 
 export default function DashboardUser() {
+  const [open, setOpen] = useState(false)
+  const dispatch = useDispatch()
+
+  // Sélection des articles du panier depuis le Redux store
+  const cartItems = useSelector((state) => state.cart.items)
+
+  // Calcul du total à partir des articles du panier
+  const total = cartItems.reduce(
+    (acc, item) => acc + item.detailsProduit.prix * item.quantity,
+    0
+  )
+  console.log("cartItems", cartItems)
   // État pour gérer le composant actif
   const [activeComponent, setActiveComponent] = useState("profile")
+
+  // État pour gérer l'ouverture/fermeture de la modal
+  const [isModalOpen, setModalOpen] = useState(false)
 
   // Liste des liens avec leurs composants associés
   const links = [
@@ -24,17 +45,12 @@ export default function DashboardUser() {
       component: <Profile />, // Composant à afficher
     },
     {
-      path: "analytics",
-      label: "Analytics",
-      icon: <BarChartIcon />,
-      component: <Analytics />, // Composant à afficher
+      path: "orders",
+      label: "Commandes",
+      icon: <LocalShippingIcon />,
+      component: <Orders />, // Composant à afficher
     },
-    {
-      path: "basket",
-      label: "Panier",
-      icon: <ShoppingBasketIcon />,
-      component: <Basket />, // Composant à afficher
-    },
+
     {
       path: "shop",
       label: "Produits",
@@ -48,13 +64,46 @@ export default function DashboardUser() {
     (link) => link.path === activeComponent
   )?.component
 
-  return (
-    <Box sx={{ display: "flex" }}>
-      {/* Menu */}
-      <Menu links={links} onLinkClick={setActiveComponent} />
+  // Gestion de la fermeture de la modal
+  const handleCloseModal = () => setModalOpen(false)
 
-      {/* Main */}
-      <Main>{activeElement}</Main>
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column" }}>
+      {/* Bouton d'ouverture de la modal */}
+      <Box sx={{ marginBottom: 2, textAlign: "center" }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setModalOpen(true)}
+        >
+          Panier
+        </Button>
+      </Box>
+      {/* Menu */}
+      <Box sx={{ display: "flex" }}>
+        <Menu links={links} onLinkClick={setActiveComponent} />
+
+        {/* Main */}
+        <Main>{activeElement}</Main>
+      </Box>
+      {/* Modal */}
+
+      <CartModal
+        open={isModalOpen}
+        onClose={() => setModalOpen(false)}
+        cartItems={cartItems} // Passer les produits du panier en props
+        total={total} // Passer le total en props
+        onIncrement={(item) =>
+          dispatch(
+            addToCart({
+              produit_id: item.produit_id,
+              detailsProduit: item.detailsProduit,
+            })
+          )
+        }
+        onDecrement={(item) => dispatch(decrementFromCart(item.produit_id))}
+        onRemove={(item) => dispatch(removeFromCart(item.produit_id))}
+      />
     </Box>
   )
 }

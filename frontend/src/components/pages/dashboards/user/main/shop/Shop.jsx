@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import {
-  fetchProducts,
-  fetchTransformedProducts,
-} from "../../../../../../redux/slices/productsSlice"
+import { fetchProducts } from "../../../../../../redux/slices/productsSlice"
 import { Box } from "@mui/material"
 import ProductCard from "./ProductCard"
 

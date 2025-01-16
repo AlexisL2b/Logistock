@@ -1,7 +1,12 @@
 import React from "react"
 import { Button, Box, Typography } from "@mui/material"
 
-export default function AddToCartButton({ quantity, onAdd, onRemove }) {
+export default function AddToCartButton({
+  quantity,
+  onAdd,
+  onRemove,
+  maxQuantity,
+}) {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
       {quantity === 0 ? (
@@ -33,6 +38,7 @@ export default function AddToCartButton({ quantity, onAdd, onRemove }) {
             color="primary"
             onClick={onAdd}
             sx={{ minWidth: "40px" }}
+            disabled={quantity >= maxQuantity} // Désactiver si max atteint
           >
             +
           </Button>
