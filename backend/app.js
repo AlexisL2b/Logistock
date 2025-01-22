@@ -55,6 +55,8 @@ app.use("/api/order_details", orderDetailsRoutes)
 app.use("/api/order_shipments", orderShipmentRoutes)
 app.use("/api/stocks", stockRoutes)
 
+app.use("/api/users", userRoutes)
+
 // Gestion des routes non trouvées
 app.use((req, res, next) => {
   res.status(404).json({ message: "Route non trouvée" })

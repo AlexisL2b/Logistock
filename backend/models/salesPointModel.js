@@ -11,10 +11,9 @@ const salesPointSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true },
   { collection: "sales_points" }
 )
 
-const SalesPoint = mongoose.model("sales_points", salesPointSchema)
+const SalesPoint = mongoose.model("SalesPoint", salesPointSchema)
 
 export default SalesPoint

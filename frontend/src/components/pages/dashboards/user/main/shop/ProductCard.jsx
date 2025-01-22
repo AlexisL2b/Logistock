@@ -16,24 +16,28 @@ export default function ProductCard({ product }) {
   const cartItem = useSelector((state) =>
     state.cart.items.find((item) => item.produit_id === product._id)
   )
+  const userId = useSelector((state) => state.auth.user._id)
+
   const quantity = useSelector(
     (state) =>
       state.cart.items.find((item) => item.produit_id === product._id)
         ?.quantity || 0
   )
   const handleAddToCart = () => {
-    dispatch(addToCart({ produit_id: product._id, detailsProduit: product }))
+    dispatch(
+      addToCart({ userId, produit_id: product._id, detailsProduit: product })
+    )
   }
 
   const handleDecrement = () => {
     if (cartItem?.quantity > 0) {
-      dispatch(decrementFromCart(product._id))
+      dispatch(decrementFromCart({ userId, produit_id: product._id }))
     }
   }
-  console.log(
-    `[ProductCard] Quantité du produit ${product._id} dans le panier :`,
-    quantity
-  )
+  // console.log(
+  //   `[ProductCard] Quantité du produit ${product._id} dans le panier :`,
+  //   quantity
+  // )
   return (
     <Card>
       <CardActionArea

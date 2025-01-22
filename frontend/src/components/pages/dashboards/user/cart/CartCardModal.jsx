@@ -1,13 +1,43 @@
 import React from "react"
 import { Box, Typography, Button } from "@mui/material"
+import { useDispatch, useSelector } from "react-redux"
+import {
+  addToCart,
+  decrementFromCart,
+  removeFromCart,
+} from "../../../../../redux/slices/cartSlice"
 
 export default function CartCardModal({
   product,
-  onIncrement,
-  onDecrement,
+
   onRemove,
 }) {
   const { nom, prix, quantite_disponible, quantity = 0 } = product
+  const dispatch = useDispatch()
+  const cartItem = useSelector((state) =>
+    state.cart.items.find((item) => item.produit_id === product.produit_id)
+  )
+  const userId = useSelector((state) => state.auth.user._id)
+
+  const handleAddToCart = () => {
+    console.log("cartItem", cartItem)
+    dispatch(
+      addToCart({
+        userId,
+        produit_id: cartItem.produit_id,
+        detailsProduit: cartItem.detailsProduit,
+      })
+    )
+  }
+
+  const handleDecrement = () => {
+    if (cartItem?.quantity > 0) {
+      dispatch(decrementFromCart({ userId, produit_id: cartItem.produit_id }))
+    }
+  }
+  const handleRemove = () => {
+    dispatch(removeFromCart({ userId, produit_id: cartItem.produit_id }))
+  }
 
   return (
     <Box
@@ -42,7 +72,7 @@ export default function CartCardModal({
         <Button
           variant="outlined"
           color="secondary"
-          onClick={onDecrement}
+          onClick={handleDecrement}
           disabled={quantity === 0}
         >
           -
@@ -53,12 +83,12 @@ export default function CartCardModal({
         <Button
           variant="outlined"
           color="primary"
-          onClick={onIncrement}
+          onClick={handleAddToCart}
           disabled={quantity >= quantite_disponible}
         >
           +
         </Button>
-        <Button variant="text" color="error" onClick={onRemove}>
+        <Button variant="text" color="error" onClick={handleRemove}>
           Supprimer
         </Button>
       </Box>

@@ -19,7 +19,19 @@ export default function CartModal({
   onDecrement,
   onRemove,
 }) {
-  console.log("cartItems from modal", cartItems)
+  // console.log("cartItems from modal", cartItems)
+
+  const onSubmit = async (cartItems) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/orders",
+        cartItems
+      )
+      console.log("commande créée", response.data)
+    } catch (error) {
+      console.error("Erreur lors de la création de la commande :", error)
+    }
+  }
 
   return (
     <Modal open={open} onClose={onClose}>

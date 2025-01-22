@@ -1,53 +1,54 @@
 import { Box, TextField, Typography, Button } from "@mui/material"
-import React, { useState } from "react"
-import { getAuth, signInWithCustomToken } from "firebase/auth"
+import React, { useEffect, useState } from "react"
+import { getAuth, signInWithCustomToken, signOut } from "firebase/auth"
 import { useNavigate } from "react-router" // Remplace Link pour la navigation
 import axios from "axios"
+import { useDispatch } from "react-redux"
+import { fetchUserProfile, setUser } from "../../../redux/slices/authSlice"
 
 export default function LoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 
+  useEffect(() => {
+    const auth = getAuth()
+    signOut(auth) // Déconnecte l'utilisateur au chargement de la page
+      .then(() => {
+        console.log("Session Firebase nettoyée")
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la déconnexion Firebase :", error)
+      })
+  }, [])
   const handleLogin = async () => {
     try {
-      // Étape 1 : Appeler l'API /login pour obtenir le token Firebase
       const loginRes = await axios.post(
         "http://localhost:5000/api/auth/login",
-        {
-          email,
-          password,
-        }
+        { email, password }
       )
 
       const { token } = loginRes.data
-
-      // Stocker le token Firebase dans le localStorage
-      localStorage.setItem("authToken", token)
-
-      // Étape 2 : Authentification avec Firebase pour obtenir l'ID Token
       const auth = getAuth()
       const userCredential = await signInWithCustomToken(auth, token)
       const idToken = await userCredential.user.getIdToken()
 
-      // Stocker l'ID Token pour les requêtes futures
-      localStorage.setItem("idToken", idToken)
-
-      // Étape 3 : Appeler l'API /profile pour récupérer les informations utilisateur depuis MongoDB
+      // Récupérer les données utilisateur depuis le backend
       const profileRes = await axios.get(
         "http://localhost:5000/api/auth/profile",
         {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
+          headers: { Authorization: `Bearer ${idToken}` },
         }
       )
 
       const user = profileRes.data.user
-      console.log("Informations utilisateur MongoDB :", user)
 
-      // Étape 4 : Redirection en fonction du rôle
+      // Dispatcher les données utilisateur
+      dispatch(setUser(user))
+
+      // Redirection en fonction du rôle
       if (user.role_id === "677cf977b39853e4a17727e0") {
         navigate("/admin-dashboard")
       } else if (user.role_id === "677cf977b39853e4a17727e3") {
@@ -57,10 +58,9 @@ export default function LoginForm() {
       }
     } catch (err) {
       console.error("Erreur lors de la connexion :", err)
-      setError("Connexion échouée. Veuillez vérifier vos identifiants.")
+      setError("Connexion échouée.")
     }
   }
-
   return (
     <Box
       sx={{

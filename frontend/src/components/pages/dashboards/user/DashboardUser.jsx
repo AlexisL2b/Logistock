@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Box, Button, Modal, Typography } from "@mui/material"
 import Menu from "../../../reusable-ui/Menu" // Importez votre composant Menu
 import Main from "./main/Main" // Import du composant Main
@@ -13,23 +13,50 @@ import { useDispatch, useSelector } from "react-redux"
 import {
   addToCart,
   decrementFromCart,
+  loadCart,
   removeFromCart,
 } from "../../../../redux/slices/cartSlice"
 import Orders from "./main/order/Orders"
+import {
+  loadUserFromLocalStorage,
+  logout,
+} from "../../../../redux/slices/authSlice"
 
 export default function DashboardUser() {
   const [open, setOpen] = useState(false)
   const dispatch = useDispatch()
-
+  const user = useSelector(
+    (state) => state.auth.user || loadUserFromLocalStorage()
+  )
+  const userId = user?._id
+  const handleLohgout = () => {
+    console.log("logout")
+    dispatch(logout())
+  }
+  useEffect(() => {
+    if (userId) {
+      dispatch(loadCart(userId))
+      console.log("userId from useEffect", userId)
+    }
+  }, [userId, dispatch])
   // Sélection des articles du panier depuis le Redux store
   const cartItems = useSelector((state) => state.cart.items)
+  // const user = useSelector((state) => state.auth.user)
 
+  console.log("userId", userId) // Récupérer l'ID utilisateur connecté
+  // console.log("user", user) // Récupérer l'ID utilisateur connecté
+  useEffect(() => {
+    if (userId) {
+      dispatch(loadCart(userId))
+      console.log("userId from useEffect", userId)
+    }
+  }, [userId, dispatch])
   // Calcul du total à partir des articles du panier
   const total = cartItems.reduce(
     (acc, item) => acc + item.detailsProduit.prix * item.quantity,
     0
   )
-  console.log("cartItems", cartItems)
+  // console.log("cartItems", cartItems)
   // État pour gérer le composant actif
   const [activeComponent, setActiveComponent] = useState("profile")
 
@@ -93,17 +120,8 @@ export default function DashboardUser() {
         onClose={() => setModalOpen(false)}
         cartItems={cartItems} // Passer les produits du panier en props
         total={total} // Passer le total en props
-        onIncrement={(item) =>
-          dispatch(
-            addToCart({
-              produit_id: item.produit_id,
-              detailsProduit: item.detailsProduit,
-            })
-          )
-        }
-        onDecrement={(item) => dispatch(decrementFromCart(item.produit_id))}
-        onRemove={(item) => dispatch(removeFromCart(item.produit_id))}
       />
+      <Button onClick={handleLohgout}>Déconnexion</Button>
     </Box>
   )
 }

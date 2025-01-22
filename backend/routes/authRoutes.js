@@ -26,7 +26,7 @@ router.get("/profile", authenticate, async (req, res) => {
 
     // Rechercher l'utilisateur dans MongoDB
     const user = await User.findOne({ firebaseUid })
-    console.log(user)
+    // console.log(user)
     if (!user) {
       return res
         .status(404)
@@ -39,7 +39,10 @@ router.get("/profile", authenticate, async (req, res) => {
       user,
     })
   } catch (error) {
-    console.error("Erreur lors de la récupération de l'utilisateur :", error)
+    console.error(
+      "Erreur lors de la récupération de l'utilisateur depuiis authRoutes :",
+      error
+    )
     res.status(500).json({ message: "Erreur serveur" })
   }
 })

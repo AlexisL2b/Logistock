@@ -12,7 +12,7 @@ export default function products() {
       .get("/products") // URL relative correcte si axiosInstance est bien configuré
       .then((response) => {
         setProducts(response.data) // Mise à jour des Produits dans le state
-        console.log("Produits récupérées :", response.data)
+        // console.log("Produits récupérées :", response.data)
       })
       .catch((error) => {
         console.error("Erreur lors de la récupération des Produits :", error)
@@ -26,7 +26,7 @@ export default function products() {
 
   // Callback pour gérer les changements de données
   const handleDataChange = () => {
-    console.log("Les données ont changé, rechargement...")
+    // console.log("Les données ont changé, rechargement...")
     fetchProducts() // Rechargez les données lorsque le callback est déclenché
   }
   const headerMapping = {
