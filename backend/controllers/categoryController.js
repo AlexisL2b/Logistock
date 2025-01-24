@@ -94,7 +94,7 @@ export const updateCategory = async (req, res) => {
 export const deleteCategory = async (req, res) => {
   try {
     const categoryId = new mongoose.Types.ObjectId(req.params.id)
-    console.log(categoryId)
+    // console.log(categoryId)
     const associatedProducts = await Product.find({ categorie_id: categoryId })
     console.log("associatedProducts:", associatedProducts)
     console.log("categoryId:", categoryId)

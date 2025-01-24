@@ -19,38 +19,52 @@ TYPES D'UTILISATEURS DANS L'ORDRE HIERARCHIQUE ET LEURS LOGIQUES:
 PREVOIR UN DASHBOARD POUR CHAQUE TYPE D'UTILISATEUR
 
 
+@A FAIRE->  6. Ajouter un système de récupération de mot de passe
 
+@A FAIRE->  3. Validitée de champs des formulaires:
+            dans chaque volet, implémenter une validation des différents champs de formulaire.
+@A FAIRE->  9. Revoir la logique de ma collection order_detail (Un champs quantité existe, imaginer un champ qui accueillera le json de toutes les produits commandés avec prix,quantité,PU HT/TTC, PTOTAL par produit  HT/TTC et PRIX TOTAL HT/TTC)
 
-@A FAIRE->  1. Gerer les conflicts entre produit/categorie ect.
+@A FAIRE->  10.Design et responsive
+
+@A FAIRE->  4. Faire un composant qui accueillera les commande (table collaps mui);
+
+@FAIT->  1. Gerer les conflicts entre produit/categorie ect.
             ex: Si un produit a une categorie "meuble", et que je supprime la categorie meuble gérer ce cas
 
 @FAIT->     2. Ajouter des listes déroulante pour donner acces lors des modification/ajout aux différentes dépendance.
             ex: Pour un produit si je veux le modifier dans la section categorie, un liste déroulante sera présente avec les categories disponibles dans ma collection
 
-@A FAIRE->  3. Validitée de champs des formulaires:
-            dans chaque volet, implémenter une validation des différents champs de formulaire.
 
-@A FAIRE->  4. Faire un composant qui accueillera les commande (table collaps mui);
 
-@A FAIRE->  5. Ajouter un système d'authentification
+@FAIT->  5. Ajouter un système d'authentification
 
-@A FAIRE->  6. Ajouter un système de récupération de mot de passe
+@FAIT->  7. Ajouter une logique de rôle/accès (voir pour ajouter une table)
 
-@A FAIRE->  7. Ajouter une logique de rôle/accès (voir pour ajouter une table)
+@FAIT->  8. Ajouter une page de création de compte avec différentes validation sur les différents champs
 
-@A FAIRE->  8. Ajouter une page de création de compte avec différentes validation sur les différents champs
 
-@A FAIRE->  9. Revoir la logique de ma collection order_detail (Un champs quantité existe, imaginer un champ qui accueillera le json de toutes les produits commandés avec prix,quantité,PU HT/TTC, PTOTAL par produit  HT/TTC et PRIX TOTAL HT/TTC)
-
-@A FAIRE->  10.Design et responsive
-
-@A FAIRE->  11.Créer une vue acheteur avec:
+@FAIT  11.Créer une vue acheteur avec:
                 a. une logique de panié/commande
                 b. un dashboard ou il peut modifié son profil, consulté ses commandes en cours ou passée
 
 
 @ A FAIRE-> Lorsque je supprime un role, créer une vue pour rediriger un utilisateur sans rôle 
 
+@ A FAIRE -> lorsque je me déconnecte ( que je retourne dans http://localhost:5173/), et que je complete l'url par -user-dahsboard j'accede au composant et aà un utilisateur pourquoi ?
+
+POINT D'AMELIORATION:
+
+
+Gestion des stockes dynamiques avec des quantité reservé , disponible et total
+
+
+Produit:
+
+Ajouter une reference pour pouvoir recommander le même produit par exemple.
 
 
 
+Shop : 
+Utiliser le composant drawer pour le panier.
+Utiliser le composant speed dial pour le menu burger

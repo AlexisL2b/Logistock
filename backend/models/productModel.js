@@ -1,10 +1,10 @@
 import mongoose from "mongoose"
+
 const productSchema = new mongoose.Schema(
   {
     nom: { type: String, required: true },
     description: { type: String, required: true },
     prix: { type: Number, required: true },
-    quantite_stock: { type: Number, required: true },
     categorie_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
@@ -14,6 +14,10 @@ const productSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Supplier",
       required: true,
+    },
+    stock_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Stock",
     },
   },
   { collection: "products" } // Force le nom de la collection

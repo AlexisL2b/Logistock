@@ -23,7 +23,7 @@ export const createUser = async (req, res) => {
       prenom,
       nom,
       adresse,
-      point_vente_id: salesPoint || addresse, // Valeur par défaut : adresse
+      point_vente_id: salesPoint || "", // Valeur par défaut : adresse
     })
 
     const savedUser = await newUser.save()
@@ -62,9 +62,9 @@ export const loginUser = async (req, res) => {
     const dbUser = await User.findOne({ email: email })
 
     if (!dbUser) {
-      return res
-        .status(404)
-        .json({ message: "Utilisateur introuvable dans MongoDB." })
+      return res.status(404).json({
+        message: "Utilisateur introuvable dans MongoDB depuis AuthController.",
+      })
     }
 
     // Étape 3 : Générer un token Firebase (ID Token)

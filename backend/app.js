@@ -16,6 +16,7 @@ import orderRoutes from "./routes/orderRoutes.js"
 import orderDetailsRoutes from "./routes/orderDetailsRoutes.js"
 import orderShipmentRoutes from "./routes/orderShipmentRoutes.js"
 import authRoutes from "./routes/authRoutes.js"
+import stockRoutes from "./routes/stockRoutes.js"
 import admin from "./config/firebase.js"
 
 // Configuration de l'application
@@ -43,15 +44,16 @@ app.use("/api/categories", categoryRoutes)
 app.use("/api/products", productRoutes)
 app.use("/api/suppliers", supplierRoutes)
 console.log("Fichier salesPointRoutes chargé")
-
 app.use("/api/sales_points", salesPointRoutes)
-
 app.use("/api/stock_logs", stockLogRoutes)
 app.use("/api/transporters", transporterRoutes)
 app.use("/api/users", userRoutes)
 app.use("/api/orders", orderRoutes)
 app.use("/api/order_details", orderDetailsRoutes)
 app.use("/api/order_shipments", orderShipmentRoutes)
+app.use("/api/stocks", stockRoutes)
+
+app.use("/api/users", userRoutes)
 
 // Gestion des routes non trouvées
 app.use((req, res, next) => {
