@@ -3,6 +3,7 @@ import productsReducer from "./slices/productsSlice"
 import cartReducer from "./slices/cartSlice"
 import stockReducer from "./slices/stockSlice" // Import du stockSlice
 import authReducer from "./slices/authSlice" // Import du stockSlice
+import ordersReducer from "./slices/orderSlice" // Import du stockSlice
 
 export const store = configureStore({
   reducer: {
@@ -10,5 +11,6 @@ export const store = configureStore({
     cart: cartReducer,
     stocks: stockReducer, // Ajout du stockSlice
     auth: authReducer,
+    orders: ordersReducer,
   },
 })

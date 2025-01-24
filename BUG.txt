@@ -62,3 +62,9 @@ Gestion des stockes dynamiques avec des quantité reservé , disponible et total
 Produit:
 
 Ajouter une reference pour pouvoir recommander le même produit par exemple.
+
+
+
+Shop : 
+Utiliser le composant drawer pour le panier.
+Utiliser le composant speed dial pour le menu burger

@@ -20,3 +20,19 @@ export const loadFromLocalStorage = (key) => {
     return undefined
   }
 }
+
+export const loadUserFromLocalStorage = () => {
+  try {
+    const keys = Object.keys(localStorage).filter((key) =>
+      key.startsWith("user_")
+    )
+    if (keys.length > 0) {
+      const userData = localStorage.getItem(keys[0])
+      return userData ? JSON.parse(userData) : null
+    }
+    return null
+  } catch (error) {
+    console.error("Erreur lors du chargement des données utilisateur :", error)
+    return null
+  }
+}

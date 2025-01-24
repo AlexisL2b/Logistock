@@ -17,10 +17,8 @@ import {
   removeFromCart,
 } from "../../../../redux/slices/cartSlice"
 import Orders from "./main/order/Orders"
-import {
-  loadUserFromLocalStorage,
-  logout,
-} from "../../../../redux/slices/authSlice"
+import { logout } from "../../../../redux/slices/authSlice"
+import { loadUserFromLocalStorage } from "../../../../utils/localStorage"
 
 export default function DashboardUser() {
   const [open, setOpen] = useState(false)

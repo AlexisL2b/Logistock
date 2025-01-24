@@ -8,7 +8,7 @@ const orderSchema = new mongoose.Schema(
     },
     statut: {
       type: String,
-      enum: ["en cours", "validée", "expédiée", "livrée"],
+      enum: ["en cours", "validée", "expédiée", "annulée"],
       default: "en cours",
     },
     acheteur_id: {

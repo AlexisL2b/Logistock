@@ -16,6 +16,7 @@ import SignUpPage from "./components/pages/signupPage/SignUpPage"
 import DashboardUser from "./components/pages/dashboards/user/DashboardUser"
 import { listenToAuthState } from "./redux/slices/authSlice"
 import ProtectedRoute from "./components/reusable-ui/ProtectedRoute"
+import DashboardLogistician from "./components/pages/dashboards/logistician/DashboardLogistician"
 
 function App() {
   const dispatch = useDispatch()
@@ -34,6 +35,14 @@ function App() {
         element={
           <ProtectedRoute>
             <DashboardUser />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/logisticien-dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardLogistician />
           </ProtectedRoute>
         }
       />

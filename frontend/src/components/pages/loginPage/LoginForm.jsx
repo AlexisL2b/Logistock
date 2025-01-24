@@ -54,7 +54,7 @@ export default function LoginForm() {
       } else if (user.role_id === "677cf977b39853e4a17727e3") {
         navigate("/user-dashboard")
       } else {
-        navigate("/unknown-role")
+        navigate("/logisticien-dashboard")
       }
     } catch (err) {
       console.error("Erreur lors de la connexion :", err)

@@ -44,9 +44,7 @@ app.use("/api/categories", categoryRoutes)
 app.use("/api/products", productRoutes)
 app.use("/api/suppliers", supplierRoutes)
 console.log("Fichier salesPointRoutes chargé")
-
 app.use("/api/sales_points", salesPointRoutes)
-
 app.use("/api/stock_logs", stockLogRoutes)
 app.use("/api/transporters", transporterRoutes)
 app.use("/api/users", userRoutes)

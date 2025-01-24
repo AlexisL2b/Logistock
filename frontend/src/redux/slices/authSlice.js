@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import { getAuth, onAuthStateChanged } from "firebase/auth"
 import axios from "axios"
+import { loadUserFromLocalStorage } from "../../utils/localStorage"
 
 // Fonctions utilitaires pour gérer localStorage
 const saveUserToLocalStorage = (userData) => {
@@ -13,22 +14,6 @@ const saveUserToLocalStorage = (userData) => {
       "Erreur lors de la sauvegarde des données utilisateur dans localStorage :",
       error
     )
-  }
-}
-
-export const loadUserFromLocalStorage = () => {
-  try {
-    const keys = Object.keys(localStorage).filter((key) =>
-      key.startsWith("user_")
-    )
-    if (keys.length > 0) {
-      const userData = localStorage.getItem(keys[0])
-      return userData ? JSON.parse(userData) : null
-    }
-    return null
-  } catch (error) {
-    console.error("Erreur lors du chargement des données utilisateur :", error)
-    return null
   }
 }
 

@@ -9,6 +9,10 @@ import {
 } from "@mui/material"
 import CloseIcon from "@mui/icons-material/Close"
 import CartCardModal from "./CartCardModal"
+import { loadUserFromLocalStorage } from "../../../../../utils/localStorage"
+import axios from "axios"
+import { useDispatch } from "react-redux"
+import { clearCart } from "../../../../../redux/slices/cartSlice"
 
 export default function CartModal({
   open,
@@ -19,17 +23,41 @@ export default function CartModal({
   onDecrement,
   onRemove,
 }) {
-  // console.log("cartItems from modal", cartItems)
+  const user = loadUserFromLocalStorage()
+  const userId = user._id
+  const dispatch = useDispatch()
+  console.log(cartItems)
 
-  const onSubmit = async (cartItems) => {
+  const handleCheckout = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/orders",
-        cartItems
-      )
-      console.log("commande créée", response.data)
+      if (cartItems.length > 0) {
+        const responseOrder = await axios.post(
+          "http://localhost:5000/api/orders",
+          { acheteur_id: userId }
+        )
+        const orderId = responseOrder.data._id
+        console.log(orderId)
+        cartItems.forEach(async (item) => {
+          const productId = item.produit_id
+          const quantity = item.quantity
+          const priceUnite = item.detailsProduit.prix
+          const orderDetailToAdd = {
+            commande_id: orderId,
+            produit_id: productId,
+            quantite: quantity,
+            prix_unitaire: priceUnite,
+          }
+          const responseOrder = await axios.post(
+            "http://localhost:5000/api/order_details",
+            orderDetailToAdd
+          )
+          dispatch(clearCart())
+          onClose()
+        })
+      }
+      console.log("cartItems Vide")
     } catch (error) {
-      console.error("Erreur lors de la création de la commande :", error)
+      console.log(error)
     }
   }
 
@@ -97,6 +125,7 @@ export default function CartModal({
             fullWidth
             color="primary"
             sx={{ textTransform: "none", mb: 1 }}
+            onClick={handleCheckout}
           >
             Checkout
           </Button>
