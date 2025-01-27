@@ -11,3 +11,8 @@ export const updateStockById = async (stockId, stockUpdates) => {
   const response = await axios.put(`/api/stocks/${stockId}`, stockUpdates)
   return response.data
 }
+
+export const getStock = async () => {
+  const response = await axios.get(`/api/stocks/all`)
+  return response.data
+}

@@ -3,15 +3,18 @@ import { useDispatch, useSelector } from "react-redux"
 import { fetchOrdersWithDetails } from "../../../../../../../redux/slices/orderSlice"
 import { Box } from "@mui/material"
 import CollapsingTableLogistician from "./CollapsingTableLogistician"
+import { fetchStocks } from "../../../../../../../redux/slices/stockSlice"
 
 export default function Awaiting() {
   const dispatch = useDispatch()
   const { orders, status, error } = useSelector((state) => state.orders)
-
+  const { stocks } = useSelector((state) => state.stocks)
+  console.log(stocks)
   // Charger les commandes uniquement au montage si nécessaire
   useEffect(() => {
     if (status === "idle") {
       dispatch(fetchOrdersWithDetails())
+      dispatch(fetchStocks())
     }
   }, [dispatch, status])
 

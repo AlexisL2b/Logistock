@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
-import { getStockByProductId, updateStockById } from "../api/stockApi"
+import { getStock, getStockByProductId, updateStockById } from "../api/stockApi"
 
 // Thunk pour récupérer le stock d'un produit
 export const fetchStockByProductId = createAsyncThunk(
@@ -10,6 +10,19 @@ export const fetchStockByProductId = createAsyncThunk(
       return response
     } catch (error) {
       console.error("Erreur lors de la récupération du stock :", error)
+      return rejectWithValue(error.response?.data || error.message)
+    }
+  }
+)
+export const fetchStocks = createAsyncThunk(
+  "stocks/fetchStocks",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await getStock()
+      console.log("Response complète :", response) // Vérifiez le contenu
+      return response.data // Retournez directement le tableau des stocks
+    } catch (error) {
+      console.error("Erreur lors de la récupération des stocks :", error)
       return rejectWithValue(error.response?.data || error.message)
     }
   }
@@ -54,6 +67,19 @@ const stockSlice = createSlice({
         }
       })
       .addCase(fetchStockByProductId.rejected, (state, action) => {
+        state.status = "failed"
+        state.error = action.payload
+      })
+      .addCase(fetchStocks.pending, (state) => {
+        state.status = "loading"
+      })
+
+      .addCase(fetchStocks.fulfilled, (state, action) => {
+        console.log("Payload reçu dans fulfilled :", action.payload)
+        state.status = "succeeded"
+        state.stocks = action.payload
+      })
+      .addCase(fetchStocks.rejected, (state, action) => {
         state.status = "failed"
         state.error = action.payload
       })

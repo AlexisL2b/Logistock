@@ -111,10 +111,19 @@ export const checkStockAvailability = async (req, res) => {
 export const getAllStocks = async (req, res) => {
   try {
     console.log("Requête reçue pour récupérer les stocks")
-    const stocks = await Stock.find().populate("produit_id") // Inclut les infos du produit lié
+
+    // Utilisez `.populate()` avec `.select()` pour n'inclure que l'ID
+    const stocks = await Stock.find().populate("produit_id", "_id").lean() // Convertit les documents Mongoose en objets JS simples
+
+    // Transformez `produit_id` pour qu'il ne contienne que l'ID
+    const updatedStocks = stocks.map((stock) => ({
+      ...stock,
+      produit_id: stock.produit_id._id, // Remplace l'objet `produit_id` par son `_id`
+    }))
+
     res.json({
       message: "Stocks récupérés avec succès",
-      data: stocks,
+      data: updatedStocks,
     })
   } catch (error) {
     res.status(500).json({
