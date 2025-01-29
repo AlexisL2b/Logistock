@@ -68,8 +68,8 @@ export const deleteSupplier = async (req, res) => {
     const associatedProducts = await Product.find({
       fournisseur_id: supplierId,
     })
-    console.log("associatedProducts:", associatedProducts)
-    console.log("supplierId:", supplierId)
+    //("associatedProducts:", associatedProducts)
+    //("supplierId:", supplierId)
 
     if (associatedProducts.length > 0) {
       // Créer une liste des noms des produits associés

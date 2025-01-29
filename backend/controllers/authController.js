@@ -13,7 +13,7 @@ export const createUser = async (req, res) => {
       password,
     })
 
-    console.log("Utilisateur créé dans Firebase :", userRecord.password)
+    //("Utilisateur créé dans Firebase :", userRecord.password)
 
     // Étape 3 : Enregistrer l'utilisateur dans MongoDB
     const newUser = new User({

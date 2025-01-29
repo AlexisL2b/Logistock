@@ -17,13 +17,13 @@ export default function home() {
         console.error("Erreur lors de la récupération des catégories :", error)
       })
   }, [])
-  console.log("Le composant Home est bien chargé")
+  //("Le composant Home est bien chargé")
 
   return (
     <Box sx={{ backgroundColor: "red" }}>
       <Form
         action="submit"
-        onSubmit={console.log("Je viens de sumbit mon form")}
+        onSubmit={//("Je viens de sumbit mon form")}
       />
     </Box>
   )

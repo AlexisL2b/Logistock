@@ -12,7 +12,7 @@ export default function Suppliers() {
       .get("/suppliers") // URL relative correcte si axiosInstance est bien configuré
       .then((response) => {
         setSuppliers(response.data) // Mise à jour des fournisseurs dans le state
-        console.log("Fournisseur récupérées :", response.data)
+        //("Fournisseur récupérées :", response.data)
       })
       .catch((error) => {
         console.error(
@@ -29,7 +29,7 @@ export default function Suppliers() {
 
   // Callback pour gérer les changements de données
   const handleDataChange = () => {
-    console.log("Les données ont changé, rechargement...")
+    //("Les données ont changé, rechargement...")
     fetchSuppliers() // Rechargez les données lorsque le callback est déclenché
   }
 

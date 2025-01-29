@@ -4,6 +4,7 @@ import cartReducer from "./slices/cartSlice"
 import stockReducer from "./slices/stockSlice" // Import du stockSlice
 import authReducer from "./slices/authSlice" // Import du stockSlice
 import ordersReducer from "./slices/orderSlice" // Import du stockSlice
+import transporterSlice from "./slices/transporterSlice"
 
 export const store = configureStore({
   reducer: {
@@ -12,5 +13,6 @@ export const store = configureStore({
     stocks: stockReducer, // Ajout du stockSlice
     auth: authReducer,
     orders: ordersReducer,
+    transporters: transporterSlice,
   },
 })

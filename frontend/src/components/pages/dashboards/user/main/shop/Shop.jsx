@@ -15,7 +15,7 @@ export default function Shop() {
       dispatch(fetchProducts())
     }
   }, [status, dispatch])
-  // console.log("Products in Shop.jsx:", products)
+  // //("Products in Shop.jsx:", products)
 
   return (
     <Box>

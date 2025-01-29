@@ -4,8 +4,8 @@ import OrderShipment from "../models/orderShipmentModel.js"
 export const getAllOrderShipments = async (req, res) => {
   try {
     const orderShipments = await OrderShipment.find()
-      .populate("commande_id", "statut date_commande") // Populate les détails de la commande
-      .populate("transporteur_id", "nom telephone") // Populate les détails du transporteur
+      .populate("commande_id", "statut date_commande")
+      .populate("transporteur_id", "nom telephone")
     res.json(orderShipments)
   } catch (error) {
     res.status(500).json({
@@ -32,8 +32,41 @@ export const getOrderShipmentById = async (req, res) => {
   }
 }
 
+// 🔍 Vérifier si une expédition existe déjà pour une commande spécifique
+export const getOrderShipmentByCommandeId = async (req, res) => {
+  try {
+    // console.log("req", req)
+    const { id } = req.params
+    if (!id) {
+      return res.status(400).json({
+        message: "L'identifiant de la commande est requis",
+      })
+    }
+
+    const existingShipment = await OrderShipment.find({ commande_id: id })
+
+    res.json(existingShipment)
+  } catch (error) {
+    res.status(500).json({
+      message: "Erreur lors de la recherche d'une expédition",
+      error,
+    })
+  }
+}
+
+// Ajouter un départ de commande
 export const addOrderShipment = async (req, res) => {
   try {
+    const { commande_id } = req.body
+
+    // Vérifier si une expédition existe déjà pour cette commande
+    const existingShipment = await OrderShipment.findOne({ commande_id })
+    if (existingShipment) {
+      return res.status(400).json({
+        message: "Une expédition existe déjà pour cette commande",
+      })
+    }
+
     const newOrderShipment = new OrderShipment(req.body)
     const savedOrderShipment = await newOrderShipment.save()
     res.status(201).json(savedOrderShipment)
@@ -45,14 +78,15 @@ export const addOrderShipment = async (req, res) => {
   }
 }
 
+// Mettre à jour un départ de commande
 export const updateOrderShipment = async (req, res) => {
   try {
     const updatedOrderShipment = await OrderShipment.findByIdAndUpdate(
       req.params.id,
       req.body,
       {
-        new: true, // Renvoie l'objet mis à jour
-        runValidators: true, // Valide les champs avant de les enregistrer
+        new: true,
+        runValidators: true,
       }
     )
     if (!updatedOrderShipment)

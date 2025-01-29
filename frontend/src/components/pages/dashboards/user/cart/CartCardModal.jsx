@@ -20,7 +20,7 @@ export default function CartCardModal({
   const userId = useSelector((state) => state.auth.user._id)
 
   const handleAddToCart = () => {
-    console.log("cartItem", cartItem)
+    //("cartItem", cartItem)
     dispatch(
       addToCart({
         userId,

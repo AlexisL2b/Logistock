@@ -12,7 +12,7 @@ export default function transporters() {
       .get("/transporters") // URL relative correcte si axiosInstance est bien configuré
       .then((response) => {
         setTransporters(response.data.data) // Mise à jour des fournisseurs dans le state
-        console.log("Fournisseur récupérées :", response.data.data)
+        //("Fournisseur récupérées :", response.data.data)
       })
       .catch((error) => {
         console.error(
@@ -29,7 +29,7 @@ export default function transporters() {
 
   // Callback pour gérer les changements de données
   const handleDataChange = () => {
-    console.log("Les données ont changé, rechargement...")
+    //("Les données ont changé, rechargement...")
     fetchTransporters() // Rechargez les données lorsque le callback est déclenché
   }
 

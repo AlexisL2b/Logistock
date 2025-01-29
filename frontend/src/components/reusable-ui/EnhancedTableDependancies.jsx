@@ -201,7 +201,7 @@ export default function EnhancedTable({
         const res = await axios.delete(
           `http://localhost:5000/api/${coll}/${id}`
         )
-        console.log(`Élément avec l'ID ${id} supprimé`)
+        //(`Élément avec l'ID ${id} supprimé`)
         setMessage(res.data.message)
         setSeverity("success")
         setShowAlert(true)
@@ -251,10 +251,10 @@ export default function EnhancedTable({
           `http://localhost:5000/api/${coll}/${updatedData._id}`,
           updatedData
         )
-        console.log("Données mises à jour :", updatedData)
+        //("Données mises à jour :", updatedData)
       } else {
         await axios.post(`http://localhost:5000/api/${coll}`, updatedData)
-        console.log("Nouvelle donnée ajoutée :", updatedData)
+        //("Nouvelle donnée ajoutée :", updatedData)
       }
 
       alert("Opération réussie !")

@@ -33,7 +33,7 @@ export default function Orders() {
     fetchOrdersWithDetails()
   }, [userId])
 
-  console.log(orders)
+  //(orders)
   if (loading) return <div>Chargement des commandes...</div> // Affichage pendant le chargement
   // if (error) return <div>{error}</div> // Affichage en cas d'erreur
 

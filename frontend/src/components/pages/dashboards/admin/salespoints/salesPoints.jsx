@@ -12,7 +12,7 @@ export default function salesPoints() {
       .get("/sales_points ") // URL relative correcte si axiosInstance est bien configuré
       .then((response) => {
         setSalesPoints(response.data.data) // Mise à jour des points de ventes dans le state
-        console.log("points de ventes récupérées :", response.data.data)
+        //("points de ventes récupérées :", response.data.data)
       })
       .catch((error) => {
         console.error(
@@ -29,7 +29,7 @@ export default function salesPoints() {
 
   // Callback pour gérer les changements de données
   const handleDataChange = () => {
-    console.log("Les données ont changé, rechargement...")
+    //("Les données ont changé, rechargement...")
     fetchSalesPoints() // Rechargez les données lorsque le callback est déclenché
   }
 
