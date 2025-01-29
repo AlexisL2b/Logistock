@@ -1,16 +1,16 @@
 import { Box } from "@mui/material"
 import React from "react"
 import TabsWithPanels from "../../../../../reusable-ui/TabsWithPanels"
-import Awaiting from "./pannels/Awaiting"
-import InPreparation from "./pannels/InPreparation"
-import Confirmed from "./pannels/Confirmed"
-import Cancelled from "./pannels/Cancelled"
+import Awaiting from "./pannels/awaiting/Awaiting"
+import Shipped from "./pannels/shipped/Shipped"
+import Confirmed from "./pannels/confirmed/Confirmed"
+import Cancelled from "./pannels/cancelled/Cancelled"
 
 export default function Order() {
   const tabs = [
     { label: "En attente", component: <Awaiting /> },
-    { label: "En préparation", component: <InPreparation /> },
     { label: "Validée", component: <Confirmed /> },
+    { label: "Expédiée", component: <Shipped /> },
     { label: "Annulée", component: <Cancelled /> },
   ]
   return (

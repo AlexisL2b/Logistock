@@ -127,7 +127,7 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
   }, [endpoints])
 
   // endpoints.forEach((endpoint) => {
-  console.log(dropdownData)
+  //(dropdownData)
   // })
 
   const headCells = data.length
@@ -175,10 +175,10 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
 
       for (const id of selected) {
         const url = `http://localhost:5000/api/${coll}/${id}`
-        console.log("DELETE URL:", url) // Debug
+        //("DELETE URL:", url) // Debug
 
         await axios.delete(url)
-        console.log(`Élément avec l'ID ${id} supprimé`)
+        //(`Élément avec l'ID ${id} supprimé`)
       }
 
       alert("Suppression réussie !")
@@ -239,20 +239,20 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
         return acc
       }, {})
 
-      console.log("Données nettoyées :", cleanedData)
+      //("Données nettoyées :", cleanedData)
 
       if (cleanedData._id) {
         const url = `http://localhost:5000/api/${coll}/${cleanedData._id}`
-        console.log("PUT URL:", url)
+        //("PUT URL:", url)
 
         await axios.put(url, cleanedData)
-        console.log("Données mises à jour :", cleanedData)
+        //("Données mises à jour :", cleanedData)
       } else {
         const url = `http://localhost:5000/api/${coll}`
-        console.log("POST URL:", url)
+        //("POST URL:", url)
 
         await axios.post(url, cleanedData)
-        console.log("Nouvelle donnée ajoutée :", cleanedData)
+        //("Nouvelle donnée ajoutée :", cleanedData)
       }
 
       alert("Opération réussie !")

@@ -28,25 +28,25 @@ export default function DashboardUser() {
   )
   const userId = user?._id
   const handleLohgout = () => {
-    console.log("logout")
+    //("logout")
     dispatch(logout())
   }
   useEffect(() => {
     if (userId) {
       dispatch(loadCart(userId))
-      console.log("userId from useEffect", userId)
+      //("userId from useEffect", userId)
     }
   }, [userId, dispatch])
   // Sélection des articles du panier depuis le Redux store
   const cartItems = useSelector((state) => state.cart.items)
   // const user = useSelector((state) => state.auth.user)
 
-  console.log("userId", userId) // Récupérer l'ID utilisateur connecté
-  // console.log("user", user) // Récupérer l'ID utilisateur connecté
+  //("userId", userId) // Récupérer l'ID utilisateur connecté
+  // //("user", user) // Récupérer l'ID utilisateur connecté
   useEffect(() => {
     if (userId) {
       dispatch(loadCart(userId))
-      console.log("userId from useEffect", userId)
+      //("userId from useEffect", userId)
     }
   }, [userId, dispatch])
   // Calcul du total à partir des articles du panier
@@ -54,7 +54,7 @@ export default function DashboardUser() {
     (acc, item) => acc + item.detailsProduit.prix * item.quantity,
     0
   )
-  // console.log("cartItems", cartItems)
+  // //("cartItems", cartItems)
   // État pour gérer le composant actif
   const [activeComponent, setActiveComponent] = useState("profile")
 

@@ -36,7 +36,7 @@ const FormulaireInscription = () => {
         .get("/sales_points") // URL relative correcte si axiosInstance est bien configuré
         .then((response) => {
           setSalesPoints(response.data.data) // Mise à jour des points de vente dans le state
-          console.log("Points de vente récupérés :", response.data.data)
+          //("Points de vente récupérés :", response.data.data)
         })
         .catch((error) => {
           console.error(
@@ -48,12 +48,12 @@ const FormulaireInscription = () => {
 
     fetchSalesPoints()
   }, [])
-  console.log("////////////////////", salesPoints)
+  //("////////////////////", salesPoints)
   // Fonction appelée lors de la soumission du formulaire
 
   const onSubmit = async (data) => {
     try {
-      console.log("Données soumises :", data)
+      //("Données soumises :", data)
 
       // Envoyer les données au backend
       const res = await axios.post(
@@ -61,7 +61,7 @@ const FormulaireInscription = () => {
         data
       )
 
-      console.log("Réponse du backend :", res.data)
+      //("Réponse du backend :", res.data)
 
       // Afficher un message de succès ou rediriger
       alert("Inscription réussie !")

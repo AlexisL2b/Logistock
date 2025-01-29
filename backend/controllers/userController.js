@@ -24,7 +24,7 @@ export const getUserByUid = async (req, res) => {
     const firebaseUid = req.params.id // Récupération de l'UID depuis les paramètres
 
     if (!firebaseUid) {
-      console.log("Valeur de req.params.id :", req.params.id)
+      //("Valeur de req.params.id :", req.params.id)
       return res.status(400).json({ message: "UID manquant ou invalide" })
     }
 
@@ -41,7 +41,7 @@ export const getUserByUid = async (req, res) => {
     }
 
     const objectId = user._id // Récupération de l'ObjectId
-    console.log("ObjectId de l'utilisateur :", objectId)
+    //("ObjectId de l'utilisateur :", objectId)
 
     res.json({
       message: "Utilisateur récupéré avec succès",
@@ -65,7 +65,7 @@ export const getUserById = async (req, res) => {
     const firebaseUid = req.params.id // Récupération de l'UID Firebase
 
     if (!firebaseUid) {
-      console.log("Valeur de req.params.id :", req.params.id)
+      //("Valeur de req.params.id :", req.params.id)
       return res.status(400).json({ message: "UID manquant ou invalide" })
     }
 
@@ -82,7 +82,7 @@ export const getUserById = async (req, res) => {
     }
 
     const objectId = user._id // Récupération de l'ObjectId
-    console.log("ObjectId de l'utilisateur :", objectId)
+    //("ObjectId de l'utilisateur :", objectId)
 
     res.json({
       ...user.toObject(), // Conversion du document Mongoose en objet JS
@@ -98,7 +98,7 @@ export const getUserById = async (req, res) => {
 }
 
 export const getUserProfile = async (req, res) => {
-  console.log("Bonour")
+  //("Bonour")
 }
 
 // Ajouter un nouvel utilisateur

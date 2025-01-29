@@ -13,7 +13,7 @@ import Profile from "./main/profile/Profile"
 export default function DashboardLogistician() {
   const [activeComponent, setActiveComponent] = useState("profile")
   const handleLohgout = () => {
-    console.log("logout")
+    //("logout")
     dispatch(logout())
   }
   const dispatch = useDispatch()

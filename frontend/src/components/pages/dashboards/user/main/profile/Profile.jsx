@@ -6,7 +6,7 @@ import { getAuth } from "firebase/auth"
 const Profile = () => {
   const auth = getAuth()
   // auth.currentUser.getIdToken(true).then((idToken) => {
-  //   console.log("ID Token Firebase :", idToken)
+  //   //("ID Token Firebase :", idToken)
   // })
   // const dispatch = useDispatch()
   const { user, status, error } = useSelector((state) => state.auth)
@@ -17,9 +17,9 @@ const Profile = () => {
   //   }
   // }, [dispatch, status])
 
-  // console.log("user", user)
+  // //("user", user)
   if (user) {
-    // console.log("user", user)
+    // //("user", user)
   }
   if (status === "loading") return <p>Chargement des données...</p>
   if (status === "failed") return <p>Erreur : {error}</p>

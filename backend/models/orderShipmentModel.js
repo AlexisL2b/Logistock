@@ -16,13 +16,7 @@ const orderShipmentSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
-    statut: {
-      type: String,
-      enum: ["en préparation", "expédiée", "livrée"],
-      default: "en préparation",
-    },
   },
-  { timestamps: true },
   { collection: "order_shipments" }
 )
 

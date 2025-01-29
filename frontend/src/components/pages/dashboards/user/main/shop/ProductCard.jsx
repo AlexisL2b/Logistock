@@ -34,7 +34,7 @@ export default function ProductCard({ product }) {
       dispatch(decrementFromCart({ userId, produit_id: product._id }))
     }
   }
-  // console.log(
+  // //(
   //   `[ProductCard] Quantité du produit ${product._id} dans le panier :`,
   //   quantity
   // )

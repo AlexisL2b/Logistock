@@ -42,13 +42,13 @@ export default function BasicModal({
         ...prevFormData,
         [name]: value,
       }
-      console.log("Updated formData:", updatedFormData) // Debug
+      //("Updated formData:", updatedFormData) // Debug
       return updatedFormData
     })
   }
 
   const handleSubmit = () => {
-    console.log("Form data submitted:", formData) // Debug
+    //("Form data submitted:", formData) // Debug
     onSubmit(formData) // Appelle la fonction onSubmit avec les données du formulaire
     onClose() // Ferme la modal après soumission
   }

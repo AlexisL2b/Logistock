@@ -11,7 +11,7 @@ router.post("/register", createUser)
 // Route de connexion
 router.post("/login", loginUser)
 // router.get("/profile", authenticate, (req, res) => {
-//   console.log("Route /profile exécutée")
+//   //("Route /profile exécutée")
 //   res.json({
 //     message: "Bienvenue dans votre profil !",
 //     user: req.user, // Informations utilisateur décodées depuis le token
@@ -26,7 +26,7 @@ router.get("/profile", authenticate, async (req, res) => {
 
     // Rechercher l'utilisateur dans MongoDB
     const user = await User.findOne({ firebaseUid })
-    // console.log(user)
+    // //(user)
     if (!user) {
       return res
         .status(404)

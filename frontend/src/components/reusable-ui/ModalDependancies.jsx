@@ -79,7 +79,7 @@ export default function BasicModal({
             .filter((key) => key !== "_id" && key !== "__v")
             .map((key) => {
               const dropdownKey = findDropdownKey(key)
-              console.log("DropdownKey for", key, ":", dropdownKey)
+              //("DropdownKey for", key, ":", dropdownKey)
 
               if (key.endsWith("_id") && dropdownKey) {
                 return (

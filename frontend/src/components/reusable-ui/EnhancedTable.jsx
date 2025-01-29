@@ -178,7 +178,7 @@ export default function EnhancedTable({
         const res = await axios.delete(
           `http://localhost:5000/api/${coll}/${id}`
         )
-        console.log(`Élément avec l'ID ${id} supprimé`)
+        //(`Élément avec l'ID ${id} supprimé`)
         setMessage(res.data.message)
         setSeverity("success")
         setShowAlert(true)
@@ -232,8 +232,8 @@ export default function EnhancedTable({
         setSeverity("success")
         setShowAlert(true)
 
-        console.log(`http://localhost:5000/api/${coll}/${updatedData._id}`)
-        // console.log("Réponse de mise à jour :", res)
+        //(`http://localhost:5000/api/${coll}/${updatedData._id}`)
+        // //("Réponse de mise à jour :", res)
       } else {
         const res = await axios.post(
           `http://localhost:5000/api/${coll}`,
@@ -242,7 +242,7 @@ export default function EnhancedTable({
         setMessage(res.data.message || "Opération réussie")
         setSeverity("success")
         setShowAlert(true)
-        console.log("Réponse d'ajout :", res)
+        //("Réponse d'ajout :", res)
       }
 
       // Déclenchement de la mise à jour des données

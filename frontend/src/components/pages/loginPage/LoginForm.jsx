@@ -17,7 +17,7 @@ export default function LoginForm() {
     const auth = getAuth()
     signOut(auth) // Déconnecte l'utilisateur au chargement de la page
       .then(() => {
-        console.log("Session Firebase nettoyée")
+        //("Session Firebase nettoyée")
       })
       .catch((error) => {
         console.error("Erreur lors de la déconnexion Firebase :", error)

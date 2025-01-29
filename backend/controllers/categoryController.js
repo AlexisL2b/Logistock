@@ -5,7 +5,7 @@ import mongoose from "mongoose"
 // Récupérer toutes les catégories
 export const getAllCategories = async (req, res) => {
   try {
-    console.log("Requête reçue pour récupérer les catégories")
+    //("Requête reçue pour récupérer les catégories")
     const categories = await Category.find()
     res.json({
       message: "Catégories récupérées avec succès",
@@ -71,11 +71,6 @@ export const updateCategory = async (req, res) => {
       return res.status(404).json({ message: "Catégorie introuvable" })
     }
 
-    console.log("Réponse envoyée :", {
-      message: "Catégorie mise à jour avec succès",
-      data: updatedCategory,
-    })
-
     res.json({
       message: "Catégorie mise à jour avec succès",
       data: updatedCategory,
@@ -94,10 +89,10 @@ export const updateCategory = async (req, res) => {
 export const deleteCategory = async (req, res) => {
   try {
     const categoryId = new mongoose.Types.ObjectId(req.params.id)
-    // console.log(categoryId)
+    // //(categoryId)
     const associatedProducts = await Product.find({ categorie_id: categoryId })
-    console.log("associatedProducts:", associatedProducts)
-    console.log("categoryId:", categoryId)
+    //("associatedProducts:", associatedProducts)
+    //("categoryId:", categoryId)
     if (associatedProducts.length > 0) {
       const noms = associatedProducts.map((product) => product.nom).join(",")
       return res.status(400).json({

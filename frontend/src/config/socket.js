@@ -16,7 +16,7 @@ socket.on("connect_error", (error) => {
 
 // Écoute de la reconnexion
 socket.on("reconnect", (attempt) => {
-  console.log(`Reconnecté à Socket.IO après ${attempt} tentative(s)`)
+  //(`Reconnecté à Socket.IO après ${attempt} tentative(s)`)
 })
 
 // Exportez l'instance Socket.IO

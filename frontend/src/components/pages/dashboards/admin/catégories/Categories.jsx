@@ -25,7 +25,7 @@ export default function Categories() {
 
   // Callback pour gérer les changements de données
   const handleDataChange = () => {
-    console.log("Les données ont changé, rechargement...")
+    //("Les données ont changé, rechargement...")
     fetchCategories() // Rechargez les données lorsque le callback est déclenché
   }
   const headerMapping = {

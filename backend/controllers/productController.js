@@ -72,7 +72,7 @@ export const updateProductStock = async (req, res) => {
     )
 
     res.status(200).json({
-      message: "Stock mis à jour avec succès",
+      message: "Stock mis à jour avec succès from productController",
       data: updatedStock,
     })
   } catch (error) {

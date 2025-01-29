@@ -26,7 +26,7 @@ export default function CartModal({
   const user = loadUserFromLocalStorage()
   const userId = user._id
   const dispatch = useDispatch()
-  console.log(cartItems)
+  //(cartItems)
 
   const handleCheckout = async () => {
     try {
@@ -36,7 +36,7 @@ export default function CartModal({
           { acheteur_id: userId }
         )
         const orderId = responseOrder.data._id
-        console.log(orderId)
+        //(orderId)
         cartItems.forEach(async (item) => {
           const productId = item.produit_id
           const quantity = item.quantity
@@ -55,9 +55,9 @@ export default function CartModal({
           onClose()
         })
       }
-      console.log("cartItems Vide")
+      //("cartItems Vide")
     } catch (error) {
-      console.log(error)
+      //(error)
     }
   }
 
