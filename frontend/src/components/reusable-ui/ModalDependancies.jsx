@@ -28,7 +28,7 @@ export default function BasicModal({
   dropdownData = {},
 }) {
   const [formData, setFormData] = useState(objectData)
-
+  console.log(dropdownData)
   useEffect(() => {
     const initialData = { ...objectData }
     Object.keys(objectData).forEach((key) => {
@@ -79,7 +79,7 @@ export default function BasicModal({
             .filter((key) => key !== "_id" && key !== "__v")
             .map((key) => {
               const dropdownKey = findDropdownKey(key)
-              //("DropdownKey for", key, ":", dropdownKey)
+              console.log("DropdownKey for", key, ":", dropdownKey)
 
               if (key.endsWith("_id") && dropdownKey) {
                 return (
@@ -95,11 +95,15 @@ export default function BasicModal({
                     onChange={handleInputChange}
                     fullWidth
                   >
-                    {dropdownData[dropdownKey]?.map((item) => (
-                      <MenuItem key={item._id} value={item._id}>
-                        {item.nom}
-                      </MenuItem>
-                    ))}
+                    {Array.isArray(dropdownData[dropdownKey]) ? (
+                      dropdownData[dropdownKey].map((item) => (
+                        <MenuItem key={item._id} value={item._id}>
+                          {item.nom}
+                        </MenuItem>
+                      ))
+                    ) : (
+                      <MenuItem disabled>Aucune donnée disponible</MenuItem>
+                    )}
                   </TextField>
                 )
               } else if (key.endsWith("_id")) {

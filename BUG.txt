@@ -120,3 +120,17 @@ ________________________________________________________________________
     
     2.4 ANNULEE
         A. AFFICHER TOUTES LES COMMANDES AVEC STATUT ANNULEE
+
+
+@ADMIN:
+
+
+
+gerestionnaire => crud + création d'acheteurs.
+admin=> créations de gestionnaire et de logisticiens.
+
+
+
+🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩🚩
+
+Ajouter les différents patch/notifications à la place d'alerte 

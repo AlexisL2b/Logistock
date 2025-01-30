@@ -173,7 +173,7 @@ export default function EnhancedTable({
         alert("Aucun élément sélectionné pour suppression !")
         return
       }
-
+      console.log("coll", coll)
       for (const id of selected) {
         const res = await axios.delete(
           `http://localhost:5000/api/${coll}/${id}`

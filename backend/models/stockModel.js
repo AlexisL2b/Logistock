@@ -7,8 +7,8 @@ const stockSchema = new mongoose.Schema({
     required: true,
     unique: true, // Un stock par produit
   },
-  quantite_totale: { type: Number, required: true, default: 0 },
-  quantite_reserve: { type: Number, required: true, default: 0 },
+  quantite_disponible: { type: Number, required: true, default: 0 },
+
   statut: {
     type: String,
     enum: ["en_stock", "hors_stock"],

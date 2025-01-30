@@ -7,10 +7,7 @@ export const getAllCategories = async (req, res) => {
   try {
     //("Requête reçue pour récupérer les catégories")
     const categories = await Category.find()
-    res.json({
-      message: "Catégories récupérées avec succès",
-      data: categories,
-    })
+    res.json(categories)
   } catch (error) {
     res.status(500).json({
       message: "Erreur lors de la récupération des catégories",
@@ -89,20 +86,25 @@ export const updateCategory = async (req, res) => {
 export const deleteCategory = async (req, res) => {
   try {
     const categoryId = new mongoose.Types.ObjectId(req.params.id)
-    // //(categoryId)
+
+    // Vérifier si des produits sont associés à cette catégorie
     const associatedProducts = await Product.find({ categorie_id: categoryId })
-    //("associatedProducts:", associatedProducts)
-    //("categoryId:", categoryId)
+    console.log(associatedProducts)
     if (associatedProducts.length > 0) {
-      const noms = associatedProducts.map((product) => product.nom).join(",")
+      // Récupérer les noms des produits concernés
+      const noms = associatedProducts.map((product) => product.nom).join(", ")
       return res.status(400).json({
-        message: `Impossible de supprimer la catégorie, elle est associée aux produits suivants : ${noms}`,
+        message: `Impossible de supprimer la catégorie. Elle est associée aux produits suivants : ${noms}`,
       })
     }
+
+    // Supprimer la catégorie si aucun produit ne l'utilise
     const deletedCategory = await Category.findByIdAndDelete(req.params.id)
+
     if (!deletedCategory) {
       return res.status(404).json({ message: "Catégorie introuvable" })
     }
+
     res.json({
       message: "Catégorie supprimée avec succès",
       data: deletedCategory,
@@ -110,7 +112,7 @@ export const deleteCategory = async (req, res) => {
   } catch (error) {
     res.status(500).json({
       message: "Erreur lors de la suppression de la catégorie",
-      error,
+      error: error.message || error,
     })
   }
 }

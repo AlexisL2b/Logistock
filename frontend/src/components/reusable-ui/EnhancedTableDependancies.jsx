@@ -115,21 +115,19 @@ export default function EnhancedTable({
         const fetchedData = {}
         for (const endpoint of endpoints) {
           const response = await axios.get("/api" + endpoint)
+          console.log(`Réponse API pour ${endpoint}:`, response.data) // 🔍 Ajoute ce log
           fetchedData[endpoint] = response.data
         }
         setDropdownData(fetchedData)
       } catch (error) {
-        console.error(
-          "Erreur lors de la récupération des données des endpoints :",
-          error
-        )
+        console.error("Erreur lors de la récupération des données :", error)
       }
     }
 
     if (endpoints.length) {
       fetchDropdownData()
     }
-  }, [endpoints])
+  }, [])
   const headCells = data.length
     ? Object.keys(data[0]).map((key) => ({
         id: key,
@@ -279,7 +277,8 @@ export default function EnhancedTable({
         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
     [data, order, orderBy, page, rowsPerPage]
   )
-
+  console.count("Console log exécuté")
+  console.log("dropdownData from enhencedtable", dropdownData)
   return (
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>

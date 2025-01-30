@@ -17,7 +17,7 @@ import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material"
 
 function Row({ row }) {
   const [open, setOpen] = React.useState(false)
-
+  console.log("row.produitDetails", row.produitDetails)
   return (
     <>
       {/* Ligne principale */}
@@ -47,7 +47,8 @@ function Row({ row }) {
               <Table size="small" aria-label="details">
                 <TableHead>
                   <TableRow>
-                    <TableCell>ID Produit</TableCell>
+                    <TableCell>Nom</TableCell>
+                    <TableCell>Référence</TableCell>
                     <TableCell>Quantité</TableCell>
                     <TableCell>Prix Unitaire</TableCell>
                     <TableCell>Total</TableCell>
@@ -56,7 +57,8 @@ function Row({ row }) {
                 <TableBody>
                   {row.produitDetails.map((product) => (
                     <TableRow key={product._id}>
-                      <TableCell>{product.produit_id}</TableCell>
+                      <TableCell>{product.name}</TableCell>
+                      <TableCell>{product.reference}</TableCell>
                       <TableCell>{product.quantite}</TableCell>
                       <TableCell>{product.prix_unitaire}</TableCell>
                       <TableCell>

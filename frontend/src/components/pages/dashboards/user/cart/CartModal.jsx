@@ -37,15 +37,20 @@ export default function CartModal({
         )
         const orderId = responseOrder.data._id
         //(orderId)
+        console.log("cartItems", cartItems)
         cartItems.forEach(async (item) => {
           const productId = item.produit_id
+          const name = item.detailsProduit.nom
           const quantity = item.quantity
           const priceUnite = item.detailsProduit.prix
+          const reference = item.detailsProduit.reference
           const orderDetailToAdd = {
             commande_id: orderId,
+            name: name,
             produit_id: productId,
             quantite: quantity,
             prix_unitaire: priceUnite,
+            reference: reference,
           }
           const responseOrder = await axios.post(
             "http://localhost:5000/api/order_details",

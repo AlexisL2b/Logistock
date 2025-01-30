@@ -139,6 +139,7 @@ export const getOrdersWithDetails = async (req, res) => {
         const details = await OrderDetails.find({
           commande_id: order._id,
         })
+        console.log("details", details)
         return {
           order_id: order._id,
           date_commande: order.date_commande,

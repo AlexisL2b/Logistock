@@ -12,7 +12,7 @@ import Profile from "./main/profile/Profile"
 
 export default function DashboardLogistician() {
   const [activeComponent, setActiveComponent] = useState("profile")
-  const handleLohgout = () => {
+  const handleLogout = () => {
     //("logout")
     dispatch(logout())
   }
@@ -41,7 +41,7 @@ export default function DashboardLogistician() {
       <Menu links={links} onLinkClick={setActiveComponent} />
 
       <Main>{activeElement}</Main>
-      <Button onClick={handleLohgout}>Déconnexion</Button>
+      <Button onClick={handleLogout}>Déconnexion</Button>
     </Box>
   )
 }
