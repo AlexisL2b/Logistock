@@ -2,9 +2,11 @@ import { Box, TextField, Typography, Button } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { getAuth, signInWithCustomToken, signOut } from "firebase/auth"
 import { useNavigate } from "react-router" // Remplace Link pour la navigation
-import axios from "axios"
+
 import { useDispatch } from "react-redux"
 import { fetchUserProfile, setUser } from "../../../redux/slices/authSlice"
+import axiosInstance from "../../../axiosConfig"
+import { saveToLocalStorage } from "../../../utils/localStorage"
 
 export default function LoginForm() {
   const [email, setEmail] = useState("")
@@ -25,29 +27,41 @@ export default function LoginForm() {
   }, [])
   const handleLogin = async () => {
     try {
-      const loginRes = await axios.post(
+      // Envoyer les identifiants au backend pour vérifier l'authentification
+      const loginRes = await axiosInstance.post(
         "http://localhost:5000/api/auth/login",
         { email, password }
       )
 
-      const { token } = loginRes.data
+      const { customToken } = loginRes.data // Ceci est un ID token et NON un custom token
+
+      // Stocker le token dans le localStorage ou sessionStorage
+      localStorage.setItem("customToken", customToken)
       const auth = getAuth()
-      const userCredential = await signInWithCustomToken(auth, token)
+      const userCredential = await signInWithCustomToken(auth, customToken)
       const idToken = await userCredential.user.getIdToken()
-
-      // Récupérer les données utilisateur depuis le backend
-      const profileRes = await axios.get(
-        "http://localhost:5000/api/auth/profile",
-        {
-          headers: { Authorization: `Bearer ${idToken}` },
-        }
+      // Récupérer les données utilisateur depuis le backend avec ce token
+      const profileRes = await axiosInstance
+        .get("http://localhost:5000/api/auth/profile")
+        .then((response) => console.log("✅ Réponse API :", response.data))
+        .catch((error) =>
+          console.error(
+            "❌ Erreur API :",
+            error.response?.data || error.message
+          )
+        )
+      console.log(userCredential.user.uid)
+      const uid = userCredential.user.uid
+      const response = await axiosInstance.get(
+        `http://localhost:5000/api/users/uid/${uid}`
       )
-
-      const user = profileRes.data.user
-
-      // Dispatcher les données utilisateur
+      const user = response.data.user
+      console.log("user", user)
+      console.log("response", response)
+      // Dispatcher les données utilisateur dans Redux
       dispatch(setUser(user))
-
+      saveToLocalStorage(`user_${user._id}`, user)
+      console.log(user)
       // Redirection en fonction du rôle
       if (user.role_id === "677cf977b39853e4a17727e0") {
         navigate("/admin-dashboard")
@@ -61,6 +75,7 @@ export default function LoginForm() {
       setError("Connexion échouée.")
     }
   }
+
   return (
     <Box
       sx={{

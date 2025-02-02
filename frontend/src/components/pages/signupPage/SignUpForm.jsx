@@ -14,9 +14,8 @@ import {
   FormControl,
 } from "@mui/material"
 import axiosInstance from "../../../axiosConfig"
-import axios from "axios"
+
 import User from "../../../../../backend/models/userModel"
-// Assurez-vous que votre instance axios est correctement configurée
 
 const FormulaireInscription = () => {
   const [salesPoints, setSalesPoints] = useState([]) // State pour stocker les points de vente
@@ -56,7 +55,7 @@ const FormulaireInscription = () => {
       //("Données soumises :", data)
 
       // Envoyer les données au backend
-      const res = await axios.post(
+      const res = await axiosInstance.post(
         "http://localhost:5000/api/auth/register",
         data
       )

@@ -19,6 +19,7 @@ import {
 import Orders from "./main/order/Orders"
 import { logout } from "../../../../redux/slices/authSlice"
 import { loadUserFromLocalStorage } from "../../../../utils/localStorage"
+import CartDrawer from "./cart/cartDrawer"
 
 export default function DashboardUser() {
   const [open, setOpen] = useState(false)
@@ -28,21 +29,16 @@ export default function DashboardUser() {
   )
   const userId = user?._id
   const handleLohgout = () => {
-    //("logout")
     dispatch(logout())
   }
   useEffect(() => {
     if (userId) {
       dispatch(loadCart(userId))
-      //("userId from useEffect", userId)
     }
   }, [userId, dispatch])
   // Sélection des articles du panier depuis le Redux store
   const cartItems = useSelector((state) => state.cart.items)
-  // const user = useSelector((state) => state.auth.user)
 
-  //("userId", userId) // Récupérer l'ID utilisateur connecté
-  // //("user", user) // Récupérer l'ID utilisateur connecté
   useEffect(() => {
     if (userId) {
       dispatch(loadCart(userId))
@@ -54,8 +50,6 @@ export default function DashboardUser() {
     (acc, item) => acc + item.detailsProduit.prix * item.quantity,
     0
   )
-  // //("cartItems", cartItems)
-  // État pour gérer le composant actif
   const [activeComponent, setActiveComponent] = useState("profile")
 
   // État pour gérer l'ouverture/fermeture de la modal
@@ -113,7 +107,7 @@ export default function DashboardUser() {
       </Box>
       {/* Modal */}
 
-      <CartModal
+      <CartDrawer
         open={isModalOpen}
         onClose={() => setModalOpen(false)}
         cartItems={cartItems} // Passer les produits du panier en props

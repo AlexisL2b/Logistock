@@ -1,6 +1,6 @@
 import React from "react"
 import {
-  Modal,
+  Drawer,
   Box,
   Typography,
   IconButton,
@@ -14,7 +14,7 @@ import { useDispatch } from "react-redux"
 import { clearCart } from "../../../../../redux/slices/cartSlice"
 import axiosInstance from "../../../../../axiosConfig"
 
-export default function CartModal({
+export default function CartDrawer({
   open,
   onClose,
   total,
@@ -26,8 +26,7 @@ export default function CartModal({
   const user = loadUserFromLocalStorage()
   const userId = user._id
   const dispatch = useDispatch()
-  //(cartItems)
-  console.log("cartItems", cartItems)
+
   const handleCheckout = async () => {
     try {
       if (cartItems.length > 0) {
@@ -36,52 +35,39 @@ export default function CartModal({
           { acheteur_id: userId }
         )
         const orderId = responseOrder.data._id
-        //(orderId)
-        console.log("cartItems", cartItems)
-        cartItems.forEach(async (item) => {
-          const productId = item.produit_id
-          const name = item.detailsProduit.nom
-          const quantity = item.quantity
-          const priceUnite = item.detailsProduit.prix
-          const reference = item.detailsProduit.reference
+
+        for (const item of cartItems) {
           const orderDetailToAdd = {
             commande_id: orderId,
-            name: name,
-            produit_id: productId,
-            quantite: quantity,
-            prix_unitaire: priceUnite,
-            reference: reference,
+            name: item.detailsProduit.nom,
+            produit_id: item.produit_id,
+            quantite: item.quantity,
+            prix_unitaire: item.detailsProduit.prix,
+            reference: item.detailsProduit.reference,
           }
-          const responseOrder = await axiosInstance.post(
+          await axiosInstance.post(
             "http://localhost:5000/api/order_details",
             orderDetailToAdd
           )
-          dispatch(clearCart())
-          onClose()
-        })
+        }
+
+        dispatch(clearCart())
+        onClose()
       }
-      //("cartItems Vide")
     } catch (error) {
-      //(error)
+      console.error("Erreur lors du checkout :", error)
     }
   }
 
   return (
-    <Modal open={open} onClose={onClose}>
+    <Drawer anchor="right" open={open} onClose={onClose}>
       <Box
         sx={{
-          position: "absolute",
-          top: "50%",
-          right: "0",
-          transform: "translateY(-50%)",
-          width: { xs: "90%", sm: "400px" },
+          width: { xs: "90vw", sm: "400px" },
           height: "100vh",
-          bgcolor: "background.paper",
-          boxShadow: 24,
-          p: 2,
-          overflowY: "auto",
           display: "flex",
           flexDirection: "column",
+          p: 2,
         }}
       >
         {/* Header */}
@@ -93,7 +79,7 @@ export default function CartModal({
             mb: 2,
           }}
         >
-          <Typography variant="h6">Your Cart</Typography>
+          <Typography variant="h6">Ton panier</Typography>
           <IconButton onClick={onClose}>
             <CloseIcon />
           </IconButton>
@@ -101,22 +87,22 @@ export default function CartModal({
         <Divider />
 
         {/* Body */}
-        <Box
-          sx={{
-            flex: 1,
-            mt: 2,
-            overflowY: "auto",
-          }}
-        >
-          {cartItems.map((item) => (
-            <CartCardModal
-              key={item.produit_id}
-              product={item}
-              onIncrement={() => onIncrement(item)}
-              onDecrement={() => onDecrement(item)}
-              onRemove={() => onRemove(item)}
-            />
-          ))}
+        <Box sx={{ flex: 1, mt: 2, overflowY: "auto" }}>
+          {cartItems.length > 0 ? (
+            cartItems.map((item) => (
+              <CartCardModal
+                key={item.produit_id}
+                product={item}
+                onIncrement={() => onIncrement(item)}
+                onDecrement={() => onDecrement(item)}
+                onRemove={() => onRemove(item)}
+              />
+            ))
+          ) : (
+            <Typography variant="body1" sx={{ textAlign: "center", mt: 4 }}>
+              Ton panier est vide
+            </Typography>
+          )}
         </Box>
 
         {/* Footer */}
@@ -131,8 +117,9 @@ export default function CartModal({
             color="primary"
             sx={{ textTransform: "none", mb: 1 }}
             onClick={handleCheckout}
+            disabled={cartItems.length === 0}
           >
-            Checkout
+            Commander
           </Button>
           <Button
             variant="outlined"
@@ -141,10 +128,10 @@ export default function CartModal({
             sx={{ textTransform: "none" }}
             onClick={onClose}
           >
-            Continue Shopping
+            Continuer mes achats
           </Button>
         </Box>
       </Box>
-    </Modal>
+    </Drawer>
   )
 }

@@ -4,6 +4,8 @@ const authenticate = async (req, res, next) => {
   //("Middleware authenticate appelé") // Vérifie que le middleware est appelé
 
   const token = req.header("Authorization")?.split(" ")[1]
+  console.log("Token reçu :", token) // Vérifie si le token est bien extrait
+
   //("Token reçu :", token) // Vérifie si le token est bien extrait
 
   if (!token) {

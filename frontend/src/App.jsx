@@ -17,6 +17,8 @@ import DashboardUser from "./components/pages/dashboards/user/DashboardUser"
 import { listenToAuthState } from "./redux/slices/authSlice"
 import ProtectedRoute from "./components/reusable-ui/ProtectedRoute"
 import DashboardLogistician from "./components/pages/dashboards/logistician/DashboardLogistician"
+import TestFirebaseAuth from "../testfirebase"
+import TestFirebase from "../testfirebase2"
 
 function App() {
   const dispatch = useDispatch()
@@ -24,6 +26,9 @@ function App() {
   useEffect(() => {
     dispatch(listenToAuthState()) // Vérifie l'utilisateur connecté
   }, [dispatch])
+  TestFirebaseAuth()
+  TestFirebase()
+
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />

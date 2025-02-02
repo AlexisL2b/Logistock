@@ -15,9 +15,9 @@ import FormControlLabel from "@mui/material/FormControlLabel"
 import Switch from "@mui/material/Switch"
 import EditIcon from "@mui/icons-material/Edit"
 import { Button, IconButton } from "@mui/material"
-import axios from "axios"
 import BasicModal from "../../../reusable-ui/BasicModal"
 import ModalProduct from "./ModalProduct"
+import axiosInstance from "../../../../../../axiosConfig"
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1
@@ -109,7 +109,7 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
       try {
         const fetchedData = {}
         for (const endpoint of endpoints) {
-          const response = await axios.get("/api" + endpoint)
+          const response = await axiosInstance.get("/api" + endpoint)
           fetchedData[endpoint] = response.data // Associez les données au nom du endpoint
         }
         setDropdownData(fetchedData)
@@ -177,7 +177,7 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
         const url = `http://localhost:5000/api/${coll}/${id}`
         //("DELETE URL:", url) // Debug
 
-        await axios.delete(url)
+        await axiosInstance.delete(url)
         //(`Élément avec l'ID ${id} supprimé`)
       }
 
@@ -245,13 +245,13 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
         const url = `http://localhost:5000/api/${coll}/${cleanedData._id}`
         //("PUT URL:", url)
 
-        await axios.put(url, cleanedData)
+        await axiosInstance.put(url, cleanedData)
         //("Données mises à jour :", cleanedData)
       } else {
         const url = `http://localhost:5000/api/${coll}`
         //("POST URL:", url)
 
-        await axios.post(url, cleanedData)
+        await axiosInstance.post(url, cleanedData)
         //("Nouvelle donnée ajoutée :", cleanedData)
       }
 

@@ -1,45 +1,58 @@
 import React, { useEffect, useState } from "react"
 import { loadUserFromLocalStorage } from "../../../../../../utils/localStorage"
-import { useDispatch } from "react-redux"
-import axios from "axios"
+
 import CollapsingTable from "./CollapsingTable"
-import { Box } from "@mui/material"
+import { Box, TextField } from "@mui/material"
+import axiosInstance from "../../../../../../axiosConfig"
 
 export default function Orders() {
   const user = loadUserFromLocalStorage()
-  const userId = user._id
-  const dispatch = useDispatch()
+  const userId = user?._id
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState("")
 
   useEffect(() => {
     const fetchOrdersWithDetails = async () => {
       try {
         if (!userId) return
 
-        // Appeler la nouvelle route backend
-        const response = await axios.get(
+        // Récupérer les commandes depuis le backend
+        const response = await axiosInstance.get(
           `http://localhost:5000/api/orders/user/${userId}/orders-details`
         )
-        setOrders(response.data) // Mettre à jour les commandes
+        setOrders(response.data) // Stocker les commandes
       } catch (err) {
         console.error("Erreur lors de la récupération des commandes :", err)
-        // setError("Impossible de charger les commandes.")
       } finally {
-        setLoading(false) // Arrêter le chargement
+        setLoading(false) // Désactiver l'état de chargement
       }
     }
 
     fetchOrdersWithDetails()
   }, [userId])
 
-  //(orders)
-  if (loading) return <div>Chargement des commandes...</div> // Affichage pendant le chargement
-  // if (error) return <div>{error}</div> // Affichage en cas d'erreur
+  // 🔍 Filtrer les commandes en fonction de la recherche
+  const filteredOrders = orders.filter((order) =>
+    order.order_id.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  if (loading) return <div>Chargement des commandes...</div>
 
   return (
     <Box>
-      <CollapsingTable data={orders} />
+      {/* 🔍 Champ de recherche */}
+      <TextField
+        label="Rechercher une commande par ID"
+        variant="outlined"
+        fullWidth
+        margin="normal"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+      {/* Table filtrée */}
+      <CollapsingTable data={filteredOrders} />
     </Box>
   )
 }

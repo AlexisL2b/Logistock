@@ -19,6 +19,7 @@ import orderDetailsRoutes from "./routes/orderDetailsRoutes.js"
 import orderShipmentRoutes from "./routes/orderShipmentRoutes.js"
 import authRoutes from "./routes/authRoutes.js"
 import stockRoutes from "./routes/stockRoutes.js"
+import roleRoutes from "./routes/roleRoutes.js"
 import admin from "./config/firebase.js"
 
 // Configuration de l'application
@@ -40,7 +41,11 @@ app.use((req, res, next) => {
   req.io = io // Injecte l'instance Socket.IO dans chaque requête
   next()
 })
-
+app.use((req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1] // Extraire le token du header
+  req.token = token // Stocker dans req.token pour l’utiliser plus tard
+  next()
+})
 app.use("/api/auth", authRoutes)
 app.use("/api/categories", categoryRoutes)
 app.use("/api/products", productRoutes)
@@ -53,6 +58,7 @@ app.use("/api/orders", orderRoutes)
 app.use("/api/order_details", orderDetailsRoutes)
 app.use("/api/order_shipments", orderShipmentRoutes)
 app.use("/api/stocks", stockRoutes)
+app.use("/api/roles", roleRoutes)
 app.use((req, res, next) => {
   res.status(404).json({ message: "Route non trouvée" })
 })

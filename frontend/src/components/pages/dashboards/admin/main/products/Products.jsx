@@ -1,32 +1,52 @@
 import { useEffect, useState } from "react"
-import { Box, TextField } from "@mui/material"
+import {
+  Box,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+} from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
 import EnhancedTableDependancies from "../../../../../reusable-ui/EnhancedTableDependancies"
 
 export default function Products() {
   const [products, setProducts] = useState([])
+  const [categories, setCategories] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState("")
 
-  // Fonction pour recharger les données
+  // Fonction pour charger les produits
   const fetchProducts = () => {
     axiosInstance
-      .get("/products") // URL relative correcte si axiosInstance est bien configuré
+      .get("/products")
       .then((response) => {
-        setProducts(response.data) // Mise à jour des Produits dans le state
+        setProducts(response.data)
       })
       .catch((error) => {
         console.error("Erreur lors de la récupération des Produits :", error)
       })
   }
 
-  // Chargement initial des Produits
+  // Fonction pour charger les catégories
+  const fetchCategories = () => {
+    axiosInstance
+      .get("/categories")
+      .then((response) => {
+        setCategories(response.data)
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la récupération des catégories :", error)
+      })
+  }
+
   useEffect(() => {
     fetchProducts()
+    fetchCategories()
   }, [])
 
-  // Callback pour gérer les changements de données
   const handleDataChange = () => {
-    fetchProducts() // Recharge les données lorsque le callback est déclenché
+    fetchProducts()
   }
 
   const headerMapping = {
@@ -36,23 +56,25 @@ export default function Products() {
     ref: "Référence",
   }
 
-  console.log("data: ", products)
-  console.log("endpoints: ", ["/categories", "/suppliers"])
-  console.log("headerMapping", headerMapping)
-
-  // 🔍 Filtrage multi-critères : Nom, ID, Catégorie, Fournisseur, Référence
+  // 🔍 Filtrage des produits par recherche et catégorie
   const filteredProducts = products.filter((product) => {
     const searchLower = searchTerm.toLowerCase()
 
-    return (
-      product.nom.toLowerCase().includes(searchLower) || // Nom du produit
-      product._id.toLowerCase().includes(searchLower) || // ID du produit
+    // Vérification du filtre de recherche
+    const matchesSearch =
+      product.nom.toLowerCase().includes(searchLower) ||
+      product._id.toLowerCase().includes(searchLower) ||
       (product.categorie_id?.nom &&
-        product.categorie_id.nom.toLowerCase().includes(searchLower)) || // Catégorie
+        product.categorie_id.nom.toLowerCase().includes(searchLower)) ||
       (product.supplier_id?.nom &&
-        product.supplier_id.nom.toLowerCase().includes(searchLower)) || // Fournisseur
-      (product.ref && product.ref.toLowerCase().includes(searchLower)) // Référence
-    )
+        product.supplier_id.nom.toLowerCase().includes(searchLower)) ||
+      (product.ref && product.ref.toLowerCase().includes(searchLower))
+
+    // Vérification du filtre par catégorie
+    const matchesCategory =
+      selectedCategory === "" || product.categorie_id?._id === selectedCategory
+
+    return matchesSearch && matchesCategory
   })
 
   return (
@@ -67,7 +89,26 @@ export default function Products() {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      {/* Passe les produits filtrés à EnhancedTableDependancies */}
+      {/* 🏷️ Filtre par catégorie */}
+      <FormControl fullWidth margin="normal">
+        <InputLabel id="category-filter-label">
+          Filtrer par Catégorie
+        </InputLabel>
+        <Select
+          labelId="category-filter-label"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          <MenuItem value="">Toutes les catégories</MenuItem>
+          {categories.map((category) => (
+            <MenuItem key={category._id} value={category._id}>
+              {category.nom}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
+      {/* Affichage des produits filtrés */}
       <EnhancedTableDependancies
         data={filteredProducts}
         coll={"products"}

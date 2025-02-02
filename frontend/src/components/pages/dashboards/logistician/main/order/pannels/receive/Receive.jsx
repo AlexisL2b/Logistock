@@ -3,10 +3,12 @@ import { useDispatch, useSelector } from "react-redux"
 import { fetchOrdersWithDetails } from "../../../../../../../../redux/slices/orderSlice"
 import { fetchStocks } from "../../../../../../../../redux/slices/stockSlice"
 import { Box, TextField } from "@mui/material"
+import AwaitingTable from "../../pannels/awaiting/AwaitingTable"
 import _ from "lodash" // Import de Lodash
-import ShippedTable from "./ShippedTable"
+import ConfirmedTable from "../confirmed/ConfirmedTable"
+import ReceivedTable from "./ReceivedTable"
 
-export default function Shipped() {
+export default function Receive() {
   const dispatch = useDispatch()
   const { orders, status, error } = useSelector((state) => state.orders)
   const stocks = useSelector((state) => state.stocks.stocks)
@@ -52,7 +54,7 @@ export default function Shipped() {
 
   const filteredOrders = orders.filter(
     (order) =>
-      order.statut === "expédiée" &&
+      order.statut === "réceptionné" &&
       order.order_id.toLowerCase().startsWith(searchTerm.toLowerCase())
   )
 
@@ -67,7 +69,7 @@ export default function Shipped() {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
-      <ShippedTable data={filteredOrders} />
+      <ReceivedTable data={filteredOrders} />
     </Box>
   )
 }
