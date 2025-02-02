@@ -1,8 +1,7 @@
 import React, { useState } from "react"
 import PropTypes from "prop-types"
-import Tabs from "@mui/material/Tabs"
-import Tab from "@mui/material/Tab"
-import Box from "@mui/material/Box"
+import { Tabs, Tab, Box, useMediaQuery } from "@mui/material"
+import { useTheme } from "@mui/material/styles"
 
 // Composant pour chaque panneau/tab
 function CustomTabPanel(props) {
@@ -16,7 +15,18 @@ function CustomTabPanel(props) {
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && (
+        <Box
+          sx={{
+            p: 3,
+            bgcolor: "background.paper",
+            borderRadius: 2,
+            boxShadow: 2,
+          }}
+        >
+          {children}
+        </Box>
+      )}
     </div>
   )
 }
@@ -35,22 +45,52 @@ function a11yProps(index) {
   }
 }
 
-// Composant principal
+// Composant principal avec gestion responsive
 export default function TabsWithPanels({ tabs }) {
   const [value, setValue] = useState(0)
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
 
   const handleChange = (event, newValue) => {
     setValue(newValue)
   }
 
   return (
-    <Box sx={{ width: "100%" }}>
-      {/* Onglets */}
-      <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+    <Box sx={{ width: "100%", maxWidth: 900, mx: "auto", mt: 3 }}>
+      {/* Onglets avec gestion responsive */}
+      <Box
+        sx={{
+          borderBottom: 1,
+          borderColor: "divider",
+          bgcolor: "background.default",
+          borderRadius: 2,
+          overflowX: isMobile ? "auto" : "visible",
+          "&::-webkit-scrollbar": { display: "none" }, // Cacher scrollbar sur mobile
+          display: "flex",
+          justifyContent: "center", // 🔥 Centrer les onglets
+        }}
+      >
         <Tabs
           value={value}
           onChange={handleChange}
+          variant={isMobile ? "scrollable" : "standard"}
+          scrollButtons={isMobile ? "auto" : false}
           aria-label="dynamic tabs example"
+          sx={{
+            "& .MuiTabs-flexContainer": {
+              justifyContent: "center", // 🔥 Centre les onglets horizontalement
+            },
+            "& .MuiTabs-indicator": {
+              backgroundColor: theme.palette.primary.main, // Couleur de l'indicateur actif
+            },
+            "& .MuiTab-root": {
+              fontWeight: "bold",
+              textTransform: "none",
+              "&.Mui-selected": {
+                color: theme.palette.primary.main, // Couleur de l'onglet actif
+              },
+            },
+          }}
         >
           {tabs.map((tab, index) => (
             <Tab key={index} label={tab.label} {...a11yProps(index)} />
@@ -58,7 +98,7 @@ export default function TabsWithPanels({ tabs }) {
         </Tabs>
       </Box>
 
-      {/* Panneaux */}
+      {/* Panneaux de contenu */}
       {tabs.map((tab, index) => (
         <CustomTabPanel key={index} value={value} index={index}>
           {tab.component}

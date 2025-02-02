@@ -17,6 +17,7 @@ router.post("/decrement", async (req, res) => {
     //("Requête reçue avec le corps :", req.body)
 
     const orderDetails = req.body.orderDetails
+    console.log("orderDetails depuis routes stock", orderDetails)
     //("orderDetails from routes", orderDetails)
 
     if (!orderDetails || !Array.isArray(orderDetails)) {
@@ -35,9 +36,10 @@ router.post("/decrement", async (req, res) => {
     })
   } catch (error) {
     console.error("Erreur dans la route decrement :", error.message)
-    res
-      .status(500)
-      .json({ message: "Erreur lors de la mise à jour du stock", error })
+    res.status(500).json({
+      message: "Erreur lors de la mise à jour du stock depuis les routes",
+      error,
+    })
   }
 })
 router.put("/:id", updateStock)

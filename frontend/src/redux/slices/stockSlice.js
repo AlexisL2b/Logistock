@@ -38,10 +38,15 @@ export const updateStock = createAsyncThunk(
       //("stockId from stockSlice", stockId)
       //("stockUpdates from stockSlice", stockUpdates)
       const response = await updateStockById(stockId, stockUpdates)
+      console.log("stockUpdates", stockUpdates)
+      console.log(stockId, stockId)
       //("response from slice", response)
       return response
     } catch (error) {
-      console.error("Erreur lors de la mise à jour du stock :", error)
+      console.error(
+        "Erreur lors de la mise à jour du stock depuis le slice :",
+        error
+      )
       return rejectWithValue(error.response?.data || error.message)
     }
   }

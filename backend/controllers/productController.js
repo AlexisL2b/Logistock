@@ -79,9 +79,13 @@ export const updateProductStock = async (req, res) => {
       data: updatedStock,
     })
   } catch (error) {
-    console.error("Erreur lors de la mise à jour du stock :", error)
+    console.error(
+      "Erreur lors de la mise à jour du stock depuis le controllerProduc:",
+      error
+    )
     res.status(500).json({
-      message: "Erreur lors de la mise à jour du stock",
+      message:
+        "Erreur lors de la mise à jour du stock depuis le controllerProduc",
       error: error.message || error,
     })
   }

@@ -14,7 +14,8 @@ import {
   Paper,
   Button,
   Modal,
-  Tooltip,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material"
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material"
 import { useSelector, useDispatch } from "react-redux"
@@ -22,8 +23,8 @@ import {
   fetchStocks,
   updateStock,
 } from "../../../../../../../../redux/slices/stockSlice"
-import { io } from "socket.io-client"
 import { fetchOrdersWithDetails } from "../../../../../../../../redux/slices/orderSlice"
+import { io } from "socket.io-client"
 import _ from "lodash"
 import axiosInstance from "../../../../../../../../axiosConfig"
 
@@ -32,25 +33,16 @@ function Row({ row }) {
   const [modalOpen, setModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
-  const color = {
-    "en cours": "orange",
-    validée: "green",
-    expédiée: "blue",
-    annulée: "red",
-    réceptionné: "purple", // Nouveau statut
-  }
   const dispatch = useDispatch()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
 
-  // Récupérer les stocks depuis Redux
   const stocks = useSelector((state) => state.stocks.stocks)
 
-  // Écouter les mises à jour en temps réel via Socket.IO
   useEffect(() => {
-    const socket = io("http://localhost:5000") // Connexion au backend
+    const socket = io("http://localhost:5000")
 
-    // Réception des mises à jour des stocks
     socket.on("stocksUpdated", (updatedStocks) => {
-      //("Stocks mis à jour via Socket.IO :", updatedStocks)
       updatedStocks.forEach((stock) => {
         dispatch(
           updateStock({
@@ -62,9 +54,10 @@ function Row({ row }) {
       dispatch(fetchStocks())
       dispatch(fetchOrdersWithDetails())
     })
-    //("stocks from useEffect", stocks)
-    return () => socket.disconnect() // Déconnexion propre
+
+    return () => socket.disconnect()
   }, [dispatch])
+
   useEffect(() => {
     dispatch(fetchOrdersWithDetails())
   }, [dispatch])
@@ -75,23 +68,22 @@ function Row({ row }) {
     try {
       await axiosInstance.put(
         `http://localhost:5000/api/orders/${row.order_id}`,
-        {
-          statut: "annulée",
-        }
+        { statut: "annulée" }
       )
 
       dispatch(fetchOrdersWithDetails())
       setModalOpen(false)
     } catch (error) {
       setErrorMessage(
-        error.response?.data?.message || "Erreur lors de l'expédition"
+        error.response?.data?.message || "Erreur lors de l'annulation"
       )
     } finally {
       setIsLoading(false)
     }
   }
+
   const hasStockIssue = row.produitDetails.some((product) => {
-    const stockInfo = stocks.find(
+    const stockInfo = stocks?.find(
       (stock) => stock.produit_id === product.produit_id
     )
     return product.quantite > (stockInfo ? stockInfo.quantite_totale : 0)
@@ -107,50 +99,33 @@ function Row({ row }) {
         produit_id: product.produit_id,
         quantite: product.quantite,
       }))
-      //("row/////////////////////", row)
-      const response = await axiosInstance.post(
-        "http://localhost:5000/api/stocks/decrement",
-        { orderDetails }
-      )
-      const responseUpdate = await axiosInstance.put(
+
+      await axiosInstance.post("http://localhost:5000/api/stocks/decrement", {
+        orderDetails,
+      })
+      await axiosInstance.put(
         `http://localhost:5000/api/orders/${row.order_id}`,
         { statut: "validée" }
       )
 
-      console.log("responseUpdate brute :", responseUpdate)
-
-      response.data.updatedStocks.forEach((stock) => {
-        dispatch(
-          updateStock({
-            stockId: stock.stockId,
-            stockUpdates: { quantite_totale: stock.quantite_totale },
-          })
-        )
-      })
-
-      //(
-      // "Stocks mis à jour après validation :",
-      // response.data.updatedStocks
-      // )
+      dispatch(fetchStocks())
+      dispatch(fetchOrdersWithDetails())
+      setModalOpen(false)
     } catch (error) {
       setErrorMessage(
         error.response?.data?.message || "Erreur lors de la validation"
       )
-      //(error)
     } finally {
       setIsLoading(false)
     }
   }
+  console.log("row", row)
 
   return (
     <>
       <TableRow>
         <TableCell>
-          <IconButton
-            aria-label="expand row"
-            size="small"
-            onClick={() => setOpen(!open)}
-          >
+          <IconButton size="small" onClick={() => setOpen(!open)}>
             {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
           </IconButton>
         </TableCell>
@@ -158,8 +133,8 @@ function Row({ row }) {
         <TableCell>{new Date(row.date_commande).toLocaleString()}</TableCell>
         <TableCell
           sx={{
-            color: color[row.statut] || "black",
-            fontWeight: "700",
+            fontWeight: "bold",
+            color: row.statut === "annulée" ? "red" : "orange",
           }}
         >
           {_.capitalize(row.statut)}
@@ -167,16 +142,17 @@ function Row({ row }) {
       </TableRow>
 
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
+        <TableCell colSpan={4} style={{ paddingBottom: 0, paddingTop: 0 }}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box margin={2}>
               <Typography variant="h6" gutterBottom>
                 Détails des produits
               </Typography>
-              <Table size="small" aria-label="details">
+              <Table size="small">
                 <TableHead>
                   <TableRow>
                     <TableCell>ID Produit</TableCell>
+                    <TableCell>Nom du produit</TableCell>
                     <TableCell>Quantité</TableCell>
                     <TableCell>Prix Unitaire</TableCell>
                     <TableCell>Stock Disponible</TableCell>
@@ -190,21 +166,23 @@ function Row({ row }) {
                     return (
                       <TableRow key={product._id}>
                         <TableCell>{product.produit_id}</TableCell>
+                        <TableCell>{product.name}</TableCell>
                         <TableCell>{product.quantite}</TableCell>
                         <TableCell>{product.prix_unitaire}</TableCell>
                         <TableCell>
-                          {stockInfo ? stockInfo.quantite_totale : "N/A"}
+                          {stockInfo ? stockInfo.quantite_disponible : "N/A"}
                         </TableCell>
                       </TableRow>
                     )
                   })}
                 </TableBody>
               </Table>
+
               <Button
-                variant="outlined"
+                variant="contained"
                 color="primary"
-                onClick={() => setModalOpen(true)}
                 sx={{ mt: 2 }}
+                onClick={() => setModalOpen(true)}
               >
                 Voir Récapitulatif
               </Button>
@@ -213,55 +191,47 @@ function Row({ row }) {
         </TableCell>
       </TableRow>
 
-      <Modal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
-      >
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)}>
         <Box
           sx={{
             position: "absolute",
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 500,
+            width: isMobile ? "90%" : 500,
             bgcolor: "background.paper",
             borderRadius: "10px",
             boxShadow: 24,
             p: 4,
           }}
         >
-          <Typography id="modal-title" variant="h6" gutterBottom>
+          <Typography variant="h6" gutterBottom>
             Récapitulatif de la commande
           </Typography>
-          <Table size="small" aria-label="recapitulatif">
-            <TableHead>
-              <TableRow>
-                <TableCell>ID Produit</TableCell>
-                <TableCell>Quantité</TableCell>
-                <TableCell>Prix Unitaire</TableCell>
-                <TableCell>Stock Disponible</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {row.produitDetails.map((product) => {
-                const stockInfo = stocks.find(
-                  (stock) => stock.produit_id === product.produit_id
-                )
-                return (
+          <TableContainer component={Paper}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>ID Produit</TableCell>
+                  <TableCell>Quantité</TableCell>
+                  <TableCell>Prix Unitaire</TableCell>
+                  <TableCell>Total</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {row.produitDetails.map((product) => (
                   <TableRow key={product._id}>
                     <TableCell>{product.produit_id}</TableCell>
                     <TableCell>{product.quantite}</TableCell>
                     <TableCell>{product.prix_unitaire}</TableCell>
                     <TableCell>
-                      {stockInfo ? stockInfo.quantite_totale : "N/A"}
+                      {product.quantite * product.prix_unitaire}
                     </TableCell>
                   </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
           {errorMessage && (
             <Typography color="error" variant="body2" sx={{ mt: 2 }}>
               {errorMessage}
@@ -274,7 +244,7 @@ function Row({ row }) {
               onClick={handleValidate}
               disabled={hasStockIssue || isLoading}
             >
-              {isLoading ? "Validation..." : "Valider la commande"}
+              {isLoading ? "Validation..." : "Valider"}
             </Button>
             <Button variant="contained" color="error" onClick={handleCancel}>
               Annuler

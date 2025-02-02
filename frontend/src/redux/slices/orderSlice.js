@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
+import axiosInstance from "../../axiosConfig"
 
 // Thunk pour récupérer toutes les commandes
 export const fetchOrdersWithDetails = createAsyncThunk(

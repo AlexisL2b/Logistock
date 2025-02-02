@@ -18,26 +18,31 @@ export const decrementStockForOrder = async (orderDetails, io) => {
 
     for (const detail of orderDetails) {
       const { produit_id, quantite } = detail
-
+      console.log("quantite from stockController", quantite)
       const stock = await Stock.findOne({ produit_id }).session(session)
+      console.log(detail)
+      console.log("stock", stock)
       //("stock from stockController 23", stock)
 
       if (!stock) {
         throw new Error(`Stock introuvable pour le produit ID: ${produit_id}`)
       }
 
-      if (quantite > stock.quantite_totale) {
+      if (quantite > stock.quantite_disponible) {
         throw new Error(
-          `Stock insuffisant pour le produit ID: ${produit_id}. Quantité demandée: ${quantite}, disponible: ${stock.quantite_totale}`
+          `Stock insuffisant pour le produit ID: ${produit_id}. Quantité demandée: ${quantite}, disponible: ${stock.quantite_disponible}`
         )
       }
 
-      stock.quantite_totale -= quantite
+      stock.quantite_disponible -= quantite
+      console.log("Type de quantite:", typeof quantite, "Valeur:", quantite)
+
+      console.log("stock.quantite_disponible", stock.quantite_disponible)
       await stock.save({ session })
 
       updatedStocks.push({
         produit_id: stock.produit_id,
-        quantite_totale: stock.quantite_totale,
+        quantite_disponible: stock.quantite_disponible,
         stockId: stock._id,
       })
     }
@@ -101,11 +106,11 @@ export const checkStockAvailability = async (req, res) => {
         continue
       }
 
-      if (quantite > stock.quantite_totale) {
+      if (quantite > stock.quantite_disponible) {
         insufficientStock.push({
           produit_id,
           quantite,
-          stockDisponible: stock.quantite_totale,
+          stockDisponible: stock.quantite_disponible,
         })
       }
     }
@@ -203,7 +208,7 @@ export const updateStock = async (req, res) => {
     })
   } catch (error) {
     res.status(500).json({
-      message: "Erreur lors de la mise à jour du stock",
+      message: "Erreur lors de la mise à jour du stock depuis le controller",
       error,
     })
   }
@@ -234,7 +239,8 @@ export const updateStockByProductId = async (req, res) => {
     })
   } catch (error) {
     res.status(500).json({
-      message: "Erreur lors de la mise à jour du stock par produit",
+      message:
+        "Erreur lors de la mise à jour du stock par produit depuis le controller",
       error,
     })
   }
@@ -257,7 +263,7 @@ export const handleStockEntry = async (req, res) => {
     }
 
     // Ajouter la quantité totale
-    stock.quantite_totale += quantite
+    stock.quantite_disponible += quantite
 
     await stock.save({ session })
     await session.commitTransaction()
@@ -285,7 +291,8 @@ export const handleOrderReception = async (req, res) => {
         .json({ message: "Stock introuvable pour ce produit" })
     }
 
-    const quantite_disponible = stock.quantite_totale - stock.quantite_reserve
+    const quantite_disponible =
+      stock.quantite_disponible - stock.quantite_reserve
 
     if (quantite > quantite_disponible) {
       return res
@@ -327,7 +334,7 @@ export const handleStockRelease = async (req, res) => {
       return res.status(400).json({ message: "Quantité réservée insuffisante" })
     }
 
-    stock.quantite_totale -= quantite
+    stock.quantite_disponible -= quantite
     stock.quantite_reserve -= quantite
 
     await stock.save({ session })
