@@ -8,7 +8,7 @@ import { store } from "./redux/store"
 import LoginPage from "./components/pages/loginPage/LoginPage"
 // import { ThemeProvider, CssBaseline } from "@mui/material"
 // import theme from "./themes"
-// import Dashboard from "./components/pages/dashboard/Dashboard"
+import DashboardAdmin from "./components/pages/dashboards/admin/DashboardAdmin"
 import PasswordForgot from "./components/pages/passwordForgot/PasswordForgot"
 import ErrorPage from "./components/pages/error/ErrorPage"
 // import Home from "./components/pages/dashboard/home/Home"
@@ -17,6 +17,8 @@ import DashboardUser from "./components/pages/dashboards/user/DashboardUser"
 import { listenToAuthState } from "./redux/slices/authSlice"
 import ProtectedRoute from "./components/reusable-ui/ProtectedRoute"
 import DashboardLogistician from "./components/pages/dashboards/logistician/DashboardLogistician"
+import TestFirebaseAuth from "../testfirebase"
+import TestFirebase from "../testfirebase2"
 
 function App() {
   const dispatch = useDispatch()
@@ -24,6 +26,9 @@ function App() {
   useEffect(() => {
     dispatch(listenToAuthState()) // Vérifie l'utilisateur connecté
   }, [dispatch])
+  TestFirebaseAuth()
+  TestFirebase()
+
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
@@ -43,6 +48,14 @@ function App() {
         element={
           <ProtectedRoute>
             <DashboardLogistician />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin-dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardAdmin />
           </ProtectedRoute>
         }
       />

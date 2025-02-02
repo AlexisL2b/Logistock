@@ -1,3 +1,4 @@
+import axios from "axios"
 import admin from "../config/firebase.js" // Firebase Admin SDK
 import User from "../models/userModel.js" // Modèle MongoDB pour les utilisateurs
 
@@ -46,34 +47,36 @@ export const createUser = async (req, res) => {
   }
 }
 // Connexion
+
 export const loginUser = async (req, res) => {
   const { email, password } = req.body
 
   try {
-    // Étape 1 : Authentifier l'utilisateur via Firebase Authentication
-    const user = await admin.auth().getUserByEmail(email)
+    // Authentifier l'utilisateur avec Firebase REST API
+    const response = await axios.post(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY}`,
+      {
+        email,
+        password,
+        returnSecureToken: true,
+      }
+    )
 
-    // Vérification de l'email trouvé
-    if (!user) {
-      return res.status(404).json({ message: "Utilisateur introuvable." })
-    }
-
-    // Étape 2 : Récupérer les données supplémentaires depuis MongoDB
+    // Vérifier si l'utilisateur existe dans MongoDB
     const dbUser = await User.findOne({ email: email })
-
     if (!dbUser) {
       return res.status(404).json({
-        message: "Utilisateur introuvable dans MongoDB depuis AuthController.",
+        message: "Utilisateur introuvable dans MongoDB.",
       })
     }
 
-    // Étape 3 : Générer un token Firebase (ID Token)
-    const customToken = await admin.auth().createCustomToken(user.uid)
+    // ✅ Générer un `customToken` à partir de Firebase Admin
+    const customToken = await admin.auth().createCustomToken(dbUser.firebaseUid)
 
-    // Étape 4 : Réponse avec le token et les informations utilisateur
+    // Réponse avec le `customToken` (PAS `idToken`)
     res.status(200).json({
       message: "Connexion réussie",
-      token: customToken,
+      customToken, // C'est ce token qu'on doit utiliser pour `signInWithCustomToken()`
       user: {
         email: dbUser.email,
         role: dbUser.role,
@@ -84,10 +87,13 @@ export const loginUser = async (req, res) => {
       },
     })
   } catch (error) {
-    console.error("Erreur lors de la connexion :", error.message)
-    res.status(500).json({
-      message: "Erreur lors de la connexion",
-      error: error.message,
+    console.error(
+      "Erreur lors de la connexion :",
+      error.response?.data || error.message
+    )
+    res.status(401).json({
+      message: "Identifiants incorrects",
+      error: error.response?.data || error.message,
     })
   }
 }

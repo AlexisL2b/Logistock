@@ -10,9 +10,9 @@ import {
 import CloseIcon from "@mui/icons-material/Close"
 import CartCardModal from "./CartCardModal"
 import { loadUserFromLocalStorage } from "../../../../../utils/localStorage"
-import axios from "axios"
 import { useDispatch } from "react-redux"
 import { clearCart } from "../../../../../redux/slices/cartSlice"
+import axiosInstance from "../../../../../axiosConfig"
 
 export default function CartModal({
   open,
@@ -27,27 +27,32 @@ export default function CartModal({
   const userId = user._id
   const dispatch = useDispatch()
   //(cartItems)
-
+  console.log("cartItems", cartItems)
   const handleCheckout = async () => {
     try {
       if (cartItems.length > 0) {
-        const responseOrder = await axios.post(
+        const responseOrder = await axiosInstance.post(
           "http://localhost:5000/api/orders",
           { acheteur_id: userId }
         )
         const orderId = responseOrder.data._id
         //(orderId)
+        console.log("cartItems", cartItems)
         cartItems.forEach(async (item) => {
           const productId = item.produit_id
+          const name = item.detailsProduit.nom
           const quantity = item.quantity
           const priceUnite = item.detailsProduit.prix
+          const reference = item.detailsProduit.reference
           const orderDetailToAdd = {
             commande_id: orderId,
+            name: name,
             produit_id: productId,
             quantite: quantity,
             prix_unitaire: priceUnite,
+            reference: reference,
           }
-          const responseOrder = await axios.post(
+          const responseOrder = await axiosInstance.post(
             "http://localhost:5000/api/order_details",
             orderDetailToAdd
           )

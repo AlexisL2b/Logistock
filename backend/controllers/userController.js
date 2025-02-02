@@ -2,6 +2,7 @@ import User from "../models/userModel.js"
 import SalesPoint from "../models/salesPointModel.js" // Importez correctement le modèle SalesPoint
 import bcrypt from "bcrypt"
 import mongoose from "mongoose"
+import { getAuth } from "firebase-admin/auth" // Firebase Admin SDK
 
 // Récupérer tous les utilisateurs
 export const getAllUsers = async (req, res) => {
@@ -21,7 +22,8 @@ export const getAllUsers = async (req, res) => {
 // Récupérer le profil utilisateur par UID Firebase
 export const getUserByUid = async (req, res) => {
   try {
-    const firebaseUid = req.params.id // Récupération de l'UID depuis les paramètres
+    console.log("req.params", req.params)
+    const firebaseUid = req.params.uid // Récupération de l'UID depuis les paramètres
 
     if (!firebaseUid) {
       //("Valeur de req.params.id :", req.params.id)
@@ -121,32 +123,118 @@ export const addUser = async (req, res) => {
 }
 
 // Mettre à jour un utilisateur par ID
+// export const updateUser = async (req, res) => {
+//   try {
+//     const { mot_de_passe, ...rest } = req.body
+//     const updatedData = { ...rest }
+
+//     if (mot_de_passe) {
+//       updatedData.mot_de_passe = await bcrypt.hash(mot_de_passe, 10) // Hachage du nouveau mot de passe
+//     }
+//     console.log(req.body)
+//     const updatedUser = await User.findByIdAndUpdate(
+//       req.params.id,
+//       updatedData,
+//       {
+//         new: true,
+//         runValidators: true,
+//       }
+//     )
+
+//     if (!updatedUser)
+//       return res.status(404).json({ message: "Utilisateur introuvable" })
+
+//     res.json(updatedUser)
+//   } catch (error) {
+//     console.error("Erreur lors de la mise à jour de l'utilisateur :", error)
+//     res.status(500).json({
+//       message: "Erreur lors de la mise à jour de l'utilisateur",
+//       error,
+//     })
+//   }
+
 export const updateUser = async (req, res) => {
   try {
-    const { mot_de_passe, ...rest } = req.body
+    const { mot_de_passe, email, ...rest } = req.body
     const updatedData = { ...rest }
 
     if (mot_de_passe) {
       updatedData.mot_de_passe = await bcrypt.hash(mot_de_passe, 10) // Hachage du nouveau mot de passe
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      updatedData,
-      {
-        new: true,
-        runValidators: true,
-      }
-    )
+    console.log("Données reçues :", req.body)
 
-    if (!updatedUser)
+    const userId = req.params.id
+
+    // Vérifier si l'utilisateur existe en base MongoDB
+    const existingUser = await User.findById(userId)
+    if (!existingUser) {
       return res.status(404).json({ message: "Utilisateur introuvable" })
+    }
+
+    // ⚠️ Si l'email change, mise à jour d'abord dans Firebase
+    if (email && email !== existingUser.email) {
+      try {
+        const auth = getAuth()
+        await auth.updateUser(existingUser.firebaseUid.toString(), { email }) // Mise à jour Firebase
+        updatedData.email = email // Mise à jour MongoDB après succès Firebase
+      } catch (firebaseError) {
+        console.error("Erreur Firebase :", firebaseError)
+        return res.status(400).json({
+          message: "Impossible de modifier l'email sur Firebase",
+          error: firebaseError.message,
+          error_code: firebaseError.code,
+        })
+      }
+    }
+
+    // Mise à jour de l'utilisateur en base de données MongoDB
+    const updatedUser = await User.findByIdAndUpdate(userId, updatedData, {
+      new: true,
+      runValidators: true,
+    })
+
+    if (!updatedUser) {
+      return res
+        .status(404)
+        .json({ message: "Utilisateur introuvable après mise à jour" })
+    }
 
     res.json(updatedUser)
   } catch (error) {
     console.error("Erreur lors de la mise à jour de l'utilisateur :", error)
     res.status(500).json({
       message: "Erreur lors de la mise à jour de l'utilisateur",
+      error,
+    })
+  }
+}
+// Récupérer un utilisateur par email
+export const getUserByEmail = async (req, res) => {
+  try {
+    const { email } = req.params // Récupérer l'email depuis l'URL
+
+    if (!email) {
+      return res.status(400).json({ message: "Email manquant ou invalide" })
+    }
+
+    // Recherche de l'utilisateur dans MongoDB par email
+    const user = await User.findOne({ email })
+
+    if (!user) {
+      return res
+        .status(200)
+        .json({ message: `Utilisateur avec l'email ${email} introuvable` })
+    }
+
+    res.json(user)
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération de l'utilisateur par email :",
+      error
+    )
+    res.status(500).json({
+      message: "Erreur lors de la récupération de l'utilisateur",
       error,
     })
   }

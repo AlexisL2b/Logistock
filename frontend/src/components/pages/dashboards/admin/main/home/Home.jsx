@@ -1,7 +1,7 @@
 import { Box } from "@mui/material"
 import React, { useEffect, useState } from "react"
-import Form from "../../../reusable-ui/Form"
-import axiosInstance from "../../../../axiosConfig"
+import Form from "../../../../../reusable-ui/Form"
+import axiosInstance from "../../../../../../axiosConfig"
 
 export default function home() {
   const [categories, setCategories] = useState([])
@@ -23,7 +23,7 @@ export default function home() {
     <Box sx={{ backgroundColor: "red" }}>
       <Form
         action="submit"
-        onSubmit={//("Je viens de sumbit mon form")}
+        onSubmit={console.log("Je viens de sumbit mon form")}
       />
     </Box>
   )

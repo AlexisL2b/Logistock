@@ -23,15 +23,22 @@ import {
   updateStock,
 } from "../../../../../../../../redux/slices/stockSlice"
 import { io } from "socket.io-client"
-import axios from "axios"
 import { fetchOrdersWithDetails } from "../../../../../../../../redux/slices/orderSlice"
+import _ from "lodash"
+import axiosInstance from "../../../../../../../../axiosConfig"
 
 function Row({ row }) {
   const [open, setOpen] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
-
+  const color = {
+    "en cours": "orange",
+    validée: "green",
+    expédiée: "blue",
+    annulée: "red",
+    réceptionné: "purple", // Nouveau statut
+  }
   const dispatch = useDispatch()
 
   // Récupérer les stocks depuis Redux
@@ -58,7 +65,31 @@ function Row({ row }) {
     //("stocks from useEffect", stocks)
     return () => socket.disconnect() // Déconnexion propre
   }, [dispatch])
+  useEffect(() => {
+    dispatch(fetchOrdersWithDetails())
+  }, [dispatch])
 
+  const handleCancel = async () => {
+    if (!window.confirm("Confirmez-vous l'annulation de cette commande ?"))
+      return
+    try {
+      await axiosInstance.put(
+        `http://localhost:5000/api/orders/${row.order_id}`,
+        {
+          statut: "annulée",
+        }
+      )
+
+      dispatch(fetchOrdersWithDetails())
+      setModalOpen(false)
+    } catch (error) {
+      setErrorMessage(
+        error.response?.data?.message || "Erreur lors de l'expédition"
+      )
+    } finally {
+      setIsLoading(false)
+    }
+  }
   const hasStockIssue = row.produitDetails.some((product) => {
     const stockInfo = stocks.find(
       (stock) => stock.produit_id === product.produit_id
@@ -77,11 +108,11 @@ function Row({ row }) {
         quantite: product.quantite,
       }))
       //("row/////////////////////", row)
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         "http://localhost:5000/api/stocks/decrement",
         { orderDetails }
       )
-      const responseUpdate = await axios.put(
+      const responseUpdate = await axiosInstance.put(
         `http://localhost:5000/api/orders/${row.order_id}`,
         { statut: "validée" }
       )
@@ -125,7 +156,14 @@ function Row({ row }) {
         </TableCell>
         <TableCell>{row.order_id}</TableCell>
         <TableCell>{new Date(row.date_commande).toLocaleString()}</TableCell>
-        <TableCell>{row.statut}</TableCell>
+        <TableCell
+          sx={{
+            color: color[row.statut] || "black",
+            fontWeight: "700",
+          }}
+        >
+          {_.capitalize(row.statut)}
+        </TableCell>
       </TableRow>
 
       <TableRow>
@@ -181,7 +219,19 @@ function Row({ row }) {
         aria-labelledby="modal-title"
         aria-describedby="modal-description"
       >
-        <Box sx={{ p: 4 }}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 500,
+            bgcolor: "background.paper",
+            borderRadius: "10px",
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
           <Typography id="modal-title" variant="h6" gutterBottom>
             Récapitulatif de la commande
           </Typography>
@@ -226,11 +276,7 @@ function Row({ row }) {
             >
               {isLoading ? "Validation..." : "Valider la commande"}
             </Button>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={() => setModalOpen(false)}
-            >
+            <Button variant="contained" color="error" onClick={handleCancel}>
               Annuler
             </Button>
           </Box>
@@ -291,24 +337,42 @@ export default function CollapsingTable({ data }) {
               style={{ cursor: "pointer" }}
             >
               Order ID{" "}
-              {sortConfig.key === "order_id" &&
-                (sortConfig.direction === "asc" ? "🔼" : "🔽")}
+              <IconButton aria-label="expand row" size="small">
+                {sortConfig.key === "order_id" &&
+                  (sortConfig.direction === "asc" ? (
+                    <KeyboardArrowUp />
+                  ) : (
+                    <KeyboardArrowDown />
+                  ))}
+              </IconButton>
             </TableCell>
             <TableCell
               onClick={() => handleSort("date_commande")}
               style={{ cursor: "pointer" }}
             >
               Date de Commande{" "}
-              {sortConfig.key === "date_commande" &&
-                (sortConfig.direction === "asc" ? "🔼" : "🔽")}
+              <IconButton aria-label="expand row" size="small">
+                {sortConfig.key === "date_commande" &&
+                  (sortConfig.direction === "asc" ? (
+                    <KeyboardArrowUp />
+                  ) : (
+                    <KeyboardArrowDown />
+                  ))}
+              </IconButton>
             </TableCell>
             <TableCell
               onClick={() => handleSort("statut")}
               style={{ cursor: "pointer" }}
             >
               Statut{" "}
-              {sortConfig.key === "statut" &&
-                (sortConfig.direction === "asc" ? "🔼" : "🔽")}
+              <IconButton aria-label="expand row" size="small">
+                {sortConfig.key === "statut" &&
+                  (sortConfig.direction === "asc" ? (
+                    <KeyboardArrowUp />
+                  ) : (
+                    <KeyboardArrowDown />
+                  ))}
+              </IconButton>
             </TableCell>
           </TableRow>
         </TableHead>

@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app"
-import { getAuth } from "firebase/auth"
+import { browserLocalPersistence, getAuth, setPersistence } from "firebase/auth"
 
 const firebaseConfig = {
   apiKey: "AIzaSyCPxn8QLxoaAxYLtgytHvIHssG8kFMZMFY",
@@ -12,7 +12,21 @@ const firebaseConfig = {
 
 // Initialisez Firebase
 const app = initializeApp(firebaseConfig)
-
+const auth = getAuth(app)
+setPersistence(auth, browserLocalPersistence)
+  .then(() => console.log("✅ Persistence activée"))
+  .catch((error) => console.error("⚠️ Erreur de persistence Firebase :", error))
 // Exportez l'instance Firebase et l'auth
-export const auth = getAuth(app)
-export default app
+auth.onIdTokenChanged(async (user) => {
+  if (user) {
+    const idToken = await user.getIdToken()
+    // console.log("🔑 Token Firebase après refresh :", idToken)
+  } else {
+    console.log("❌ Aucun utilisateur après refresh.")
+  }
+})
+export default { app, auth }
+
+// Obtenir l'instance Firebase Auth
+
+// Surveiller les changements de token

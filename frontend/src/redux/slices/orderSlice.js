@@ -1,12 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
-import axios from "axios"
 
 // Thunk pour récupérer toutes les commandes
 export const fetchOrdersWithDetails = createAsyncThunk(
   "orders/fetchOrdersWithDetails",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         "http://localhost:5000/api/orders/all-orders-details"
       )
       return response.data // Retourne les données formatées

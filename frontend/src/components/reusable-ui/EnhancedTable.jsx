@@ -15,8 +15,9 @@ import FormControlLabel from "@mui/material/FormControlLabel"
 import Switch from "@mui/material/Switch"
 import EditIcon from "@mui/icons-material/Edit"
 import { Alert, Button, IconButton, Snackbar } from "@mui/material"
-import axios from "axios"
+
 import BasicModal from "./BasicModal" // Import du composant modal
+import axiosInstance from "../../axiosConfig"
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1
@@ -173,9 +174,9 @@ export default function EnhancedTable({
         alert("Aucun élément sélectionné pour suppression !")
         return
       }
-
+      console.log("coll", coll)
       for (const id of selected) {
-        const res = await axios.delete(
+        const res = await axiosInstance.delete(
           `http://localhost:5000/api/${coll}/${id}`
         )
         //(`Élément avec l'ID ${id} supprimé`)
@@ -224,7 +225,7 @@ export default function EnhancedTable({
   const handleModalSubmit = async (updatedData) => {
     try {
       if (updatedData._id) {
-        const res = await axios.put(
+        const res = await axiosInstance.put(
           `http://localhost:5000/api/${coll}/${updatedData._id}`,
           updatedData
         )
@@ -235,7 +236,7 @@ export default function EnhancedTable({
         //(`http://localhost:5000/api/${coll}/${updatedData._id}`)
         // //("Réponse de mise à jour :", res)
       } else {
-        const res = await axios.post(
+        const res = await axiosInstance.post(
           `http://localhost:5000/api/${coll}`,
           updatedData
         )

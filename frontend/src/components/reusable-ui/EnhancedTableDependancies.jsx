@@ -15,7 +15,7 @@ import FormControlLabel from "@mui/material/FormControlLabel"
 import Switch from "@mui/material/Switch"
 import EditIcon from "@mui/icons-material/Edit"
 import { Alert, Button, IconButton, Snackbar } from "@mui/material"
-import axios from "axios"
+
 import ModalDependancies from "./ModalDependancies" // Import du composant modal
 import { useEffect } from "react"
 
@@ -114,22 +114,20 @@ export default function EnhancedTable({
       try {
         const fetchedData = {}
         for (const endpoint of endpoints) {
-          const response = await axios.get("/api" + endpoint)
+          const response = await axiosInstance.get("/api" + endpoint)
+          console.log(`Réponse API pour ${endpoint}:`, response.data) // 🔍 Ajoute ce log
           fetchedData[endpoint] = response.data
         }
         setDropdownData(fetchedData)
       } catch (error) {
-        console.error(
-          "Erreur lors de la récupération des données des endpoints :",
-          error
-        )
+        console.error("Erreur lors de la récupération des données :", error)
       }
     }
 
     if (endpoints.length) {
       fetchDropdownData()
     }
-  }, [endpoints])
+  }, [])
   const headCells = data.length
     ? Object.keys(data[0]).map((key) => ({
         id: key,
@@ -198,7 +196,7 @@ export default function EnhancedTable({
       }
 
       for (const id of selected) {
-        const res = await axios.delete(
+        const res = await axiosInstance.delete(
           `http://localhost:5000/api/${coll}/${id}`
         )
         //(`Élément avec l'ID ${id} supprimé`)
@@ -247,13 +245,16 @@ export default function EnhancedTable({
   const handleModalSubmit = async (updatedData) => {
     try {
       if (updatedData._id) {
-        await axios.put(
+        await axiosInstance.put(
           `http://localhost:5000/api/${coll}/${updatedData._id}`,
           updatedData
         )
         //("Données mises à jour :", updatedData)
       } else {
-        await axios.post(`http://localhost:5000/api/${coll}`, updatedData)
+        await axiosInstance.post(
+          `http://localhost:5000/api/${coll}`,
+          updatedData
+        )
         //("Nouvelle donnée ajoutée :", updatedData)
       }
 
@@ -279,7 +280,8 @@ export default function EnhancedTable({
         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
     [data, order, orderBy, page, rowsPerPage]
   )
-
+  console.count("Console log exécuté")
+  console.log("dropdownData from enhencedtable", dropdownData)
   return (
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>

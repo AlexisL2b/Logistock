@@ -63,12 +63,12 @@ export const deleteSupplier = async (req, res) => {
   try {
     // Convertir l'ID en ObjectId
     const supplierId = new mongoose.Types.ObjectId(req.params.id)
-
+    console.log("supplierId", supplierId)
     // Vérifier si des produits sont associés au fournisseur
     const associatedProducts = await Product.find({
-      fournisseur_id: supplierId,
+      supplier_id: supplierId,
     })
-    //("associatedProducts:", associatedProducts)
+    console.log("associatedProducts:", associatedProducts)
     //("supplierId:", supplierId)
 
     if (associatedProducts.length > 0) {
