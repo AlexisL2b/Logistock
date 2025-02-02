@@ -114,7 +114,7 @@ export default function CartDrawer({
           <Button
             variant="contained"
             fullWidth
-            color="primary"
+            color="success"
             sx={{ textTransform: "none", mb: 1 }}
             onClick={handleCheckout}
             disabled={cartItems.length === 0}
@@ -124,7 +124,7 @@ export default function CartDrawer({
           <Button
             variant="outlined"
             fullWidth
-            color="secondary"
+            color="blue"
             sx={{ textTransform: "none" }}
             onClick={onClose}
           >

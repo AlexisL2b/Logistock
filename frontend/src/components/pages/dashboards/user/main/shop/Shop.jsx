@@ -39,7 +39,7 @@ export default function Shop() {
     : products
 
   return (
-    <Box>
+    <Box sx={{ p: 3 }}>
       {/* 🏷️ Filtre par catégorie */}
       <FormControl fullWidth margin="normal">
         <InputLabel id="category-filter-label">
@@ -59,8 +59,21 @@ export default function Shop() {
         </Select>
       </FormControl>
 
-      {/* Affichage des produits filtrés */}
-      <Box>
+      {/* 🌟 Affichage ultra responsive des produits */}
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: {
+            xs: "1fr", // 1 produit par ligne sur mobile
+            sm: "repeat(2, 1fr)", // 2 produits par ligne sur tablette
+            md: "repeat(3, 1fr)", // 3 produits par ligne sur PC
+          },
+          gap: "24px", // Espacement horizontal
+          rowGap: "70px", // Espacement vertical
+          mt: 2,
+          justifyContent: "center",
+        }}
+      >
         {filteredProducts.map((product) => (
           <ProductCard key={product._id} product={product} />
         ))}

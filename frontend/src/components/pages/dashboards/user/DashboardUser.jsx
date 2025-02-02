@@ -1,59 +1,48 @@
 import React, { useEffect, useState } from "react"
-import { Box, Button, Modal, Typography } from "@mui/material"
-import Menu from "../../../reusable-ui/Menu" // Importez votre composant Menu
+import { Box, Button, Drawer, IconButton, Badge } from "@mui/material"
+import Menu from "../../../reusable-ui/Menu" // Import du composant Menu
 import Main from "./main/Main" // Import du composant Main
 import AccountCircleIcon from "@mui/icons-material/AccountCircle"
-import BarChartIcon from "@mui/icons-material/BarChart"
 import LocalShippingIcon from "@mui/icons-material/LocalShipping"
-import Profile from "./main/profile/Profile"
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart"
+import MenuIcon from "@mui/icons-material/Menu"
+import Profile from "./main/profile/Profile"
 import Shop from "./main/shop/Shop"
-import CartModal from "./cart/CartModal"
-import { useDispatch, useSelector } from "react-redux"
-import {
-  addToCart,
-  decrementFromCart,
-  loadCart,
-  removeFromCart,
-} from "../../../../redux/slices/cartSlice"
+import CartDrawer from "./cart/cartDrawer"
 import Orders from "./main/order/Orders"
+import { useDispatch, useSelector } from "react-redux"
+import { loadCart } from "../../../../redux/slices/cartSlice"
 import { logout } from "../../../../redux/slices/authSlice"
 import { loadUserFromLocalStorage } from "../../../../utils/localStorage"
-import CartDrawer from "./cart/cartDrawer"
+import { useTheme } from "@mui/material/styles"
+import useMediaQuery from "@mui/material/useMediaQuery"
 
 export default function DashboardUser() {
-  const [open, setOpen] = useState(false)
+  const [openCart, setOpenCart] = useState(false)
+  const [openDrawer, setOpenDrawer] = useState(false)
   const dispatch = useDispatch()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"))
+
   const user = useSelector(
     (state) => state.auth.user || loadUserFromLocalStorage()
   )
   const userId = user?._id
-  const handleLohgout = () => {
-    dispatch(logout())
-  }
-  useEffect(() => {
-    if (userId) {
-      dispatch(loadCart(userId))
-    }
-  }, [userId, dispatch])
-  // Sélection des articles du panier depuis le Redux store
-  const cartItems = useSelector((state) => state.cart.items)
 
   useEffect(() => {
     if (userId) {
       dispatch(loadCart(userId))
-      //("userId from useEffect", userId)
     }
   }, [userId, dispatch])
-  // Calcul du total à partir des articles du panier
+
+  const cartItems = useSelector((state) => state.cart.items)
   const total = cartItems.reduce(
     (acc, item) => acc + item.detailsProduit.prix * item.quantity,
     0
   )
-  const [activeComponent, setActiveComponent] = useState("profile")
+  const cartCount = cartItems.length // Nombre total d'articles
 
-  // État pour gérer l'ouverture/fermeture de la modal
-  const [isModalOpen, setModalOpen] = useState(false)
+  const [activeComponent, setActiveComponent] = useState("profile")
 
   // Liste des liens avec leurs composants associés
   const links = [
@@ -61,59 +50,118 @@ export default function DashboardUser() {
       path: "profile",
       label: "Profile",
       icon: <AccountCircleIcon />,
-      component: <Profile />, // Composant à afficher
+      component: <Profile />,
     },
     {
       path: "orders",
       label: "Commandes",
       icon: <LocalShippingIcon />,
-      component: <Orders />, // Composant à afficher
+      component: <Orders />,
     },
-
     {
       path: "shop",
       label: "Produits",
       icon: <ShoppingCartIcon />,
-      component: <Shop />, // Composant à afficher
+      component: <Shop />,
     },
   ]
 
-  // Récupérer le composant actif
+  // Trouver le composant actif
   const activeElement = links.find(
     (link) => link.path === activeComponent
   )?.component
 
-  // Gestion de la fermeture de la modal
-  const handleCloseModal = () => setModalOpen(false)
-
   return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
-      {/* Bouton d'ouverture de la modal */}
-      <Box sx={{ marginBottom: 2, textAlign: "center" }}>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setModalOpen(true)}
+    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+      {/* Drawer pour mobile */}
+      {isMobile && (
+        <Drawer
+          anchor="left"
+          open={openDrawer}
+          onClose={() => setOpenDrawer(false)}
         >
-          Panier
-        </Button>
-      </Box>
-      {/* Menu */}
-      <Box sx={{ display: "flex" }}>
-        <Menu links={links} onLinkClick={setActiveComponent} />
+          <Box sx={{ width: 250, padding: 2 }}>
+            <Menu
+              links={links}
+              onLinkClick={(path) => {
+                setActiveComponent(path)
+                setOpenDrawer(false)
+              }}
+            />
+          </Box>
+        </Drawer>
+      )}
 
-        {/* Main */}
+      {/* Menu latéral sur desktop */}
+      {!isMobile && (
+        <Box
+          sx={{
+            width: "250px",
+            bgcolor: "background.paper",
+            boxShadow: 3,
+            display: "flex",
+            flexDirection: "column",
+            padding: 2,
+          }}
+        >
+          <Menu links={links} onLinkClick={setActiveComponent} />
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => dispatch(logout())}
+            sx={{
+              mt: "auto",
+              borderColor: "transparent",
+              "&:hover": {
+                borderColor: "red",
+              },
+            }}
+          >
+            Déconnexion
+          </Button>
+        </Box>
+      )}
+
+      {/* Contenu principal */}
+      <Box sx={{ flexGrow: 1, overflowY: "auto", p: 2 }}>
+        {/* Header avec menu burger (gauche) et panier (droite) */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
+          }}
+        >
+          {isMobile && (
+            <IconButton onClick={() => setOpenDrawer(true)}>
+              <MenuIcon />
+            </IconButton>
+          )}
+
+          {/* Bouton panier toujours à droite */}
+          <IconButton
+            color="primary"
+            onClick={() => setOpenCart(true)}
+            sx={{ ml: "auto" }} // Force l'alignement à droite
+          >
+            <Badge badgeContent={cartCount} color="error">
+              <ShoppingCartIcon />
+            </Badge>
+          </IconButton>
+        </Box>
+
+        {/* Affichage du composant actif */}
         <Main>{activeElement}</Main>
       </Box>
-      {/* Modal */}
 
+      {/* Cart Drawer */}
       <CartDrawer
-        open={isModalOpen}
-        onClose={() => setModalOpen(false)}
-        cartItems={cartItems} // Passer les produits du panier en props
-        total={total} // Passer le total en props
+        open={openCart}
+        onClose={() => setOpenCart(false)}
+        cartItems={cartItems}
+        total={total}
       />
-      <Button onClick={handleLohgout}>Déconnexion</Button>
     </Box>
   )
 }
