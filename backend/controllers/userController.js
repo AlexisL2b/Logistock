@@ -3,6 +3,7 @@ import SalesPoint from "../models/salesPointModel.js" // Importez correctement l
 import bcrypt from "bcrypt"
 import mongoose from "mongoose"
 import { getAuth } from "firebase-admin/auth" // Firebase Admin SDK
+import admin from "../config/firebase.js"
 
 // Récupérer tous les utilisateurs
 export const getAllUsers = async (req, res) => {
@@ -241,19 +242,69 @@ export const getUserByEmail = async (req, res) => {
 }
 
 // Supprimer un utilisateur par ID
+// export const deleteUser = async (req, res) => {
+//   try {
+//     const deletedUser = await User.findByIdAndDelete(req.params.id)
+//     const deletedUserByUid = await User.find(req.params.id)
+
+//     if (!deletedUser)
+//       return res.status(404).json({ message: "Utilisateur introuvable" })
+
+//     res.json({ message: "Utilisateur supprimé avec succès" })
+//   } catch (error) {
+//     console.error("Erreur lors de la suppression de l'utilisateur :", error)
+//     res.status(500).json({
+//       message: "Erreur lors de la suppression de l'utilisateur",
+//       error,
+//     })
+//   }
+// }
 export const deleteUser = async (req, res) => {
   try {
-    const deletedUser = await User.findByIdAndDelete(req.params.id)
+    const userId = req.params.id // Récupération de l'ID MongoDB
 
-    if (!deletedUser)
+    // Vérifier si l'utilisateur existe en base MongoDB
+    const user = await User.findById(userId)
+    if (!user) {
       return res.status(404).json({ message: "Utilisateur introuvable" })
+    }
 
-    res.json({ message: "Utilisateur supprimé avec succès" })
+    const firebaseUid = user.firebaseUid // Récupérer l'UID Firebase
+
+    // 🔥 Suppression de l'utilisateur dans Firebase Auth
+    try {
+      await admin.auth().deleteUser(firebaseUid)
+      console.log(
+        `✅ Utilisateur Firebase ${firebaseUid} supprimé avec succès.`
+      )
+    } catch (firebaseError) {
+      console.error(
+        "❌ Erreur lors de la suppression de Firebase :",
+        firebaseError.message
+      )
+      return res.status(500).json({
+        message: "Erreur lors de la suppression dans Firebase",
+        error: firebaseError.message,
+      })
+    }
+
+    // 🗑 Suppression de l'utilisateur en base de données MongoDB
+    const deletedUser = await User.findByIdAndDelete(userId)
+
+    if (!deletedUser) {
+      return res
+        .status(404)
+        .json({ message: "Utilisateur introuvable en base MongoDB" })
+    }
+
+    res.json({
+      message: "Utilisateur supprimé avec succès dans Firebase et MongoDB",
+    })
   } catch (error) {
-    console.error("Erreur lors de la suppression de l'utilisateur :", error)
+    console.error("❌ Erreur lors de la suppression de l'utilisateur :", error)
     res.status(500).json({
       message: "Erreur lors de la suppression de l'utilisateur",
-      error,
+      error: error.message,
     })
   }
 }

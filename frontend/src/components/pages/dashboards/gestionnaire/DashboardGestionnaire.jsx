@@ -8,21 +8,29 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material"
-import AccountCircleIcon from "@mui/icons-material/AccountCircle"
-import SupervisedUserCircleIcon from "@mui/icons-material/SupervisedUserCircle"
-
+import DashboardIcon from "@mui/icons-material/Dashboard"
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart"
+import LocalShippingIcon from "@mui/icons-material/LocalShipping"
+import CategoryIcon from "@mui/icons-material/Category"
+import FmdGoodIcon from "@mui/icons-material/FmdGood"
+import InventoryIcon from "@mui/icons-material/Inventory"
+import SellIcon from "@mui/icons-material/Sell"
 import MenuIcon from "@mui/icons-material/Menu"
 import LogoutIcon from "@mui/icons-material/Logout"
 
 import { useDispatch } from "react-redux"
 import { logout } from "../../../../redux/slices/authSlice"
 import Menu from "../../../reusable-ui/Menu"
-
+import Categories from "./main/catégories/Categories"
+import Suppliers from "./main/suppliers/Suppliers"
+import SalesPoints from "./main/salesPoints/salesPoints"
+import Transporters from "./main/transporters/Transporters"
 import Users from "./main/users/Users"
-import Main from "./main/main"
+import Products from "./main/products/Products"
+import Main from "./main/Main"
 import Profile from "../user/main/profile/Profile"
 
-export default function DashboardAdmin() {
+export default function DashboardGestionnaire() {
   const [activeComponent, setActiveComponent] = useState("dashboard")
   const [openDrawer, setOpenDrawer] = useState(false)
   const dispatch = useDispatch()
@@ -38,14 +46,45 @@ export default function DashboardAdmin() {
     {
       path: "dashboard",
       label: "Profile",
-      icon: <AccountCircleIcon />,
+      icon: <DashboardIcon />,
       component: <Profile />,
     },
     {
       path: "users",
       label: "Utilisateur",
-      icon: <SupervisedUserCircleIcon />,
+      icon: <DashboardIcon />,
       component: <Users />,
+    },
+
+    {
+      path: "categories",
+      label: "Categories",
+      icon: <CategoryIcon />,
+      component: <Categories />,
+    },
+    {
+      path: "suppliers",
+      label: "Fournisseur",
+      icon: <InventoryIcon />,
+      component: <Suppliers />,
+    },
+    {
+      path: "sales_points",
+      label: "Points de vente",
+      icon: <FmdGoodIcon />,
+      component: <SalesPoints />,
+    },
+    {
+      path: "transporters",
+      label: "Transporteurs",
+      icon: <LocalShippingIcon />,
+      component: <Transporters />,
+    },
+    {
+      path: "products",
+      label: "Produits",
+      icon: <SellIcon />,
+      component: <Products />,
     },
   ]
 

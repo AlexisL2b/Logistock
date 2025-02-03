@@ -5,9 +5,9 @@ import User from "../models/userModel.js" // Modèle MongoDB pour les utilisateu
 export const createUser = async (req, res) => {
   try {
     // Étape 1 : Extraire les données du corps de la requête
-    const { email, password, prenom, nom, adresse, salesPoint, role_id } =
+    const { email, password, prenom, nom, adresse, salesPoint, roles } =
       req.body
-
+    console.log("req.body", req.body)
     // Étape 2 : Créer l'utilisateur dans Firebase Authentication
     const userRecord = await admin.auth().createUser({
       email,
@@ -20,11 +20,11 @@ export const createUser = async (req, res) => {
     const newUser = new User({
       firebaseUid: userRecord.uid, // UID de Firebase
       email: userRecord.email,
-      role_id: "677cf977b39853e4a17727e3", // Rôle par défaut
+      role_id: roles, // Rôle par défaut
       prenom,
       nom,
       adresse,
-      point_vente_id: salesPoint || "", // Valeur par défaut : adresse
+      ...(salesPoint && { point_vente_id: salesPoint }), // Ajoute seulement si salesPoint existe
     })
 
     const savedUser = await newUser.save()

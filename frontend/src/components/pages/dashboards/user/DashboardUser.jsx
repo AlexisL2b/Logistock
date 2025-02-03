@@ -34,6 +34,9 @@ export default function DashboardUser() {
       dispatch(loadCart(userId))
     }
   }, [userId, dispatch])
+  const handleLogout = () => {
+    dispatch(logout())
+  }
 
   const cartItems = useSelector((state) => state.cart.items)
   const total = cartItems.reduce(
@@ -80,7 +83,15 @@ export default function DashboardUser() {
           open={openDrawer}
           onClose={() => setOpenDrawer(false)}
         >
-          <Box sx={{ width: 250, padding: 2 }}>
+          <Box
+            sx={{
+              width: 250,
+              padding: 2,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+            }}
+          >
             <Menu
               links={links}
               onLinkClick={(path) => {
@@ -88,6 +99,14 @@ export default function DashboardUser() {
                 setOpenDrawer(false)
               }}
             />
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleLogout}
+              sx={{ mt: "auto" }}
+            >
+              Déconnexion
+            </Button>
           </Box>
         </Drawer>
       )}

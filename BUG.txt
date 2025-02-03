@@ -143,3 +143,6 @@ Ajouter les différents patch/notifications à la place d'alerte
 4. Rendre responsive.
 5. Faire tout le frontend
 
+BUG:
+Lorsque je m'inscrit, l'email est rentrer en lower dans mongo mais pas dans firebase.
+Lenteure des requêtes

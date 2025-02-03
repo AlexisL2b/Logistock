@@ -58,6 +58,14 @@ export default function DashboardLogistician() {
                 setOpenDrawer(false)
               }}
             />
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleLogout}
+              sx={{ mt: "auto" }}
+            >
+              Déconnexion
+            </Button>
           </Box>
         </Drawer>
       )}

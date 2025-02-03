@@ -19,6 +19,7 @@ import ProtectedRoute from "./components/reusable-ui/ProtectedRoute"
 import DashboardLogistician from "./components/pages/dashboards/logistician/DashboardLogistician"
 import TestFirebaseAuth from "../testfirebase"
 import TestFirebase from "../testfirebase2"
+import DashboardGestionnaire from "./components/pages/dashboards/gestionnaire/DashboardGestionnaire"
 
 function App() {
   const dispatch = useDispatch()
@@ -56,6 +57,14 @@ function App() {
         element={
           <ProtectedRoute>
             <DashboardAdmin />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/gestionnaire-dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardGestionnaire />
           </ProtectedRoute>
         }
       />
