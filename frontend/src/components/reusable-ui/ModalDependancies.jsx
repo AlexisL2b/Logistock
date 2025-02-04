@@ -28,7 +28,7 @@ export default function BasicModal({
   dropdownData = {},
 }) {
   const [formData, setFormData] = useState(objectData)
-  console.log(dropdownData)
+  console.log("dropdownData from modal dependancies", dropdownData)
   useEffect(() => {
     const initialData = { ...objectData }
     Object.keys(objectData).forEach((key) => {
@@ -58,6 +58,7 @@ export default function BasicModal({
 
   const findDropdownKey = (key) => {
     const baseKey = key.replace("_id", "").toLowerCase().trim()
+    console.log("baseKey", baseKey)
     return (
       Object.keys(dropdownData).find((dropdownKey) =>
         dropdownKey.toLowerCase().includes(baseKey)
@@ -76,7 +77,9 @@ export default function BasicModal({
           sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}
         >
           {Object.keys(formData)
-            .filter((key) => key !== "_id" && key !== "__v")
+            .filter(
+              (key) => key !== "_id" && key !== "__v" && key !== "Stock_id"
+            )
             .map((key) => {
               const dropdownKey = findDropdownKey(key)
               console.log("DropdownKey for", key, ":", dropdownKey)

@@ -109,7 +109,7 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
       try {
         const fetchedData = {}
         for (const endpoint of endpoints) {
-          const response = await axiosInstance.get("/api" + endpoint)
+          const response = await axiosInstance.get(endpoint)
           fetchedData[endpoint] = response.data // Associez les données au nom du endpoint
         }
         setDropdownData(fetchedData)
@@ -125,6 +125,7 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
       fetchDropdownData()
     }
   }, [endpoints])
+  console.log("dropdownData", dropdownData)
 
   // endpoints.forEach((endpoint) => {
   //(dropdownData)

@@ -115,7 +115,7 @@ export default function EnhancedTable({
       try {
         const fetchedData = {}
         for (const endpoint of endpoints) {
-          const response = await axiosInstance.get("/api" + endpoint)
+          const response = await axiosInstance.get(endpoint)
           console.log(`Réponse API pour ${endpoint}:`, response.data) // 🔍 Ajoute ce log
           fetchedData[endpoint] = response.data
         }

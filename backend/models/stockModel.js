@@ -8,12 +8,6 @@ const stockSchema = new mongoose.Schema({
     unique: true, // Un stock par produit
   },
   quantite_disponible: { type: Number, required: true, default: 0 },
-
-  statut: {
-    type: String,
-    enum: ["en_stock", "hors_stock"],
-    default: "en_stock",
-  },
 })
 
 // Middleware pour calculer automatiquement le statut
