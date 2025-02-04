@@ -146,3 +146,40 @@ Ajouter les différents patch/notifications à la place d'alerte
 BUG:
 Lorsque je m'inscrit, l'email est rentrer en lower dans mongo mais pas dans firebase.
 Lenteure des requêtes
+
+
+Suppression = alert confirmation.
+
+à quoi sert l'application?
+
+Les label à modifier :
+
+Product=>Formulaire de création/modification=> Quantité_disponible pour Quantité disponible
+Product=>Formulaire de création/modification=> Quantité_disponible pour Quantité disponible
+
+Lié un  stock avec un point de vente ( ajouter l'object id du point de vente dans le stock )
+
+à implémenter:
+
+Produit:
+
+Réaprovisionnement d'un produit dans un point de vente.
+Pour ça je doit lier un point de vente a un produit lors de la création.
+Implémementer une recherche par point de vente avec un liste déroulante.
+Bouton réaprovisionner uun produit sur la ligne d'un produit.
+Produit>Point de vente>stock 
+Créer de l'analytic  à partir des commande:
+Si selection de point de vente à partir d'un dropdown
+-Produit les plus vendues dans un point de vente ( Récupérer les produits à partir du point de vente, récupérer toutes les commande avec le statut validé qui on un produit lié au point de vente)
+-Tableau des utilisateurs ayant le plus commandé, ajoute un bouton pour afficher la liste des commande détailée (Récupérer:  les orders a partir de l'id utilisateur>.populate les orders_details par rapport à l'id orders. )
+
+Si aucun point n'est selectionné afficher la même chose mais de manière inter-points de vente.
+
+
+
+
+
+
+
+
+
