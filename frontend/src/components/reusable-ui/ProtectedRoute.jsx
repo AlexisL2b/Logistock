@@ -22,11 +22,6 @@ const ProtectedRoute = ({ children }) => {
 
   const user = localStorageUser || reduxUser
 
-  if (status === "loading") {
-    // Afficher un écran de chargement pendant l'initialisation
-    return <div>Chargement...</div>
-  }
-
   if (!user) {
     // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
     return <Navigate to="/" />

@@ -53,10 +53,7 @@ export const listenToAuthState = createAsyncThunk(
 
             // Récupérer les infos utilisateur depuis le backend
             const response = await axiosInstance.get(
-              `http://localhost:5000/api/users/me`,
-              {
-                headers: { Authorization: `Bearer ${idToken}` },
-              }
+              `http://localhost:5000/api/users/me`
             )
 
             const userData = response.data
@@ -114,10 +111,7 @@ export const fetchUserProfile = createAsyncThunk(
 
       const idToken = await auth.currentUser.getIdToken(true)
       const response = await axiosInstance.get(
-        "http://localhost:5000/api/users/me",
-        {
-          headers: { Authorization: `Bearer ${idToken}` },
-        }
+        "http://localhost:5000/api/users/me"
       )
 
       return response.data

@@ -17,18 +17,24 @@ import DashboardUser from "./components/pages/dashboards/user/DashboardUser"
 import { listenToAuthState } from "./redux/slices/authSlice"
 import ProtectedRoute from "./components/reusable-ui/ProtectedRoute"
 import DashboardLogistician from "./components/pages/dashboards/logistician/DashboardLogistician"
-import TestFirebaseAuth from "../testfirebase"
-import TestFirebase from "../testfirebase2"
+
 import DashboardGestionnaire from "./components/pages/dashboards/gestionnaire/DashboardGestionnaire"
 
 function App() {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    dispatch(listenToAuthState()) // Vérifie l'utilisateur connecté
+    let isMounted = true
+    console.log("🚀 useEffect de l'auth s'exécute")
+
+    if (isMounted) {
+      dispatch(listenToAuthState()) // Vérifie l'utilisateur connecté
+    }
+
+    return () => {
+      isMounted = false // Empêche le second appel
+    }
   }, [dispatch])
-  TestFirebaseAuth()
-  TestFirebase()
 
   return (
     <Routes>
