@@ -1,92 +1,61 @@
-import OrderDetails from "../models/orderDetailsModel.js"
+import orderDetailsService from "../services/orderDetailsService.js"
 
 // Récupérer tous les détails des commandes
 export const getAllOrderDetails = async (req, res) => {
   try {
-    const orderDetails = await OrderDetails.find()
-      .populate("commande_id", "date_commande statut")
-      .populate("produit_id", "nom prix")
+    const orderDetails = await orderDetailsService.getAllOrderDetails()
     res.json(orderDetails)
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur lors de la récupération des détails de commandes",
-      error,
-    })
+    res.status(500).json({ message: error.message })
   }
 }
 
 // Récupérer les détails d'une commande spécifique
 export const getOrderDetailsById = async (req, res) => {
   try {
-    const orderDetails = await OrderDetails.findById(req.params.id)
-      .populate("commande_id", "date_commande statut")
-      .populate("produit_id", "nom prix")
-    if (!orderDetails)
-      return res
-        .status(404)
-        .json({ message: "Détails de commande introuvables" })
+    const orderDetails = await orderDetailsService.getOrderDetailsById(
+      req.params.id
+    )
     res.json(orderDetails)
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur lors de la récupération des détails de la commande",
-      error,
-    })
+    res.status(404).json({ message: error.message })
   }
 }
 
 // Ajouter des détails de commande
 export const addOrderDetails = async (req, res) => {
   try {
-    const newOrderDetails = new OrderDetails(req.body)
-    const savedOrderDetails = await newOrderDetails.save()
-    res.status(201).json(savedOrderDetails)
+    const newOrderDetails = await orderDetailsService.addOrderDetails(req.body)
+    res.status(201).json(newOrderDetails)
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur lors de l'ajout des détails de commande",
-      error,
-    })
+    res.status(400).json({ message: error.message })
   }
 }
 
 // Mettre à jour des détails de commande
 export const updateOrderDetails = async (req, res) => {
   try {
-    const updatedOrderDetails = await OrderDetails.findByIdAndUpdate(
+    const updatedOrderDetails = await orderDetailsService.updateOrderDetails(
       req.params.id,
-      req.body,
-      {
-        new: true, // Renvoie l'objet mis à jour
-        runValidators: true, // Valide les champs avant de les enregistrer
-      }
+      req.body
     )
-    if (!updatedOrderDetails)
-      return res
-        .status(404)
-        .json({ message: "Détails de commande introuvables" })
     res.json(updatedOrderDetails)
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur lors de la mise à jour des détails de commande",
-      error,
-    })
+    res.status(404).json({ message: error.message })
   }
 }
 
 // Supprimer des détails de commande
 export const deleteOrderDetails = async (req, res) => {
   try {
-    const deletedOrderDetails = await OrderDetails.findByIdAndDelete(
+    const deletedOrderDetails = await orderDetailsService.deleteOrderDetails(
       req.params.id
     )
-    if (!deletedOrderDetails)
-      return res
-        .status(404)
-        .json({ message: "Détails de commande introuvables" })
-    res.json({ message: "Détails de commande supprimés avec succès" })
-  } catch (error) {
-    res.status(500).json({
-      message: "Erreur lors de la suppression des détails de commande",
-      error,
+    res.json({
+      message: "Détails de commande supprimés avec succès",
+      data: deletedOrderDetails,
     })
+  } catch (error) {
+    res.status(400).json({ message: error.message })
   }
 }

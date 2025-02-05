@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react"
+import { useState, useMemo, memo } from "react"
 import PropTypes from "prop-types"
 import {
   Box,
@@ -24,6 +24,7 @@ import {
 } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
 import SignUpForm from "../../../../signupPage/SignUpForm"
+import ConfirmationDialog from "../../../../../reusable-ui/ConfirmationDialog"
 
 // Fonction de comparaison pour le tri
 function descendingComparator(a, b, orderBy) {
@@ -95,12 +96,13 @@ EnhancedTableHead.propTypes = {
   headCells: PropTypes.array.isRequired,
 }
 
-export default function BasicTable({
+function BasicTable({
   admin,
   data,
   coll,
   onDataChange,
   headerMapping,
+  trigger,
 }) {
   const [order, setOrder] = useState("asc")
   const [orderBy, setOrderBy] = useState(Object.keys(data[0] || [])[0] || "")
@@ -113,7 +115,13 @@ export default function BasicTable({
   const [showAlert, setShowAlert] = useState(false)
   const [severity, setSeverity] = useState("")
   const [openDialog, setOpenDialog] = useState(false)
+  const [open, setOpen] = useState(false)
 
+  const handleOpen = () => setOpen(true)
+  const handleClose = () => setOpen(false)
+  const handleConfirm = () => {
+    handleDelete()
+  }
   const onClose = () => {
     setOpenDialog(false)
     setMessage("Inscription réussie")
@@ -295,7 +303,7 @@ export default function BasicTable({
         />
       </Paper>
       <Box sx={{ display: "flex", gap: 2 }}>
-        <Button variant="contained" color="error" onClick={handleDelete}>
+        <Button variant="contained" color="error" onClick={handleOpen}>
           Supprimer
         </Button>
         <Button
@@ -309,12 +317,21 @@ export default function BasicTable({
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Ajouter un nouvel utilisateur</DialogTitle>
         <DialogContent>
-          <SignUpForm onClose={onClose} admin={true} />
+          <SignUpForm
+            onClose={onClose}
+            admin={true}
+            onUserAdded={onDataChange}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenDialog(false)}>Annuler</Button>
         </DialogActions>
       </Dialog>
+      <ConfirmationDialog
+        open={open}
+        onClose={handleClose}
+        onConfirm={handleConfirm}
+      />
     </Box>
   )
 }
@@ -325,3 +342,5 @@ BasicTable.propTypes = {
   onDataChange: PropTypes.func,
   headerMapping: PropTypes.object,
 }
+
+export default memo(BasicTable)

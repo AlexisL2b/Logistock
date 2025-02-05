@@ -120,6 +120,7 @@ export default function EnhancedTable({
           fetchedData[endpoint] = response.data
         }
         setDropdownData(fetchedData)
+        console.log("dropdownData", dropdownData)
       } catch (error) {
         console.error("Erreur lors de la récupération des données :", error)
       }
@@ -143,15 +144,15 @@ export default function EnhancedTable({
   const [selectedRow, setSelectedRow] = useState(null)
 
   // Générer un objet vide basé sur la structure
-  const generateEmptyObject = () => {
-    if (data.length === 0) return {}
-    const firstItem = data[0]
-    const emptyObject = {}
-    Object.keys(firstItem).forEach((key) => {
-      emptyObject[key] = key === "_id" ? undefined : "" // `_id` reste vide
-    })
-    return emptyObject
-  }
+  // const generateEmptyObject = () => {
+  //   if (data.length === 0) return {}
+  //   const firstItem = data[0]
+  //   const emptyObject = {}
+  //   Object.keys(firstItem).forEach((key) => {
+  //     emptyObject[key] = key === "_id" ? undefined : "" // `_id` reste vide
+  //   })
+  //   return emptyObject
+  // }
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc"
@@ -234,7 +235,15 @@ export default function EnhancedTable({
   }
 
   const handleOpenModalForAdd = () => {
-    const emptyObject = generateEmptyObject()
+    const emptyObject = {
+      nom: "",
+      reference: "",
+      description: "",
+      prix: "",
+      categorie_id: "",
+      supplier_id: "",
+      quantite: "",
+    }
     setSelectedRow(emptyObject)
     setOpenModal(true)
   }

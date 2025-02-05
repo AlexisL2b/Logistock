@@ -9,10 +9,10 @@ import {
 
 const router = express.Router()
 
-router.get("/", getAllSalesPoints) // GET /api/sales_points
-router.get("/:id", getSalesPointById) // GET /api/sales_points/:id
-router.post("/", addSalesPoint) // POST /api/sales_points
-router.put("/:id", updateSalesPoint) // PUT /api/sales_points/:id
-router.delete("/:id", deleteSalesPoint) // DELETE /api/sales_points/:id
+router.get("/", getAllSalesPoints)
+router.get("/:id", getSalesPointById)
+router.post("/", addSalesPoint)
+router.put("/:id", updateSalesPoint)
+router.delete("/:id", deleteSalesPoint)
 
 export default router

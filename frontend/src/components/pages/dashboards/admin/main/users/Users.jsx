@@ -3,7 +3,7 @@ import { Box, TextField } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
 import BasicTable from "./BasicTable"
 
-export default function Transporters() {
+export default function Users() {
   const [users, setUsers] = useState([])
   const [usersFiltered, setUsersFiltered] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
@@ -74,6 +74,7 @@ export default function Transporters() {
         coll={"users"}
         onDataChange={handleDataChange}
         headerMapping={headerMapping}
+        trigger={users.length} // 🔥 Change la prop pour forcer un rerender
       />
     </Box>
   )

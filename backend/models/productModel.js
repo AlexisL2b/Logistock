@@ -16,10 +16,6 @@ const productSchema = new mongoose.Schema(
       ref: "Supplier",
       required: true,
     },
-    stock_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Stock",
-    },
   },
   { collection: "products" } // Force le nom de la collection
 )

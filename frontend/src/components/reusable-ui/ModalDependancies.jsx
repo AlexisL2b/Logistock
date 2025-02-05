@@ -1,11 +1,17 @@
 import { useState, useEffect } from "react"
-import Box from "@mui/material/Box"
-import Button from "@mui/material/Button"
-import Typography from "@mui/material/Typography"
-import Modal from "@mui/material/Modal"
-import TextField from "@mui/material/TextField"
-import MenuItem from "@mui/material/MenuItem"
 import PropTypes from "prop-types"
+import {
+  Box,
+  Button,
+  Typography,
+  Modal,
+  TextField,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
+  FormHelperText,
+} from "@mui/material"
 
 const style = {
   position: "absolute",
@@ -14,7 +20,7 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 400,
   bgcolor: "background.paper",
-  border: "2px solid #000",
+  borderRadius: "8px",
   boxShadow: 24,
   p: 4,
 }
@@ -27,20 +33,28 @@ export default function BasicModal({
   objectData = {},
   dropdownData = {},
 }) {
-  const [formData, setFormData] = useState(objectData)
-  console.log("dropdownData from modal dependancies", dropdownData)
+  const [formData, setFormData] = useState({
+    name: "",
+    reference: "",
+    price: "",
+    quantite_disponible: "",
+    category_id: "",
+    supplier_id: "",
+    sales_point_id: "",
+  })
+
   useEffect(() => {
-    const initialData = { ...objectData }
-    Object.keys(objectData).forEach((key) => {
-      if (
-        objectData[key] &&
-        typeof objectData[key] === "object" &&
-        objectData[key]._id
-      ) {
-        initialData[key] = objectData[key]._id // Remplacer l'objet par l'ID
-      }
-    })
-    setFormData(initialData)
+    if (objectData) {
+      setFormData({
+        name: objectData.name || "",
+        reference: objectData.reference || "",
+        price: objectData.price || "",
+        quantite_disponible: objectData.quantite_disponible || "",
+        category_id: objectData.category_id?._id || "",
+        supplier_id: objectData.supplier_id?._id || "",
+        sales_point_id: objectData.sales_point_id || "",
+      })
+    }
   }, [objectData])
 
   const handleInputChange = (e) => {
@@ -56,85 +70,139 @@ export default function BasicModal({
     onClose()
   }
 
-  const findDropdownKey = (key) => {
-    const baseKey = key.replace("_id", "").toLowerCase().trim()
-    console.log("baseKey", baseKey)
-    return (
-      Object.keys(dropdownData).find((dropdownKey) =>
-        dropdownKey.toLowerCase().includes(baseKey)
-      ) || null
-    )
-  }
-
   return (
     <Modal open={open} onClose={onClose} aria-labelledby="modal-modal-title">
       <Box sx={style}>
-        <Typography id="modal-modal-title" variant="h6">
+        <Typography id="modal-modal-title" variant="h6" sx={{ mb: 2 }}>
           {title}
         </Typography>
         <Box
           component="form"
           sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}
         >
-          {Object.keys(formData)
-            .filter(
-              (key) => key !== "_id" && key !== "__v" && key !== "Stock_id"
-            )
-            .map((key) => {
-              const dropdownKey = findDropdownKey(key)
-              console.log("DropdownKey for", key, ":", dropdownKey)
+          {/* Nom */}
+          <TextField
+            label="Nom"
+            name="nom"
+            value={formData.nom}
+            onChange={handleInputChange}
+            fullWidth
+            sx={{ mb: 2 }}
+          />
 
-              if (key.endsWith("_id") && dropdownKey) {
-                return (
-                  <TextField
-                    select
-                    key={key}
-                    label={
-                      key.charAt(0).toUpperCase() +
-                      key.slice(1).replace("_id", "")
-                    }
-                    name={key}
-                    value={formData[key] || ""}
-                    onChange={handleInputChange}
-                    fullWidth
-                  >
-                    {Array.isArray(dropdownData[dropdownKey]) ? (
-                      dropdownData[dropdownKey].map((item) => (
-                        <MenuItem key={item._id} value={item._id}>
-                          {item.nom}
-                        </MenuItem>
-                      ))
-                    ) : (
-                      <MenuItem disabled>Aucune donnée disponible</MenuItem>
-                    )}
-                  </TextField>
-                )
-              } else if (key.endsWith("_id")) {
-                console.warn(`No dropdown data found for key: ${key}`)
-                return (
-                  <TextField
-                    key={key}
-                    label={`${
-                      key.charAt(0).toUpperCase() + key.slice(1)
-                    } (Aucune correspondance)`}
-                    value={formData[key] || ""}
-                    disabled
-                    fullWidth
-                  />
-                )
-              }
+          {/* Référence */}
+          <TextField
+            label="Référence"
+            name="reference"
+            value={formData.reference}
+            onChange={handleInputChange}
+            fullWidth
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            label="Description"
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            fullWidth
+            sx={{ mb: 2 }}
+          />
 
-              return (
-                <TextField
-                  key={key}
-                  label={key.charAt(0).toUpperCase() + key.slice(1)}
-                  name={key}
-                  value={formData[key] || ""}
-                  onChange={handleInputChange}
-                  fullWidth
-                />
-              )
-            })}
+          {/* Prix */}
+          <TextField
+            label="Prix"
+            name="prix"
+            type="number"
+            value={formData.prix}
+            onChange={handleInputChange}
+            onInput={(e) => {
+              e.target.value = e.target.value.replace(/[^0-9.]/g, "") // 🔥 Empêche tout sauf les chiffres et le point
+            }}
+            fullWidth
+            sx={{ mb: 2 }}
+          />
+
+          {/* Quantité Disponible */}
+          <TextField
+            label="Quantité Disponible"
+            name="quantite_disponible"
+            type="number"
+            value={formData.quantite_disponible}
+            onChange={handleInputChange}
+            onInput={(e) => {
+              e.target.value = e.target.value.replace(/[^0-9]/g, "") // 🔥 Empêche tout sauf les chiffres et le point
+            }}
+            fullWidth
+            sx={{ mb: 2 }}
+          />
+
+          {/* Catégorie */}
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>Catégorie</InputLabel>
+            <Select
+              name="categorie_id"
+              value={formData.categorie_id}
+              onChange={handleInputChange}
+            >
+              {dropdownData["/categories"] &&
+              dropdownData["/categories"].length > 0 ? (
+                dropdownData["/categories"].map((item) => (
+                  <MenuItem key={item._id} value={item._id}>
+                    {item.nom}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem disabled>Aucune catégorie disponible</MenuItem>
+              )}
+            </Select>
+          </FormControl>
+
+          {/* Fournisseur */}
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel>Fournisseur</InputLabel>
+            <Select
+              name="supplier_id"
+              value={formData.supplier_id}
+              onChange={handleInputChange}
+            >
+              {dropdownData["/suppliers"] &&
+              dropdownData["/suppliers"].length > 0 ? (
+                dropdownData["/suppliers"].map((item) => (
+                  <MenuItem key={item._id} value={item._id}>
+                    {item.nom}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem disabled>Aucun fournisseur disponible</MenuItem>
+              )}
+            </Select>
+          </FormControl>
+
+          {/* Point de Vente */}
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel id="sales-point-label">Point de Vente</InputLabel>
+            <Select
+              labelId="sales-point-label"
+              id="sales-point-select"
+              name="sales_point_id"
+              value={formData.sales_point_id}
+              onChange={handleInputChange}
+            >
+              {dropdownData["/sales_points"] &&
+              dropdownData["/sales_points"].length > 0 ? (
+                dropdownData["/sales_points"].map((item) => (
+                  <MenuItem key={item._id} value={item._id}>
+                    {item.nom}
+                  </MenuItem>
+                ))
+              ) : (
+                <MenuItem disabled>Aucun point de vente disponible</MenuItem>
+              )}
+            </Select>
+            <FormHelperText>Sélectionnez un point de vente</FormHelperText>
+          </FormControl>
+
+          {/* Bouton d'enregistrement */}
           <Button
             variant="contained"
             color="primary"
@@ -150,10 +218,10 @@ export default function BasicModal({
 }
 
 BasicModal.propTypes = {
-  open: PropTypes.bool.isRequired, // Obligatoire
-  onClose: PropTypes.func.isRequired, // Obligatoire
-  onSubmit: PropTypes.func.isRequired, // Obligatoire
-  title: PropTypes.string, // Facultatif (a une valeur par défaut)
-  objectData: PropTypes.object, // Facultatif (a une valeur par défaut)
-  dropdownData: PropTypes.object, // Nouvel objet pour gérer les dropdowns
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  title: PropTypes.string,
+  objectData: PropTypes.object,
+  dropdownData: PropTypes.object,
 }

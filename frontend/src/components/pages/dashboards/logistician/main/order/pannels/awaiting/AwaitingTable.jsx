@@ -99,6 +99,7 @@ function Row({ row }) {
         produit_id: product.produit_id,
         quantite: product.quantite,
       }))
+      console.log("orderDetails from AwaitingTable", orderDetails)
 
       await axiosInstance.post("http://localhost:5000/api/stocks/decrement", {
         orderDetails,

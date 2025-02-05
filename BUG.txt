@@ -166,7 +166,7 @@ Produit:
 Réaprovisionnement d'un produit dans un point de vente.
 Pour ça je doit lier un point de vente a un produit lors de la création.
 Implémementer une recherche par point de vente avec un liste déroulante.
-Bouton réaprovisionner uun produit sur la ligne d'un produit.
+Bouton réaprovisionner un produit sur la ligne d'un produit.
 Produit>Point de vente>stock 
 Créer de l'analytic  à partir des commande:
 Si selection de point de vente à partir d'un dropdown
@@ -176,10 +176,16 @@ Si selection de point de vente à partir d'un dropdown
 Si aucun point n'est selectionné afficher la même chose mais de manière inter-points de vente.
 
 
+Logisticien:
+
+Profile:
+Afficher l'email
+
+Orders:
+
+Afficher les noms des utilisateurs ayant fait la commande.
 
 
-
-
-
+implementer JOI pour la validation coter serveur.
 
 

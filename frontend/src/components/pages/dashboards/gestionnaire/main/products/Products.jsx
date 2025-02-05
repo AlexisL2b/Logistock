@@ -113,7 +113,7 @@ export default function Products() {
         data={filteredProducts}
         coll={"products"}
         onDataChange={handleDataChange}
-        endpoints={["/categories", "/suppliers"]}
+        endpoints={["/categories", "/suppliers", "/sales_points"]}
         headerMapping={headerMapping}
       />
     </Box>

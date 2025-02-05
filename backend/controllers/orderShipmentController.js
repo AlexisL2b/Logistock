@@ -1,118 +1,74 @@
-import OrderShipment from "../models/orderShipmentModel.js"
+import orderShipmentService from "../services/orderShipmentService.js"
 
 // Récupérer tous les départs de commandes
 export const getAllOrderShipments = async (req, res) => {
   try {
-    const orderShipments = await OrderShipment.find()
-      .populate("commande_id", "statut date_commande")
-      .populate("transporteur_id", "nom telephone")
+    const orderShipments = await orderShipmentService.getAllOrderShipments()
     res.json(orderShipments)
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur lors de la récupération des départs de commandes",
-      error,
-    })
+    res.status(500).json({ message: error.message })
   }
 }
 
 // Récupérer un départ de commande par ID
 export const getOrderShipmentById = async (req, res) => {
   try {
-    const orderShipment = await OrderShipment.findById(req.params.id)
-      .populate("commande_id", "statut date_commande")
-      .populate("transporteur_id", "nom telephone")
-    if (!orderShipment)
-      return res.status(404).json({ message: "Départ de commande introuvable" })
+    const orderShipment = await orderShipmentService.getOrderShipmentById(
+      req.params.id
+    )
     res.json(orderShipment)
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur lors de la récupération du départ de commande",
-      error,
-    })
+    res.status(404).json({ message: error.message })
   }
 }
 
-// 🔍 Vérifier si une expédition existe déjà pour une commande spécifique
+// Récupérer un départ de commande par ID de commande
 export const getOrderShipmentByCommandeId = async (req, res) => {
   try {
-    // console.log("req", req)
-    const { id } = req.params
-    if (!id) {
-      return res.status(400).json({
-        message: "L'identifiant de la commande est requis",
-      })
-    }
-
-    const existingShipment = await OrderShipment.find({ commande_id: id })
-
+    const existingShipment =
+      await orderShipmentService.getOrderShipmentByCommandeId(req.params.id)
     res.json(existingShipment)
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur lors de la recherche d'une expédition",
-      error,
-    })
+    res.status(500).json({ message: error.message })
   }
 }
 
 // Ajouter un départ de commande
 export const addOrderShipment = async (req, res) => {
   try {
-    const { commande_id } = req.body
-
-    // Vérifier si une expédition existe déjà pour cette commande
-    const existingShipment = await OrderShipment.findOne({ commande_id })
-    if (existingShipment) {
-      return res.status(400).json({
-        message: "Une expédition existe déjà pour cette commande",
-      })
-    }
-
-    const newOrderShipment = new OrderShipment(req.body)
-    const savedOrderShipment = await newOrderShipment.save()
-    res.status(201).json(savedOrderShipment)
+    const newOrderShipment = await orderShipmentService.addOrderShipment(
+      req.body
+    )
+    res.status(201).json(newOrderShipment)
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur lors de l'ajout du départ de commande",
-      error,
-    })
+    res.status(400).json({ message: error.message })
   }
 }
 
 // Mettre à jour un départ de commande
 export const updateOrderShipment = async (req, res) => {
   try {
-    const updatedOrderShipment = await OrderShipment.findByIdAndUpdate(
+    const updatedOrderShipment = await orderShipmentService.updateOrderShipment(
       req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
+      req.body
     )
-    if (!updatedOrderShipment)
-      return res.status(404).json({ message: "Départ de commande introuvable" })
     res.json(updatedOrderShipment)
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur lors de la mise à jour du départ de commande",
-      error,
-    })
+    res.status(404).json({ message: error.message })
   }
 }
 
 // Supprimer un départ de commande par ID
 export const deleteOrderShipment = async (req, res) => {
   try {
-    const deletedOrderShipment = await OrderShipment.findByIdAndDelete(
+    const deletedOrderShipment = await orderShipmentService.deleteOrderShipment(
       req.params.id
     )
-    if (!deletedOrderShipment)
-      return res.status(404).json({ message: "Départ de commande introuvable" })
-    res.json({ message: "Départ de commande supprimé avec succès" })
-  } catch (error) {
-    res.status(500).json({
-      message: "Erreur lors de la suppression du départ de commande",
-      error,
+    res.json({
+      message: "Départ de commande supprimé avec succès",
+      data: deletedOrderShipment,
     })
+  } catch (error) {
+    res.status(400).json({ message: error.message })
   }
 }

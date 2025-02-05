@@ -16,7 +16,7 @@ import {
 } from "@mui/material"
 import axiosInstance from "../../../axiosConfig"
 
-const FormulaireInscription = ({ admin, onClose }) => {
+const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
   const [salesPoints, setSalesPoints] = useState([])
   const [roles, setRoles] = useState([])
   const [selectedRole, setSelectedRole] = useState("") // Stocke le rôle sélectionné
@@ -48,12 +48,20 @@ const FormulaireInscription = ({ admin, onClose }) => {
   useEffect(() => {
     axiosInstance
       .get("/sales_points")
-      .then((response) => setSalesPoints(response.data.data))
+      .then((response) => {
+        console.log("Réponse API Rôles :", response.data.data),
+          setSalesPoints(response.data.data),
+          console.log(salesPoints)
+      })
       .catch((error) => console.error("Erreur points de vente :", error))
 
     axiosInstance
       .get("/roles")
-      .then((response) => setRoles(response.data.data))
+      .then((response) => {
+        console.log("Réponse API Rôles :", response.data) // Vérifier si les données sont correctes
+        setRoles(response.data)
+        console.log(roles)
+      })
       .catch((error) => console.error("Erreur rôles :", error))
   }, [])
 
@@ -80,7 +88,9 @@ const FormulaireInscription = ({ admin, onClose }) => {
         severity: "success",
       })
 
-      setModalOpen(true) // Ouvre la modale
+      setModalOpen(false) // Ouvre la modale
+      onUserAdded()
+      onClose()
     } catch (error) {
       setSnackbar({
         open: true,
@@ -258,7 +268,7 @@ const FormulaireInscription = ({ admin, onClose }) => {
                         setSelectedRole(e.target.value) // Met à jour l'état
                       }}
                     >
-                      {roles.map((role) => (
+                      {roles?.map((role) => (
                         <MenuItem key={role._id} value={role._id}>
                           {role.nom}
                         </MenuItem>
@@ -273,40 +283,39 @@ const FormulaireInscription = ({ admin, onClose }) => {
           )}
 
           {/* Sélecteur de point de vente (Seulement si "Acheteur" est sélectionné) */}
-          {selectedRole === "677cf977b39853e4a17727e3" ||
-            (!admin && (
-              <Grid item xs={12}>
-                <Controller
-                  name="salesPoint"
-                  control={control}
-                  defaultValue=""
-                  rules={{
-                    required:
-                      selectedRole === "677cf977b39853e4a17727e3"
-                        ? "Veuillez sélectionner un point de vente"
-                        : false,
-                  }}
-                  render={({ field }) => (
-                    <FormControl fullWidth>
-                      <InputLabel id="sales-point-label">
-                        Point de Vente
-                      </InputLabel>
-                      <Select
-                        {...field}
-                        labelId="sales-point-label"
-                        label="Point de Vente"
-                      >
-                        {salesPoints.map((point) => (
-                          <MenuItem key={point._id} value={point._id}>
-                            {point.nom}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  )}
-                />
-              </Grid>
-            ))}
+          {selectedRole === "677cf977b39853e4a17727e3" && (
+            <Grid item xs={12}>
+              <Controller
+                name="salesPoint"
+                control={control}
+                defaultValue=""
+                rules={{
+                  required:
+                    selectedRole === "677cf977b39853e4a17727e3"
+                      ? "Veuillez sélectionner un point de vente"
+                      : false,
+                }}
+                render={({ field }) => (
+                  <FormControl fullWidth>
+                    <InputLabel id="sales-point-label">
+                      Point de Vente
+                    </InputLabel>
+                    <Select
+                      {...field}
+                      labelId="sales-point-label"
+                      label="Point de Vente"
+                    >
+                      {salesPoints.map((point) => (
+                        <MenuItem key={point._id} value={point._id}>
+                          {point.nom}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              />
+            </Grid>
+          )}
 
           {/* Bouton Soumettre */}
           <Grid item xs={12}>

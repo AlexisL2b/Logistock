@@ -11,7 +11,8 @@ export default function Awaiting() {
   const { orders, status, error } = useSelector((state) => state.orders)
   const { stocks } = useSelector((state) => state.stocks)
   const [searchTerm, setSearchTerm] = useState("")
-
+  console.log("stocks", stocks)
+  console.log("orders", orders)
   // Références pour stocker les versions précédentes des données
   const prevOrdersRef = useRef(orders)
   const prevStocksRef = useRef(stocks)

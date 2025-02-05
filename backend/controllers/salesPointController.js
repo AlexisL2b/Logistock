@@ -4,10 +4,7 @@ import SalesPoint from "../models/salesPointModel.js"
 export const getAllSalesPoints = async (req, res) => {
   try {
     const salesPoints = await SalesPoint.find()
-    res.json({
-      message: "Points de vente récupérés avec succès",
-      data: salesPoints,
-    })
+    res.json(salesPoints)
   } catch (error) {
     res.status(500).json({
       message: "Erreur lors de la récupération des points de vente",

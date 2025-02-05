@@ -23,3 +23,10 @@ export const getStock = async () => {
   )
   return response.data
 }
+export const decrementStock = async (orderDetails) => {
+  const response = await axiosInstance.post(
+    `http://localhost:5000/api/stocks/decrement`,
+    { orderDetails }
+  )
+  return response.data
+}

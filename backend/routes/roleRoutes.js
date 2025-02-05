@@ -1,11 +1,12 @@
 import express from "express"
 import {
-  addRole,
-  deleteRole,
   getAllRoles,
   getRoleById,
+  addRole,
   updateRole,
+  deleteRole,
 } from "../controllers/roleController.js"
+
 const router = express.Router()
 
 router.get("/", getAllRoles) // GET /api/roles
