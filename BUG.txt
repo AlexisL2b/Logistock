@@ -189,3 +189,7 @@ Afficher les noms des utilisateurs ayant fait la commande.
 implementer JOI pour la validation coter serveur.
 
 
+
+Ajouter des stock_logs
+
+

@@ -5,9 +5,8 @@ import {
   addUser,
   updateUser,
   deleteUser,
-  getUserProfile,
   getUserByUid,
-  getUserByEmail,
+  // getUserByEmail,
 } from "../controllers/userController.js"
 import authenticate from "../middlewares/authenticate.js"
 import User from "../models/userModel.js"
@@ -26,7 +25,7 @@ router.get("/me", authenticate, async (req, res) => {
 })
 router.get("/", getAllUsers) // GET /api/users
 router.get("/:id", getUserById) // GET /api/users/:id
-router.get("/email/:email", getUserByEmail) // GET /api/users/:id
+// router.get("/email/:email", getUserByEmail) // GET /api/users/:id
 router.get("/uid/:uid", getUserByUid) // GET /api/users/:id
 router.post("/", addUser) // POST /api/users
 router.put("/:id", updateUser) // PUT /api/users/:id

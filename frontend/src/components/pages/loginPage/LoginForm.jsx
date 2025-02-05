@@ -37,7 +37,9 @@ export default function LoginForm() {
       const response = await axiosInstance.get(
         `http://localhost:5000/api/users/uid/${uid}`
       )
-      const user = response.data.user
+
+      console.log("response,", response)
+      const user = response.data
 
       dispatch(setUser(user))
       saveToLocalStorage(`user_${user._id}`, user)
