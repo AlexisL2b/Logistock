@@ -17,10 +17,52 @@ export const createUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body
+
+    // 🔥 On récupère `result` depuis AuthService
     const result = await AuthService.loginUser(email, password)
-    res.status(200).json(result)
+
+    // ✅ Vérification que result contient bien le `customToken`
+    if (!result.customToken) {
+      return res.status(400).json({ message: "Token manquant dans la réponse" })
+    }
+
+    // ✅ Stocker le token en cookie HTTPOnly
+    res.cookie("token", result.customToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+      maxAge: 3600000, // 1h
+    })
+
+    // 🔥 On renvoie aussi temporairement le token pour le frontend
+    res.status(200).json({
+      message: "Connexion réussie",
+      customToken: result.customToken, // 👉 Firebase en a besoin pour `signInWithCustomToken`
+    })
   } catch (error) {
     res.status(401).json({ message: error.message })
+  }
+}
+export const storeToken = async (req, res) => {
+  try {
+    const { idToken } = req.body
+    if (!idToken) {
+      return res.status(400).json({ message: "ID Token manquant" })
+    }
+
+    console.log("✅ Stockage de l'ID Token dans un cookie :", idToken)
+
+    // 🔥 Stocker le token en cookie HTTPOnly
+    res.cookie("token", idToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+      maxAge: 3600000, // 1h
+    })
+
+    res.status(200).json({ message: "Token stocké avec succès" })
+  } catch (error) {
+    res.status(500).json({ message: "Erreur serveur", error: error.message })
   }
 }
 

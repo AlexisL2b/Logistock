@@ -1,5 +1,9 @@
 import express from "express"
-import { createUser, loginUser } from "../controllers/authController.js"
+import {
+  createUser,
+  loginUser,
+  storeToken,
+} from "../controllers/authController.js"
 import authenticate from "../middlewares/authenticate.js"
 import User from "../models/userModel.js"
 
@@ -7,7 +11,7 @@ const router = express.Router()
 
 // Route d'inscription
 router.post("/register", createUser)
-
+router.post("/store-token", storeToken)
 // Route de connexion
 router.post("/login", loginUser)
 

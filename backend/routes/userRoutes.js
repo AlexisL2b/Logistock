@@ -23,6 +23,9 @@ router.get("/me", authenticate, async (req, res) => {
     res.status(500).json({ message: "Erreur serveur", error: error.message })
   }
 })
+// router.get("/me", authenticate, (req, res) => {
+//   res.json({ message: "Utilisateur authentifié", user: req.user })
+// })
 router.get("/", getAllUsers) // GET /api/users
 router.get("/:id", getUserById) // GET /api/users/:id
 // router.get("/email/:email", getUserByEmail) // GET /api/users/:id

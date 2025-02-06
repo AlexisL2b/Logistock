@@ -36,7 +36,6 @@ const clearUserFromLocalStorage = () => {
 }
 
 // 🔹 Écoute les changements d'auth Firebase
-
 export const listenToAuthState = createAsyncThunk(
   "auth/listenToAuthState",
   async (_, { dispatch, rejectWithValue }) => {
@@ -45,15 +44,20 @@ export const listenToAuthState = createAsyncThunk(
 
       return new Promise(async (resolve) => {
         onAuthStateChanged(auth, async (user) => {
-          // console.log("🔍 onAuthStateChanged détecté après refresh :", user)
-
           if (user) {
             const idToken = await user.getIdToken(true)
-            // console.log("✅ Token récupéré après refresh :", idToken)
+            console.log("✅ Token récupéré après refresh :", idToken)
 
-            // Récupérer les infos utilisateur depuis le backend
+            // 🔥 Vérifier si le cookie d'auth existe
+            const cookieExists = document.cookie.includes("token=")
+            if (!cookieExists) {
+              console.warn("🚨 Cookie d'auth manquant, déconnexion forcée")
+              dispatch(logout())
+              return resolve(null)
+            }
+
             const response = await axiosInstance.get(
-              `http://localhost:5000/api/users/me`
+              "http://localhost:5000/api/users/me"
             )
 
             const userData = response.data
@@ -61,34 +65,9 @@ export const listenToAuthState = createAsyncThunk(
             dispatch(setUser(userData))
             resolve(userData)
           } else {
-            // 🚨 Firebase a perdu la session : Tentative de reconnexion avec `customToken`
-            const storedToken = localStorage.getItem("customToken")
-            if (storedToken) {
-              try {
-                console.log("🔄 Tentative de reconnexion avec Firebase...")
-                const userCredential = await signInWithCustomToken(
-                  auth,
-                  storedToken
-                )
-                const refreshedToken = await userCredential.user.getIdToken(
-                  true
-                )
-
-                localStorage.setItem("token", refreshedToken)
-                console.log("✅ Reconnexion réussie !")
-                resolve(userCredential.user)
-              } catch (error) {
-                console.error(
-                  "🚨 Impossible de reconnecter l'utilisateur :",
-                  error
-                )
-                dispatch(logout())
-                resolve(null)
-              }
-            } else {
-              dispatch(logout())
-              resolve(null)
-            }
+            console.log("🚨 Aucun utilisateur Firebase détecté, déconnexion...")
+            dispatch(logout())
+            resolve(null)
           }
         })
       })

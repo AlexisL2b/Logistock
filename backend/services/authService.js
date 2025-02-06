@@ -51,6 +51,7 @@ class AuthService {
       const customToken = await admin
         .auth()
         .createCustomToken(dbUser.firebaseUid)
+      console.log("🔹 Custom Token généré :", customToken)
 
       return {
         message: "Connexion réussie",

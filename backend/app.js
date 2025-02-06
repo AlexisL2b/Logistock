@@ -21,12 +21,14 @@ import dotenv from "dotenv"
 import { createServer } from "http"
 import { Server } from "socket.io"
 import connectDB from "./config/db.js"
+import cookieParser from "cookie-parser"
 
 // Charger les variables d’environnement
 dotenv.config()
 connectDB()
 const app = express()
-
+// Pour lire les JSON
+app.use(cookieParser())
 // ✅ Configuration CORS unique (placée AVANT les routes)
 app.use(
   cors({

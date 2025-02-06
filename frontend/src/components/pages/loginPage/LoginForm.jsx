@@ -27,22 +27,49 @@ export default function LoginForm() {
         "http://localhost:5000/api/auth/login",
         { email, password }
       )
-      const { customToken } = loginRes.data
-      localStorage.setItem("customToken", customToken)
 
+      const customToken = loginRes.data.customToken
+      if (!customToken) {
+        console.error("❌ Erreur : Aucun customToken reçu !")
+        setError("Erreur d'authentification. Token manquant.")
+        return
+      }
+
+      console.log("✅ Custom Token reçu :", customToken)
+
+      // 🔥 Se connecter avec le Custom Token pour obtenir un ID Token
       const auth = getAuth()
       const userCredential = await signInWithCustomToken(auth, customToken)
-      const uid = userCredential.user.uid
+      const idToken = await userCredential.user.getIdToken()
 
-      const response = await axiosInstance.get(
-        `http://localhost:5000/api/users/uid/${uid}`
+      console.log("✅ ID Token obtenu :", idToken)
+
+      // 🔥 Envoyer l'ID Token au backend et attendre la confirmation
+      const storeTokenRes = await axiosInstance.post(
+        "http://localhost:5000/api/auth/store-token",
+        { idToken }
       )
 
-      console.log("response,", response)
+      console.log(
+        "✅ Réponse du backend après stockage du token :",
+        storeTokenRes.data
+      )
+
+      // ⏳ Attendre 500ms pour être sûr que le cookie est bien stocké
+      await new Promise((resolve) => setTimeout(resolve, 500))
+
+      // 👉 Une fois l'utilisateur authentifié, récupérer ses infos
+      const response = await axiosInstance.get(
+        `http://localhost:5000/api/users/uid/${userCredential.user.uid}`
+      )
+
+      console.log(
+        "✅ Réponse du backend après récupération du user :",
+        response.data
+      )
       const user = response.data
 
       dispatch(setUser(user))
-      saveToLocalStorage(`user_${user._id}`, user)
 
       switch (user.role_id) {
         case "677cf977b39853e4a17727e0":
