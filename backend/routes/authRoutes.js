@@ -14,7 +14,7 @@ const router = express.Router()
 router.post(
   "/register",
   authenticate,
-  checkRole("Admin", "Gestionnaire"),
+  checkRole("Admin", "admin", "Gestionnaire"),
   createUser
 )
 router.post("/store-token", storeToken)

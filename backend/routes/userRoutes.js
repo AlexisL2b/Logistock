@@ -30,12 +30,22 @@ router.get("/", getAllUsers)
 router.get("/buyers", getAllBuyers) // 🔥 Route pour récupérer uniquement les acheteurs
 router.get("/:id", getUserById)
 router.get("/uid/:uid", getUserByUid)
-router.post("/", authenticate, checkRole("Admin", "Gestionnaire"), addUser)
-router.put("/:id", authenticate, checkRole("Admin", "Gestionnaire"), updateUser)
+router.post(
+  "/",
+  authenticate,
+  checkRole("Admin", "admin", "Gestionnaire"),
+  addUser
+)
+router.put(
+  "/:id",
+  authenticate,
+  checkRole("Admin", "admin", "Gestionnaire"),
+  updateUser
+)
 router.delete(
   "/:id",
   authenticate,
-  checkRole("Admin", "Gestionnaire"),
+  checkRole("Admin", "admin", "Gestionnaire"),
   deleteUser
 )
 

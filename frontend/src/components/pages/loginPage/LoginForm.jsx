@@ -66,6 +66,9 @@ export default function LoginForm() {
       dispatch(setUser({ uid: userCredential.user.uid, role }))
       // 🔥 Redirige en fonction du rôle
       switch (role) {
+        case "admin":
+          navigate("/admin-dashboard")
+          break
         case "Admin":
           navigate("/admin-dashboard")
           break
