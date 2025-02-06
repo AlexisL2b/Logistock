@@ -10,20 +10,23 @@ import {
   deleteStock,
   incrementStock,
 } from "../controllers/stockController.js"
+import validate from "../middlewares/validate.js"
+import { stockSchema } from "../validations/stockValidation.js"
 
 const router = express.Router()
 
-router.post("/decrement", decrementStockForOrder)
-router.put("/increment", incrementStock)
-
-router.post("/check", checkStockAvailability)
-
-router.get("/all", getAllStocks)
-
+router.post("/decrement", validate(stockSchema), decrementStockForOrder) // ✅ Validation ajoutée ici
+router.put("/increment", validate(stockSchema), incrementStock) // ✅ Validation ajoutée ici
+router.post("/check", validate(stockSchema), checkStockAvailability) // ✅ Validation ajoutée ici
+router.get("/all", getAllStocks) // Récupérer tous les stocks
 router.get("/:id", getStockById) // Récupérer un stock par ID
-router.post("/", addStock) // Ajouter un stock
-router.put("/:id", updateStock) // Mettre à jour un stock par ID
-router.put("/update-by-product/:produit_id", updateStockByProductId) // Mettre à jour un stock par ID produit
+router.post("/", validate(stockSchema), addStock) // ✅ Validation ajoutée ici
+router.put("/:id", validate(stockSchema), updateStock) // ✅ Validation ajoutée ici
+router.put(
+  "/update-by-product/:produit_id",
+  validate(stockSchema),
+  updateStockByProductId
+) // ✅ Validation ajoutée ici
 router.delete("/:id", deleteStock) // Supprimer un stock par ID
 
 export default router
