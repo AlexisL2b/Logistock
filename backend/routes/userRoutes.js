@@ -10,6 +10,7 @@ import {
 } from "../controllers/userController.js"
 import authenticate from "../middlewares/authenticate.js"
 import User from "../models/userModel.js"
+import checkRole from "../middlewares/checkRole.js"
 
 const router = express.Router()
 
@@ -29,8 +30,13 @@ router.get("/", getAllUsers)
 router.get("/buyers", getAllBuyers) // 🔥 Route pour récupérer uniquement les acheteurs
 router.get("/:id", getUserById)
 router.get("/uid/:uid", getUserByUid)
-router.post("/", authenticate, addUser)
-router.put("/:id", authenticate, updateUser)
-router.delete("/:id", authenticate, deleteUser)
+router.post("/", authenticate, checkRole("Admin", "Gestionnaire"), addUser)
+router.put("/:id", authenticate, checkRole("Admin", "Gestionnaire"), updateUser)
+router.delete(
+  "/:id",
+  authenticate,
+  checkRole("Admin", "Gestionnaire"),
+  deleteUser
+)
 
 export default router

@@ -6,11 +6,17 @@ import {
 } from "../controllers/authController.js"
 import authenticate from "../middlewares/authenticate.js"
 import User from "../models/userModel.js"
+import checkRole from "../middlewares/checkRole.js"
 
 const router = express.Router()
 
 // Route d'inscription
-router.post("/register", authenticate, createUser)
+router.post(
+  "/register",
+  authenticate,
+  checkRole("Admin", "Gestionnaire"),
+  createUser
+)
 router.post("/store-token", storeToken)
 // Route de connexion
 router.post("/login", loginUser)

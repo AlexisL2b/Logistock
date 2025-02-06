@@ -6,15 +6,32 @@ import {
   updateProduct,
   deleteProduct,
 } from "../controllers/productController.js"
+import authenticate from "../middlewares/authenticate.js"
+import checkRole from "../middlewares/checkRole.js"
 
 const router = express.Router()
 
 // ✅ Routes des produits
 router.get("/", getAllProducts)
 router.get("/:id", getProductById)
-router.post("/", createProduct)
-router.put("/:id", updateProduct)
-router.delete("/:id", deleteProduct)
+router.post(
+  "/",
+  authenticate,
+  checkRole("Admin", "Gestionnaire"),
+  createProduct
+)
+router.put(
+  "/:id",
+  authenticate,
+  checkRole("Admin", "Gestionnaire"),
+  updateProduct
+)
+router.delete(
+  "/:id",
+  authenticate,
+  checkRole("Admin", "Gestionnaire"),
+  deleteProduct
+)
 
 export default router
 

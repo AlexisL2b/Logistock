@@ -70,9 +70,6 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
       }
 
       // 🚨 Supprimer `roles` pour éviter qu'un gestionnaire attribue un rôle
-      if (!admin) {
-        delete data.roles // Un gestionnaire ne peut pas choisir un rôle
-      }
 
       const cleanedData = cleanObject(data)
       console.log(cleanedData)
