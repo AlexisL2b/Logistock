@@ -10,7 +10,7 @@ import User from "../models/userModel.js"
 const router = express.Router()
 
 // Route d'inscription
-router.post("/register", createUser)
+router.post("/register", authenticate, createUser)
 router.post("/store-token", storeToken)
 // Route de connexion
 router.post("/login", loginUser)

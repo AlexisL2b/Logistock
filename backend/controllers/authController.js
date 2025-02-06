@@ -3,7 +3,11 @@ import AuthService from "../services/authService.js"
 // ✅ Inscription utilisateur
 export const createUser = async (req, res) => {
   try {
-    const newUser = await AuthService.createUser(req.body)
+    const currentUserRole = req.user?.role || "Acheteur" // 🔥 Vérifie qui fait la requête
+    console.log(" 🔥 🔥 🔥 🔥req.user?.roles 🔥 🔥 🔥 🔥", req.user?.role)
+
+    const newUser = await AuthService.createUser(req.body, currentUserRole)
+    // console.log("// ✅ Inscription utilisateur", newUser)
     res.status(201).json({
       message: "Utilisateur créé avec succès",
       data: newUser,

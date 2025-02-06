@@ -40,14 +40,18 @@ export default function LoginForm() {
       // 🔥 Se connecter avec le Custom Token pour obtenir un ID Token
       const auth = getAuth()
       const userCredential = await signInWithCustomToken(auth, customToken)
-      const idToken = await userCredential.user.getIdToken()
+      const idTokenResult = await userCredential.user.getIdTokenResult() // 🔥 Récupère l'ID Token avec les claims Firebase
 
-      console.log("✅ ID Token obtenu :", idToken)
+      console.log("✅ ID Token obtenu :", idTokenResult.token)
 
-      // 🔥 Envoyer l'ID Token au backend et attendre la confirmation
+      // 🔥 Extraire le rôle depuis Firebase Claims
+      const role = idTokenResult.claims.role || "user" // 🔥 Récupère le rôle sécurisé depuis Firebase
+      console.log("✅ Rôle extrait du token :", role)
+
+      // 🔥 Stocker l'ID Token en backend via un cookie
       const storeTokenRes = await axiosInstance.post(
         "http://localhost:5000/api/auth/store-token",
-        { idToken }
+        { idToken: idTokenResult.token }
       )
 
       console.log(
@@ -58,31 +62,21 @@ export default function LoginForm() {
       // ⏳ Attendre 500ms pour être sûr que le cookie est bien stocké
       await new Promise((resolve) => setTimeout(resolve, 500))
 
-      // 👉 Une fois l'utilisateur authentifié, récupérer ses infos
-      const response = await axiosInstance.get(
-        `http://localhost:5000/api/users/uid/${userCredential.user.uid}`
-      )
-
-      console.log(
-        "✅ Réponse du backend après récupération du user :",
-        response.data
-      )
-      const user = response.data
-
-      dispatch(setUser(user))
-
-      switch (user.role_id) {
-        case "677cf977b39853e4a17727e0":
+      // 🔥 Enregistre l'utilisateur avec son rôle
+      dispatch(setUser({ uid: userCredential.user.uid, role }))
+      // 🔥 Redirige en fonction du rôle
+      switch (role) {
+        case "Admin":
           navigate("/admin-dashboard")
           break
-        case "677cf977b39853e4a17727e3":
-          navigate("/user-dashboard")
-          break
-        case "677cf977b39853e4a17727e1":
+        case "Gestionnaire":
           navigate("/gestionnaire-dashboard")
           break
-        default:
+        case "Logisticien":
           navigate("/logisticien-dashboard")
+          break
+        default:
+          navigate("/user-dashboard")
       }
     } catch (err) {
       console.error("Erreur lors de la connexion :", err)

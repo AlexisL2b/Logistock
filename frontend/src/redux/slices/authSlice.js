@@ -45,29 +45,37 @@ export const listenToAuthState = createAsyncThunk(
       return new Promise(async (resolve) => {
         onAuthStateChanged(auth, async (user) => {
           if (user) {
-            const idToken = await user.getIdToken(true)
-            console.log("✅ Token récupéré après refresh :", idToken)
+            try {
+              // ✅ Attendre 500ms pour éviter la déconnexion intempestive
+              await new Promise((resolve) => setTimeout(resolve, 500))
 
-            // 🔥 Vérifier si le cookie d'auth existe
-            const cookieExists = document.cookie.includes("token=")
-            if (!cookieExists) {
-              console.warn("🚨 Cookie d'auth manquant, déconnexion forcée")
+              // 🔥 Vérifier l'authentification auprès du backend
+              const response = await axiosInstance.get(
+                "http://localhost:5000/api/users/me"
+              )
+
+              const userData = response.data
+              console.log("✅ Utilisateur authentifié :", userData)
+
+              saveUserToLocalStorage(userData)
+              dispatch(setUser(userData))
+              resolve(userData)
+            } catch (error) {
+              console.warn("🚨 Échec de vérification du token, déconnexion...")
               dispatch(logout())
-              return resolve(null)
+              resolve(null)
             }
-
-            const response = await axiosInstance.get(
-              "http://localhost:5000/api/users/me"
-            )
-
-            const userData = response.data
-            saveUserToLocalStorage(userData)
-            dispatch(setUser(userData))
-            resolve(userData)
           } else {
-            console.log("🚨 Aucun utilisateur Firebase détecté, déconnexion...")
-            dispatch(logout())
-            resolve(null)
+            // ⏳ Attendre un peu avant de forcer la déconnexion pour éviter un faux `null`
+            setTimeout(() => {
+              if (!auth.currentUser) {
+                console.log(
+                  "🚨 Aucun utilisateur Firebase détecté, déconnexion..."
+                )
+                dispatch(logout())
+                resolve(null)
+              }
+            }, 1000)
           }
         })
       })

@@ -18,7 +18,12 @@ import axiosInstance from "../../../axiosConfig"
 
 const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
   const [salesPoints, setSalesPoints] = useState([])
-  const [roles, setRoles] = useState([])
+  const [roles, setRoles] = useState([
+    { nom: "Admin", id: 1 },
+    { nom: "Gestionnaire", id: 2 },
+    { nom: "Logisticien", id: 3 },
+    { nom: "Acheteur", id: 4 },
+  ])
   const [selectedRole, setSelectedRole] = useState("") // Stocke le rôle sélectionné
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -49,39 +54,33 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
     axiosInstance
       .get("/sales_points")
       .then((response) => {
-        console.log("Réponse API Rôles :", response.data.data),
-          setSalesPoints(response.data.data),
+        console.log("Réponse API salesPoints :", response.data),
+          setSalesPoints(response.data),
           console.log(salesPoints)
       })
       .catch((error) => console.error("Erreur points de vente :", error))
-
-    axiosInstance
-      .get("/roles")
-      .then((response) => {
-        console.log("Réponse API Rôles :", response.data) // Vérifier si les données sont correctes
-        setRoles(response.data)
-        console.log(roles)
-      })
-      .catch((error) => console.error("Erreur rôles :", error))
   }, [])
 
   const onSubmit = async (data) => {
     try {
-      console.log(data) // Supprime la propriété salesPoint si le rôle n'est pas "Acheteur"
-      if (selectedRole !== "677cf977b39853e4a17727e3" && admin) {
+      console.log(data)
+
+      if (selectedRole !== "Acheteur" && admin) {
         delete data.salesPoint
       }
+
+      // 🚨 Supprimer `roles` pour éviter qu'un gestionnaire attribue un rôle
       if (!admin) {
-        data.roles = "677cf977b39853e4a17727e3"
+        delete data.roles // Un gestionnaire ne peut pas choisir un rôle
       }
 
       const cleanedData = cleanObject(data)
       console.log(cleanedData)
+
       await axiosInstance.post(
         "http://localhost:5000/api/auth/register",
         cleanedData
       )
-
       setSnackbar({
         open: true,
         message: "Inscription réussie !",
@@ -269,7 +268,7 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
                       }}
                     >
                       {roles?.map((role) => (
-                        <MenuItem key={role._id} value={role._id}>
+                        <MenuItem key={role.id} value={role.nom}>
                           {role.nom}
                         </MenuItem>
                       ))}
@@ -283,7 +282,7 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
           )}
 
           {/* Sélecteur de point de vente (Seulement si "Acheteur" est sélectionné) */}
-          {selectedRole === "677cf977b39853e4a17727e3" && (
+          {selectedRole === "Acheteur" && (
             <Grid item xs={12}>
               <Controller
                 name="salesPoint"
@@ -291,7 +290,7 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
                 defaultValue=""
                 rules={{
                   required:
-                    selectedRole === "677cf977b39853e4a17727e3"
+                    selectedRole === "Acheteur"
                       ? "Veuillez sélectionner un point de vente"
                       : false,
                 }}

@@ -4,21 +4,35 @@ import User from "../models/userModel.js" // Modèle MongoDB pour les utilisateu
 
 class AuthService {
   // ✅ Création d'un utilisateur (Firebase + MongoDB)
-  async createUser(userData) {
+  async createUser(userData, currentUserRole) {
     const { email, password, prenom, nom, adresse, salesPoint, roles } =
       userData
-
-    // Étape 1 : Création de l'utilisateur dans Firebase
+    console.log("🚨🚨🚨🚨currentUserRole🚨🚨🚨🚨", currentUserRole)
+    console.log("🚨🚨🚨🚨roles🚨🚨🚨🚨", roles)
+    // ✅ Étape 1 : Création de l'utilisateur Firebase
     const userRecord = await admin.auth().createUser({
       email,
       password,
     })
 
-    // Étape 2 : Enregistrement dans MongoDB
+    // 🔥 Étape 2 : Attribution sécurisée du rôle
+    let assignedRole = "Acheteur" // 🚨 Rôle par défaut pour les gestionnaires
+
+    if (currentUserRole === "admin" && roles) {
+      // ✅ Si un admin crée un utilisateur, il peut définir un rôle spécifique
+      assignedRole = roles
+    }
+
+    // ✅ Étape 3 : Ajouter le rôle dans Firebase Custom Claims
+    await admin
+      .auth()
+      .setCustomUserClaims(userRecord.uid, { role: assignedRole })
+
+    // ✅ Étape 4 : Enregistrement sécurisé en MongoDB
     const newUser = new User({
       firebaseUid: userRecord.uid, // UID Firebase
       email: userRecord.email,
-      role_id: roles, // Rôle par défaut
+      role_id: assignedRole, // Stocké en base de données
       prenom,
       nom,
       adresse,
@@ -56,14 +70,6 @@ class AuthService {
       return {
         message: "Connexion réussie",
         customToken,
-        user: {
-          email: dbUser.email,
-          role: dbUser.role_id,
-          prenom: dbUser.prenom,
-          nom: dbUser.nom,
-          adresse: dbUser.adresse,
-          point_vente_id: dbUser.point_vente_id,
-        },
       }
     } catch (error) {
       console.error("Erreur lors de la connexion :", error.message)

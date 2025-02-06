@@ -25,6 +25,11 @@ import cookieParser from "cookie-parser"
 
 // Charger les variables d’environnement
 dotenv.config()
+console.log(
+  "🔍 FIREBASE_PRIVATE_KEY:",
+  process.env.FIREBASE_PRIVATE_KEY ? "Définie" : "NON définie"
+)
+
 connectDB()
 const app = express()
 // Pour lire les JSON

@@ -7,6 +7,10 @@ class UserService {
     return await UserDAO.findAll()
   }
 
+  async getBuyers() {
+    return await UserDAO.findAll().filter((user) => user.role === "Acheteur")
+  }
+
   async getUserById(id) {
     const user = await UserDAO.findById(id)
     if (!user) {
@@ -31,12 +35,17 @@ class UserService {
     return user
   }
 
-  async addUser(userData) {
+  async addUser(userData, creatorRole) {
     if (!userData.nom || !userData.email || !userData.mot_de_passe) {
       throw new Error("Les champs 'nom', 'email' et 'mot_de_passe' sont requis")
     }
 
     userData.mot_de_passe = await bcrypt.hash(userData.mot_de_passe, 10)
+
+    // 🔥 Si un gestionnaire crée un utilisateur, il ne peut créer que des acheteurs
+    if (creatorRole === "Gestionnaire") {
+      userData.role = "Acheteur"
+    }
 
     return await UserDAO.create(userData)
   }

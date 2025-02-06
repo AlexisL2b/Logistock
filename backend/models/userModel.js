@@ -24,11 +24,11 @@ const userSchema = new mongoose.Schema({
     unique: true,
   },
 
-  role_id: {
-    type: mongoose.Schema.Types.ObjectId,
+  // role_id: {
+  //   type: mongoose.Schema.Types.ObjectId,
 
-    ref: "Role",
-  },
+  //   ref: "Role",
+  // },
   point_vente_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "SalesPoint",
