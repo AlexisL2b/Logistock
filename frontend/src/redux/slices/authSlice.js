@@ -55,7 +55,6 @@ export const listenToAuthState = createAsyncThunk(
               )
 
               const userData = response.data
-              console.log("✅ Utilisateur authentifié :", userData)
 
               saveUserToLocalStorage(userData)
               dispatch(setUser(userData))

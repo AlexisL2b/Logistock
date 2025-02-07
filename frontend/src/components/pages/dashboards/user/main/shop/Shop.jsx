@@ -14,6 +14,8 @@ export default function Shop() {
   const [categories, setCategories] = useState([])
   const [selectedCategory, setSelectedCategory] = useState("")
 
+  console.log("products", products)
+
   // Charger les catégories depuis l'API
   useEffect(() => {
     axiosInstance
@@ -37,7 +39,7 @@ export default function Shop() {
         (product) => product.categorie_id?._id === selectedCategory
       )
     : products
-
+  console.log(filteredProducts)
   return (
     <Box sx={{ p: 3 }}>
       {/* 🏷️ Filtre par catégorie */}

@@ -19,7 +19,7 @@ router.post(
   "/",
   validate(orderDetailsSchema),
   authenticate,
-  checkRole("Admin", "Gestionnaire"),
+  checkRole("Admin", "Gestionnaire", "Acheteur"),
   addOrderDetails
 ) // ✅ Validation ajoutée ici
 router.put(

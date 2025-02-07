@@ -1,27 +1,22 @@
 import ProductService from "../services/productService.js"
 
-export const getProductById = async (req, res) => {
+export const getAllProducts = async (req, res) => {
   try {
-    const product = await ProductService.getProductById(req.params.id)
-    res.status(200).json(product)
+    const products = await ProductService.getAllProducts()
+    console.log("products", products)
+    res.json(products)
   } catch (error) {
-    res.status(404).json({ message: error.message })
+    res.status(500).json({ message: error.message })
   }
 }
 
-export const getAllProducts = async (req, res) => {
+// 🔥 Récupérer un produit par son ID
+export const getProductById = async (req, res) => {
   try {
-    const { page, limit, ...filters } = req.query
-    const products = await ProductService.getAllProducts(
-      filters,
-      Number(page),
-      Number(limit)
-    )
-    res.status(200).json(products)
+    const product = await ProductService.getProductById(req.params.id)
+    res.json(product)
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Erreur lors de la récupération des produits" })
+    res.status(404).json({ message: error.message })
   }
 }
 

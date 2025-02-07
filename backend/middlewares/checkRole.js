@@ -6,9 +6,6 @@ const checkRole = (...allowedRoles) => {
         .json({ message: "Accès interdit. Rôle non défini." })
     }
 
-    console.log("🚀 Rôle utilisateur :", req.user.role)
-    console.log("✅ Rôles autorisés :", allowedRoles)
-
     // Vérifie si l'utilisateur a l'un des rôles autorisés
     if (!allowedRoles.includes(req.user.role)) {
       return res

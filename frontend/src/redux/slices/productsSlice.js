@@ -7,9 +7,13 @@ export const fetchProducts = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await getProducts()
+      console.log("'response from slice'", response)
       return response
     } catch (error) {
-      console.error("Erreur lors de la récupération des produits :", error)
+      console.error(
+        "Erreur lors de la récupération des produits slice :",
+        error
+      )
       return rejectWithValue(error.response?.data || error.message)
     }
   }

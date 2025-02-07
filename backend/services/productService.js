@@ -3,19 +3,18 @@ import StockDAO from "../dao/stockDAO.js"
 
 class ProductService {
   // ✅ Récupérer un produit avec gestion d'erreur
-  async getProductById(productId) {
-    const product = await ProductDAO.findById(productId)
+  async getAllProducts() {
+    // console.log("zzzz", ProductDAO.findAll())
+    return await ProductDAO.findAll()
+  }
+
+  async getProductById(id) {
+    const product = await ProductDAO.findById(id)
     if (!product) {
-      throw new Error(`Produit introuvable avec l'ID: ${productId}`)
+      throw new Error("Produit introuvable")
     }
     return product
   }
-
-  // ✅ Récupérer tous les produits avec pagination et filtres
-  async getAllProducts(filter = {}, page = 1, limit = 10) {
-    return await ProductDAO.findAll(filter, page, limit)
-  }
-
   // ✅ Créer un produit avec validation
   async createProduct(productData) {
     try {
@@ -23,7 +22,7 @@ class ProductService {
 
       const { reference, quantite_disponible } = productData
       let product = await ProductDAO.findByReference(reference)
-      console.log(productData)
+      // console.log(productData)
       if (product) {
         console.log("🔄 Produit existant, mise à jour du stock")
         let existingStock = await StockDAO.findByProductId(product._id)

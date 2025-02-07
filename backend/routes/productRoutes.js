@@ -13,6 +13,8 @@ const router = express.Router()
 
 // ✅ Routes des produits
 router.get("/", getAllProducts)
+
+// Récupérer un produit par son ID
 router.get("/:id", getProductById)
 router.post(
   "/",

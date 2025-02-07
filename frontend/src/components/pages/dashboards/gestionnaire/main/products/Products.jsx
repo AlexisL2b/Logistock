@@ -24,7 +24,10 @@ export default function Products() {
         setProducts(response.data)
       })
       .catch((error) => {
-        console.error("Erreur lors de la récupération des Produits :", error)
+        console.error(
+          "Erreur lors de la récupération des Produits products.jsx :",
+          error
+        )
       })
   }
 

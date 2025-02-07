@@ -7,6 +7,7 @@ import stockLogRoutes from "./routes/stockLogRoutes.js"
 import transporterRoutes from "./routes/transporterRoutes.js"
 import userRoutes from "./routes/userRoutes.js"
 import orderRoutes from "./routes/orderRoutes.js"
+import stripeRoutes from "./routes/stripeRoutes.js"
 import orderDetailsRoutes from "./routes/orderDetailsRoutes.js"
 import orderShipmentRoutes from "./routes/orderShipmentRoutes.js"
 import authRoutes from "./routes/authRoutes.js"
@@ -25,10 +26,6 @@ import cookieParser from "cookie-parser"
 
 // Charger les variables d’environnement
 dotenv.config()
-console.log(
-  "🔍 FIREBASE_PRIVATE_KEY:",
-  process.env.FIREBASE_PRIVATE_KEY ? "Définie" : "NON définie"
-)
 
 connectDB()
 const app = express()
@@ -83,6 +80,7 @@ app.use((err, req, res, next) => {
 })
 // Définition des routes
 app.use("/api/auth", authRoutes)
+app.use("/api/stripe", stripeRoutes)
 app.use("/api/categories", categoryRoutes)
 app.use("/api/products", productRoutes)
 app.use("/api/suppliers", supplierRoutes)

@@ -26,6 +26,9 @@ export default function ProductCard({ product }) {
   const quantity = cartItem?.quantity || 0
 
   const handleAddToCart = () => {
+    console.log("userId", userId)
+    console.log("product._id", product._id)
+    console.log("product", product)
     dispatch(
       addToCart({ userId, produit_id: product._id, detailsProduit: product })
     )

@@ -54,8 +54,6 @@ export const storeToken = async (req, res) => {
       return res.status(400).json({ message: "ID Token manquant" })
     }
 
-    console.log("✅ Stockage de l'ID Token dans un cookie :", idToken)
-
     // 🔥 Stocker le token en cookie HTTPOnly
     res.cookie("token", idToken, {
       httpOnly: true,

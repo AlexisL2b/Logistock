@@ -1,25 +1,36 @@
 import Product from "../models/productModel.js"
+import Stock from "../models/stockModel.js"
 
 class ProductDAO {
   // ✅ Récupérer un produit par ID
-  async findById(productId) {
-    return await Product.findById(productId)
-  }
+
   async findByReference(reference) {
     return await Product.findOne({ reference })
   }
 
   // ✅ Récupérer tous les produits avec options de filtrage et pagination
-  async findAll(filter = {}, page = 1, limit = 10) {
-    return await Product.find(filter)
-      .skip((page - 1) * limit)
-      .limit(limit)
+  async findAll() {
+    // Récupérer tous les produits
+    const products = await Product.find().lean() // Utiliser `lean()` pour des objets JS purs
+
+    // Pour chaque produit, chercher la quantité disponible dans `Stock`
+    const productsWithStock = await Promise.all(
+      products.map(async (product) => {
+        const stock = await Stock.findOne({ produit_id: product._id }) // 🔥 Recherche du stock lié
+        return {
+          ...product,
+          quantite_disponible: stock ? stock.quantite_disponible : 0, // 🔥 Ajoute `quantite_disponible`
+        }
+      })
+    )
+
+    return productsWithStock
   }
 
-  // ✅ Créer un nouveau produit
-  async createProduct(productData) {
-    const product = new Product(productData)
-    return await product.save()
+  async findById(id) {
+    return await Product.findById(id)
+      .populate("stock_id", "quantite_disponible")
+      .lean()
   }
 
   // ✅ Mettre à jour un produit
