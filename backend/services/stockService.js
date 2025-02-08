@@ -5,6 +5,9 @@ class StockService {
   async getAllStocks() {
     return await StockDAO.findAll()
   }
+  async getAllStocksWithProducts() {
+    return await StockDAO.findAllWithProducts()
+  }
 
   async getStockById(id) {
     const stock = await StockDAO.findById(id)

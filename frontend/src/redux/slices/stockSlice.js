@@ -1,5 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
-import { getStock, getStockByProductId, updateStockById } from "../api/stockApi"
+import {
+  getStock,
+  getStockByProductId,
+  getStockWithProducts,
+  updateStockById,
+} from "../api/stockApi"
 
 // Thunk pour récupérer le stock d'un produit
 export const fetchStockByProductId = createAsyncThunk(
@@ -25,6 +30,22 @@ export const fetchStocks = createAsyncThunk(
       return response.data // Retournez directement le tableau des stocks
     } catch (error) {
       console.error("Erreur lors de la récupération des stocks :", error)
+      return rejectWithValue(error.response?.data || error.message)
+    }
+  }
+)
+export const fetchStocksWithProduct = createAsyncThunk(
+  "stocks/fetchStocksWithProduct",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await getStockWithProducts()
+      console.log("response from slice", response)
+      return response // Retournez directement le tableau des stocks
+    } catch (error) {
+      console.error(
+        "Erreur lors de la récupération des stocksWithProducts :",
+        error
+      )
       return rejectWithValue(error.response?.data || error.message)
     }
   }
@@ -107,6 +128,18 @@ const stockSlice = createSlice({
         state.stocks = action.payload // Met à jour toute la liste des stocks
       })
       .addCase(fetchStocks.rejected, (state, action) => {
+        state.status = "failed"
+        state.error = action.payload
+      })
+      .addCase(fetchStocksWithProduct.pending, (state) => {
+        state.status = "loading"
+      })
+      .addCase(fetchStocksWithProduct.fulfilled, (state, action) => {
+        //("Payload reçu dans fulfilled :", action.payload)
+        state.status = "succeeded"
+        state.stocksProducts = action.payload // Met à jour toute la liste des stocks
+      })
+      .addCase(fetchStocksWithProduct.rejected, (state, action) => {
         state.status = "failed"
         state.error = action.payload
       })

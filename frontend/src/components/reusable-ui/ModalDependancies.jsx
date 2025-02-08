@@ -67,7 +67,7 @@ export default function BasicModal({
 
   const handleSubmit = () => {
     onSubmit(formData)
-    onClose()
+    // onClose()
   }
 
   return (

@@ -1,5 +1,7 @@
 import ProductDAO from "../dao/productDAO.js"
+import stockDAO from "../dao/stockDAO.js"
 import StockDAO from "../dao/stockDAO.js"
+import stockLogDAO from "../dao/stockLogDAO.js"
 
 class ProductService {
   // ✅ Récupérer un produit avec gestion d'erreur
@@ -18,7 +20,7 @@ class ProductService {
   // ✅ Créer un produit avec validation
   async createProduct(productData) {
     try {
-      console.log("🔵 Début de la création du produit")
+      console.log("🔵 Début de la création du produit", productData)
 
       const { reference, quantite_disponible } = productData
       let product = await ProductDAO.findByReference(reference)
@@ -41,20 +43,35 @@ class ProductService {
 
           statut: "en_stock",
         })
+        await stockLogDAO.create({
+          produit_id: product._id,
+          evenement: "entrée",
+          quantite: quantite_disponible,
+          stock_id: stock._id,
+        })
       }
       // return { message: "Produit existant, stock créé", data: product }
       //   }
 
       console.log("🆕 Création du produit et du stock associé")
-      product = await ProductDAO.createProduct(productData)
+      product = await ProductDAO.create(productData)
+      console.log(
+        "//////////////////////////////product//////////////////////////////",
+        product
+      )
 
-      await StockDAO.createStock({
+      let stock = await StockDAO.createStock({
         produit_id: product._id,
         quantite_disponible,
         sales_point_id: productData.sales_point_id,
         statut: "en_stock",
       })
-
+      let stockLog = await stockLogDAO.create({
+        produit_id: product._id,
+        evenement: "création",
+        quantite: quantite_disponible,
+        stock_id: stock._id,
+      })
       return { message: "Produit et stock créés", data: product }
     } catch (error) {
       console.error("❌ Erreur lors de la création du produit :", error)
@@ -77,6 +94,16 @@ class ProductService {
 
   // ✅ Supprimer un produit avec vérification
   async deleteProduct(productId) {
+    console.log("productId", productId)
+    const stockToDelete = await stockDAO.findByProductId(productId)
+
+    await stockLogDAO.create({
+      produit_id: productId,
+      stock_id: stockToDelete._id,
+      quantite: 0,
+      evenement: "suppression",
+    })
+    await stockDAO.deleteByProductId(productId)
     const deletedProduct = await ProductDAO.deleteProduct(productId)
     if (!deletedProduct) {
       throw new Error(

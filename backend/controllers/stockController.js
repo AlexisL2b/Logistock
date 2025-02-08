@@ -9,6 +9,17 @@ export const getAllStocks = async (req, res) => {
     res.status(500).json({ message: error.message })
   }
 }
+export const getStocksWithProducts = async (req, res) => {
+  try {
+    const stocksProducts = await stockService.getAllStocksWithProducts()
+    res.json({
+      message: "Stock.Products récupérés avec succès ",
+      data: stocksProducts,
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
 
 // Récupérer un stock par ID
 export const getStockById = async (req, res) => {

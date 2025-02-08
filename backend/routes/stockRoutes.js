@@ -9,6 +9,7 @@ import {
   updateStockByProductId,
   deleteStock,
   incrementStock,
+  getStocksWithProducts,
 } from "../controllers/stockController.js"
 import validate from "../middlewares/validate.js"
 import { stockSchema } from "../validations/stockValidation.js"
@@ -31,6 +32,7 @@ router.put(
   checkRole("Admin", "Gestionnaire", "Logisticien"),
   incrementStock
 ) // ✅ Validation ajoutée ici
+router.get("/stocks-with-products", getStocksWithProducts) // Récupérer un stock par ID
 router.post("/check", validate(stockSchema), checkStockAvailability) // ✅ Validation ajoutée ici
 router.get("/all", getAllStocks) // Récupérer tous les stocks
 router.get("/:id", getStockById) // Récupérer un stock par ID

@@ -176,7 +176,7 @@ Si selection de point de vente à partir d'un dropdown
 
 Si aucun point n'est selectionné afficher la même chose mais de manière inter-points de vente.
 
-Gestion des roles avec firebase (firestore).
+Gestion des roles avec firebase (firestore). @OK
 
 Logisticien:
 
@@ -197,3 +197,38 @@ Ajouter des stock_logs et une gestion d'entrée en stock.
 pour l'entrée en stock, créer un produit ect... puis créer un volet Récéption sur les comptes logisticiens? ( lié un logisticien sur un point de vente ?)
 
 
+
+
+
+Acheteur:
+Voir les produits de son point de vente.
+Historique des commande plus détaillé
+Affichage de son rôle, point de vente.
+
+
+Gestionnaire:
+Ajouter un composant stock:
+Permetant la commande en fonction du point de vente.
+Ajouter une vue analytic pour:
+le composant point de vente:
+Si un point de ventes est selectionné hydrater en conséquence l'analytique sinon, faire une analytique générale
+graphique des produits vendues
+graphique des commandes vendues
+graphique des categories de produits les plus vendues (camembert?)
+
+
+Logisticien:
+Avoir la possibilité de trier les commande par tranche de date
+Ajouter un composant stock, qui accueillera les commandes des gestionnaires pour le réa
+
+(Boite de notification ?)
+
+
+donc ma collection stock:
+avoir un champ reservés qui va s'incrémenter pour chaque produit dans une commande en cours ( à la création de la commande) et ce décrémenter lorsqu'un commande va passer en validée
+Lorsque j'annule une commade remboursement + increment stock.
+commandes-> pour chaque  produit de la commande-> 
+en cours -> stock insufisant-> bouton réassort-> notification gestionnaire-> réaprovisionement.
+
+
+CREATION DUN STOCK LOG LORSQUE JE CREER UN PRODUIT.

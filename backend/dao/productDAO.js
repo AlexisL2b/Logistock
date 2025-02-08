@@ -11,7 +11,12 @@ class ProductDAO {
   // ✅ Récupérer tous les produits avec options de filtrage et pagination
   async findAll() {
     // Récupérer tous les produits
-    const products = await Product.find().lean() // Utiliser `lean()` pour des objets JS purs
+    const products = await Product.find()
+      .populate([
+        { path: "categorie_id", model: "Category", select: "nom" },
+        { path: "supplier_id", model: "Supplier", select: "nom" },
+      ])
+      .lean() // Utiliser `lean()` pour des objets JS purs
 
     // Pour chaque produit, chercher la quantité disponible dans `Stock`
     const productsWithStock = await Promise.all(
@@ -37,7 +42,10 @@ class ProductDAO {
   async updateProduct(productId, updateData) {
     return await Product.findByIdAndUpdate(productId, updateData, { new: true })
   }
-
+  async create(productData) {
+    const newProduct = new Product(productData)
+    return await newProduct.save()
+  }
   // ✅ Supprimer un produit
   async deleteProduct(productId) {
     return await Product.findByIdAndDelete(productId)

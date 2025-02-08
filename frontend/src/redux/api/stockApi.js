@@ -30,3 +30,10 @@ export const decrementStock = async (orderDetails) => {
   )
   return response.data
 }
+
+export const getStockWithProducts = async () => {
+  const response = await axiosInstance.get(
+    "http://localhost:5000/api/stocks/stocks-with-products"
+  )
+  return response.data.data
+}

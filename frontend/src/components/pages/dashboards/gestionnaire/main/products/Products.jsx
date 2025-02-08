@@ -6,6 +6,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Button,
 } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
 import EnhancedTableDependancies from "../../../../../reusable-ui/EnhancedTableDependancies"
@@ -13,44 +14,55 @@ import EnhancedTableDependancies from "../../../../../reusable-ui/EnhancedTableD
 export default function Products() {
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
+  const [suppliers, setSuppliers] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("")
+  const [selectedSupplier, setSelectedSupplier] = useState("")
 
   // Fonction pour charger les produits
   const fetchProducts = () => {
     axiosInstance
       .get("/products")
-      .then((response) => {
-        setProducts(response.data)
-      })
-      .catch((error) => {
-        console.error(
-          "Erreur lors de la récupération des Produits products.jsx :",
-          error
-        )
-      })
+      .then((response) => setProducts(response.data))
+      .catch((error) =>
+        console.error("Erreur lors de la récupération des Produits :", error)
+      )
   }
 
   // Fonction pour charger les catégories
   const fetchCategories = () => {
     axiosInstance
       .get("/categories")
-      .then((response) => {
-        setCategories(response.data)
-      })
-      .catch((error) => {
+      .then((response) => setCategories(response.data))
+      .catch((error) =>
         console.error("Erreur lors de la récupération des catégories :", error)
-      })
+      )
+  }
+
+  // Fonction pour charger les fournisseurs
+  const fetchSuppliers = () => {
+    axiosInstance
+      .get("/suppliers")
+      .then((response) => setSuppliers(response.data))
+      .catch((error) =>
+        console.error(
+          "Erreur lors de la récupération des fournisseurs :",
+          error
+        )
+      )
   }
 
   useEffect(() => {
     fetchProducts()
     fetchCategories()
+    fetchSuppliers()
   }, [])
 
   const handleDataChange = () => {
     fetchProducts()
   }
+
+  console.log(products)
 
   const headerMapping = {
     supplier_id: "Fournisseur",
@@ -59,7 +71,7 @@ export default function Products() {
     ref: "Référence",
   }
 
-  // 🔍 Filtrage des produits par recherche et catégorie
+  // 🔍 **Filtrage des produits par recherche, catégorie et fournisseur**
   const filteredProducts = products.filter((product) => {
     const searchLower = searchTerm.toLowerCase()
 
@@ -77,12 +89,16 @@ export default function Products() {
     const matchesCategory =
       selectedCategory === "" || product.categorie_id?._id === selectedCategory
 
-    return matchesSearch && matchesCategory
+    // Vérification du filtre par fournisseur
+    const matchesSupplier =
+      selectedSupplier === "" || product.supplier_id?._id === selectedSupplier
+
+    return matchesSearch && matchesCategory && matchesSupplier
   })
 
   return (
     <Box>
-      {/* 🔍 Champ de recherche multi-critères */}
+      {/* 🔍 Barre de recherche multi-critères */}
       <TextField
         label="Rechercher par Nom, ID, Catégorie, Fournisseur, Référence"
         variant="outlined"
@@ -92,26 +108,53 @@ export default function Products() {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      {/* 🏷️ Filtre par catégorie */}
-      <FormControl fullWidth margin="normal">
-        <InputLabel id="category-filter-label">
-          Filtrer par Catégorie
-        </InputLabel>
-        <Select
-          labelId="category-filter-label"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-        >
-          <MenuItem value="">Toutes les catégories</MenuItem>
-          {categories.map((category) => (
-            <MenuItem key={category._id} value={category._id}>
-              {category.nom}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+        {/* 🏷️ Filtre par catégorie */}
+        <FormControl fullWidth>
+          <InputLabel>Filtrer par Catégorie</InputLabel>
+          <Select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+          >
+            <MenuItem value="">Toutes les catégories</MenuItem>
+            {categories.map((category) => (
+              <MenuItem key={category._id} value={category._id}>
+                {category.nom}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
-      {/* Affichage des produits filtrés */}
+        {/* 🚚 Filtre par fournisseur */}
+        <FormControl fullWidth>
+          <InputLabel>Filtrer par Fournisseur</InputLabel>
+          <Select
+            value={selectedSupplier}
+            onChange={(e) => setSelectedSupplier(e.target.value)}
+          >
+            <MenuItem value="">Tous les fournisseurs</MenuItem>
+            {suppliers.map((supplier) => (
+              <MenuItem key={supplier._id} value={supplier._id}>
+                {supplier.nom}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        {/* 🔄 Bouton de réinitialisation */}
+        <Button
+          variant="contained"
+          onClick={() => {
+            setSelectedCategory("")
+            setSelectedSupplier("")
+            setSearchTerm("")
+          }}
+        >
+          Réinitialiser
+        </Button>
+      </Box>
+
+      {/* 📊 Affichage des produits filtrés */}
       <EnhancedTableDependancies
         data={filteredProducts}
         coll={"products"}

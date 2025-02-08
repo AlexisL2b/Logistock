@@ -29,6 +29,7 @@ import Users from "./main/users/Users"
 import Products from "./main/products/Products"
 import Main from "./main/Main"
 import Profile from "../user/main/profile/Profile"
+import Stocks from "./main/stocks/Stocks"
 
 export default function DashboardGestionnaire() {
   const [activeComponent, setActiveComponent] = useState("dashboard")
@@ -61,6 +62,12 @@ export default function DashboardGestionnaire() {
       label: "Categories",
       icon: <CategoryIcon />,
       component: <Categories />,
+    },
+    {
+      path: "stocks",
+      label: "Stocks",
+      icon: <CategoryIcon />,
+      component: <Stocks />,
     },
     {
       path: "suppliers",
