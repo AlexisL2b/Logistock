@@ -12,7 +12,10 @@ import {
   getStocksWithProducts,
 } from "../controllers/stockController.js"
 import validate from "../middlewares/validate.js"
-import { stockSchema } from "../validations/stockValidation.js"
+import {
+  incrementStockSchema,
+  stockSchema,
+} from "../validations/stockValidation.js"
 import authenticate from "../middlewares/authenticate.js"
 import checkRole from "../middlewares/checkRole.js"
 
@@ -26,8 +29,8 @@ router.post(
   decrementStockForOrder
 ) // ✅ Validation ajoutée ici
 router.put(
-  "/increment",
-  validate(stockSchema),
+  "/increment/:id",
+  validate(incrementStockSchema),
   authenticate,
   checkRole("Admin", "Gestionnaire", "Logisticien"),
   incrementStock
@@ -50,6 +53,7 @@ router.put(
   checkRole("Admin", "Gestionnaire", "Logisticien"),
   updateStock
 ) // ✅ Validation ajoutée ici
+// ✅ Validation ajoutée ici
 router.put(
   "/update-by-product/:produit_id",
   validate(stockSchema),

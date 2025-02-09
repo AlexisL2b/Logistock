@@ -22,3 +22,10 @@ export const stockSchema = Joi.object({
     "any.required": "La quantité disponible est obligatoire.",
   }),
 })
+
+export const incrementStockSchema = Joi.object({
+  quantite_disponible: Joi.number().min(1).required().messages({
+    "number.min": "La quantité doit être supérieure à 0.",
+    "any.required": "La quantité est obligatoire.",
+  }),
+})

@@ -143,6 +143,7 @@ export default function Products() {
 
         {/* 🔄 Bouton de réinitialisation */}
         <Button
+          sx={{ width: "300px" }}
           variant="contained"
           onClick={() => {
             setSelectedCategory("")

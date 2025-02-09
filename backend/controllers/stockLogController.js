@@ -23,7 +23,7 @@ export const getStockLogById = async (req, res) => {
 // Ajouter un nouveau log de stock
 export const addStockLog = async (req, res) => {
   try {
-    const newStockLog = await StockLogService.addStockLog(req.body)
+    const newStockLog = await StockLogService.create(req.body)
     res.status(201).json(newStockLog)
   } catch (error) {
     res.status(400).json({ message: error.message })

@@ -70,6 +70,16 @@ class StockService {
     }
     return deletedStock
   }
+  async incrementStock(id, quantite_disponible) {
+    const incrementStock = await StockDAO.incrementStock(
+      id,
+      quantite_disponible
+    )
+    if (!incrementStock) {
+      throw new Error("Stock introuvable")
+    }
+    return incrementStock
+  }
 
   /**
    * Décrémente le stock en fonction des détails de commande

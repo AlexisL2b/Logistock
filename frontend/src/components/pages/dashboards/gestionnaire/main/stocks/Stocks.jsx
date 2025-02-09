@@ -45,6 +45,9 @@ export default function Stocks() {
         )
       )
   }, [])
+  const refreshStocks = () => {
+    dispatch(fetchStocksWithProduct())
+  }
 
   // Filtrage des stocks en fonction des sélections
   const filteredStocks = stocks.stocksProducts?.filter(
@@ -106,7 +109,7 @@ export default function Stocks() {
 
       {/* Tableau des stocks filtrés */}
       {filteredStocks ? (
-        <StocksTable stocks={filteredStocks} />
+        <StocksTable stocks={filteredStocks} onStockUpdated={refreshStocks} />
       ) : (
         <Typography>Aucun stocks !</Typography>
       )}

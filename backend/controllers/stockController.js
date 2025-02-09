@@ -131,19 +131,17 @@ export const deleteStock = async (req, res) => {
 
 export const incrementStock = async (req, res) => {
   try {
-    const { stock_id, quantite_disponible } = req.body
+    const { id } = req.params
+    const { quantite_disponible } = req.body
 
     // ✅ Vérifier si `stock_id` et `quantite_disponible` sont valides
-    if (!stock_id || !quantite_disponible || quantite_disponible <= 0) {
+    if (!quantite_disponible || quantite_disponible <= 0) {
       return res
         .status(400)
         .json({ message: "Données invalides pour l'incrémentation du stock" })
     }
 
-    const result = await StockService.incrementStock(
-      stock_id,
-      quantite_disponible
-    )
+    const result = await stockService.incrementStock(id, quantite_disponible)
     res.status(200).json(result)
   } catch (error) {
     res.status(500).json({ message: error.message })

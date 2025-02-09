@@ -10,10 +10,11 @@ export const stockLogSchema = Joi.object({
       "any.required": "L'ID du produit est obligatoire.",
     }),
   evenement: Joi.string()
-    .valid("entree", "sortie", "ajustement")
+    .valid("entrée", "sortie", "suppression", "création")
     .required()
     .messages({
-      "any.only": "L'événement doit être 'entree', 'sortie' ou 'ajustement'.",
+      "any.only":
+        "L'événement doit être 'entrée', 'sortie', 'supprssion' ou création.",
       "any.required": "L'événement est obligatoire.",
     }),
   quantite: Joi.number().min(1).required().messages({
@@ -23,4 +24,12 @@ export const stockLogSchema = Joi.object({
   date_evenement: Joi.date().default(Date.now).messages({
     "date.base": "La date de l'événement doit être une date valide.",
   }),
+  stock_id: Joi.string()
+    .regex(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.pattern.base":
+        "L'ID du stock  doit être un ObjectId MongoDB valide.",
+      "any.required": "L'ID du produit est obligatoire.",
+    }),
 })

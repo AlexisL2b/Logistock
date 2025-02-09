@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react"
-import Box from "@mui/material/Box"
-import Button from "@mui/material/Button"
-import Typography from "@mui/material/Typography"
-import Modal from "@mui/material/Modal"
-import TextField from "@mui/material/TextField"
-import MenuItem from "@mui/material/MenuItem"
 import PropTypes from "prop-types"
+import {
+  Box,
+  Button,
+  Typography,
+  Modal,
+  TextField,
+  MenuItem,
+  FormHelperText,
+} from "@mui/material"
 
 const style = {
   position: "absolute",
@@ -14,7 +17,7 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 400,
   bgcolor: "background.paper",
-  border: "2px solid #000",
+  borderRadius: "8px",
   boxShadow: 24,
   p: 4,
 }
@@ -25,53 +28,78 @@ export default function BasicModal({
   onSubmit,
   title = "Modifier l'élément",
   objectData = {},
-  dropdownData = {}, // Objet pour hydrater les dropdowns
+  dropdownData = {},
 }) {
   const [formData, setFormData] = useState(objectData)
+  const [errors, setErrors] = useState({})
 
   useEffect(() => {
-    // Si objectData est vide, initialise un objet avec des champs par défaut
     const initialData = objectData || {}
     setFormData(initialData)
+    setErrors({})
   }, [objectData])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    setFormData((prevFormData) => {
-      const updatedFormData = {
-        ...prevFormData,
-        [name]: value,
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value,
+    }))
+
+    // Nettoyer l'erreur lorsqu'on commence à taper
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: "",
+    }))
+  }
+
+  // 🔍 Fonction de validation des champs
+  const validateFields = () => {
+    let newErrors = {}
+
+    // Vérifier les champs obligatoires
+    Object.keys(formData).forEach((key) => {
+      if (!formData[key] && key !== "_id") {
+        newErrors[key] = "Ce champ est obligatoire."
       }
-      //("Updated formData:", updatedFormData) // Debug
-      return updatedFormData
     })
+
+    // Vérification spécifique des nombres (prix, quantité)
+    if (formData.prix && (isNaN(formData.prix) || formData.prix <= 0)) {
+      newErrors.prix = "Le prix doit être un nombre positif."
+    }
+
+    if (
+      formData.quantite_disponible &&
+      (isNaN(formData.quantite_disponible) || formData.quantite_disponible < 1)
+    ) {
+      newErrors.quantite_disponible = "La quantité doit être un entier positif."
+    }
+
+    setErrors(newErrors)
+
+    return Object.keys(newErrors).length === 0 // ✅ Retourne true si tout est valide
   }
 
   const handleSubmit = () => {
-    //("Form data submitted:", formData) // Debug
-    onSubmit(formData) // Appelle la fonction onSubmit avec les données du formulaire
-    onClose() // Ferme la modal après soumission
+    if (validateFields()) {
+      onSubmit(formData) // Envoie les données si elles sont valides
+      onClose() // Ferme la modal
+    }
   }
 
   const findDropdownKey = (key) => {
-    // Basé sur une relation dynamique entre les noms de clés
     const keyMapping = {
       categorie_id: "/categories",
       fournisseur_id: "/suppliers",
     }
-
-    return keyMapping[key] || null // Retourne la clé correspondante ou null si aucune correspondance
+    return keyMapping[key] || null
   }
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description"
-    >
+    <Modal open={open} onClose={onClose} aria-labelledby="modal-modal-title">
       <Box sx={style}>
-        <Typography id="modal-modal-title" variant="h6" component="h2">
+        <Typography id="modal-modal-title" variant="h6" sx={{ mb: 2 }}>
           {title}
         </Typography>
         <Box
@@ -79,9 +107,9 @@ export default function BasicModal({
           sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}
         >
           {Object.keys(formData)
-            .filter((key) => key !== "_id" && key !== "__v") // Filtrer les clés _id et __v
+            .filter((key) => key !== "_id" && key !== "__v")
             .map((key) => {
-              const dropdownKey = findDropdownKey(key) // Trouvez dynamiquement la clé dans dropdownData
+              const dropdownKey = findDropdownKey(key)
 
               if (key.endsWith("_id") && dropdownData[dropdownKey]) {
                 return (
@@ -93,6 +121,8 @@ export default function BasicModal({
                     value={formData[key] || ""}
                     onChange={handleInputChange}
                     fullWidth
+                    error={!!errors[key]}
+                    helperText={errors[key]}
                   >
                     {dropdownData[dropdownKey]?.map((item) => (
                       <MenuItem key={item._id} value={item._id}>
@@ -102,7 +132,6 @@ export default function BasicModal({
                   </TextField>
                 )
               } else if (key.endsWith("_id")) {
-                // Si la clé existe mais pas dans dropdownData
                 return (
                   <TextField
                     key={key}
@@ -115,7 +144,6 @@ export default function BasicModal({
                 )
               }
 
-              // Sinon, retournez un champ TextField normal
               return (
                 <TextField
                   key={key}
@@ -124,6 +152,8 @@ export default function BasicModal({
                   value={formData[key] || ""}
                   onChange={handleInputChange}
                   fullWidth
+                  error={!!errors[key]}
+                  helperText={errors[key]}
                 />
               )
             })}
@@ -142,10 +172,10 @@ export default function BasicModal({
 }
 
 BasicModal.propTypes = {
-  open: PropTypes.bool.isRequired, // Obligatoire
-  onClose: PropTypes.func.isRequired, // Obligatoire
-  onSubmit: PropTypes.func.isRequired, // Obligatoire
-  title: PropTypes.string, // Facultatif (a une valeur par défaut)
-  objectData: PropTypes.object, // Facultatif (a une valeur par défaut)
-  dropdownData: PropTypes.object, // Nouvel objet pour gérer les dropdowns
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  title: PropTypes.string,
+  objectData: PropTypes.object,
+  dropdownData: PropTypes.object,
 }

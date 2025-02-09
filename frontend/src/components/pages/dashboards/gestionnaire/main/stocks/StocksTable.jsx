@@ -13,9 +13,13 @@ import {
   Typography,
   Paper,
   TableSortLabel,
+  Button,
+  Modal,
+  TextField,
 } from "@mui/material"
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp"
+import axiosInstance from "../../../../../../axiosConfig"
 
 // Fonction pour styliser les événements
 const getEventStyle = (event) => {
@@ -27,11 +31,11 @@ const getEventStyle = (event) => {
   return styles[event.toLowerCase()] || { color: "black", fontWeight: "bold" }
 }
 
-function Row({ row }) {
+function Row({ row, onReassort }) {
   const [open, setOpen] = React.useState(false)
 
   return (
-    <React.Fragment>
+    <>
       {/* Ligne principale du tableau */}
       <TableRow
         sx={{
@@ -48,9 +52,7 @@ function Row({ row }) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell component="th" scope="row">
-          {row.produit_id.nom}
-        </TableCell>
+        <TableCell>{row.produit_id.nom}</TableCell>
         <TableCell>{row.produit_id.reference}</TableCell>
         <TableCell>{row.produit_id.categorie_id.nom}</TableCell>
         <TableCell>{row.produit_id.supplier_id.nom}</TableCell>
@@ -65,14 +67,23 @@ function Row({ row }) {
           {row.quantite_disponible}
         </TableCell>
         <TableCell align="right">{row.produit_id.prix} €</TableCell>
+        <TableCell align="right">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => onReassort(row)}
+          >
+            Réassort
+          </Button>
+        </TableCell>
       </TableRow>
 
       {/* Volet avec les logs */}
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
-              <Typography variant="h6" gutterBottom component="div">
+              <Typography variant="h6" gutterBottom>
                 Historique des Stocks
               </Typography>
               <Table size="small" aria-label="stock-logs">
@@ -110,38 +121,38 @@ function Row({ row }) {
           </Collapse>
         </TableCell>
       </TableRow>
-    </React.Fragment>
+    </>
   )
 }
 
 Row.propTypes = {
-  row: PropTypes.shape({
-    produit_id: PropTypes.shape({
-      nom: PropTypes.string.isRequired,
-      reference: PropTypes.string.isRequired,
-      prix: PropTypes.number.isRequired,
-      categorie_id: PropTypes.shape({
-        nom: PropTypes.string.isRequired,
-      }).isRequired,
-      supplier_id: PropTypes.shape({
-        nom: PropTypes.string.isRequired,
-      }).isRequired,
-    }).isRequired,
-    quantite_disponible: PropTypes.number.isRequired,
-    stockLogs: PropTypes.arrayOf(
-      PropTypes.shape({
-        _id: PropTypes.string.isRequired,
-        evenement: PropTypes.string.isRequired,
-        quantite: PropTypes.number.isRequired,
-        date_evenement: PropTypes.string.isRequired,
-      })
-    ).isRequired,
-  }).isRequired,
+  row: PropTypes.object.isRequired,
+  onReassort: PropTypes.func.isRequired,
 }
 
-export default function CollapsibleTable({ stocks }) {
+// STYLES DE LA MODALE
+const modalStyle = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  boxShadow: 24,
+  borderRadius: "10px",
+  p: 4,
+  outline: "none",
+  display: "flex",
+  flexDirection: "column",
+  gap: 2,
+}
+
+export default function CollapsibleTable({ stocks, onStockUpdated }) {
   const [order, setOrder] = React.useState("asc")
   const [orderBy, setOrderBy] = React.useState("quantite_disponible")
+  const [modalOpen, setModalOpen] = React.useState(false)
+  const [selectedStock, setSelectedStock] = React.useState(null)
+  const [reassortQuantity, setReassortQuantity] = React.useState("")
 
   // Fonction de tri
   const handleSort = (property) => {
@@ -150,23 +161,48 @@ export default function CollapsibleTable({ stocks }) {
     setOrderBy(property)
   }
 
-  // Tri des stocks
-  const sortedStocks = [...stocks].sort((a, b) => {
-    if (orderBy === "quantite_disponible") {
-      return order === "asc"
-        ? a.quantite_disponible - b.quantite_disponible
-        : b.quantite_disponible - a.quantite_disponible
-    } else if (orderBy === "prix") {
-      return order === "asc"
-        ? a.produit_id.prix - b.produit_id.prix
-        : b.produit_id.prix - a.produit_id.prix
+  // Ouvrir la modale
+  const handleOpenModal = (stock) => {
+    setSelectedStock(stock)
+    setReassortQuantity("")
+    setModalOpen(true)
+  }
+
+  // Fermer la modale
+  const handleCloseModal = () => {
+    setSelectedStock(null)
+    setModalOpen(false)
+  }
+
+  // Confirmer le réassort
+  const handleConfirmReassort = async () => {
+    console.log("nikomok")
+    try {
+      const response = await axiosInstance.put(
+        `/stocks/increment/${selectedStock._id}`,
+        {
+          quantite_disponible: reassortQuantity,
+        }
+      )
+      console.log(response)
+      await axiosInstance.post(`/stock_logs`, {
+        produit_id: selectedStock.produit_id._id,
+        quantite: reassortQuantity,
+        evenement: "entrée",
+        stock_id: selectedStock._id,
+      })
+      console.log("Ok")
+      onStockUpdated()
+    } catch (error) {
+      alert("Une erreur s'est produite : " + error.message)
     }
-    return 0
-  })
+
+    handleCloseModal()
+  }
 
   return (
     <TableContainer component={Paper}>
-      <Table aria-label="collapsible table">
+      <Table>
         <TableHead>
           <TableRow>
             <TableCell />
@@ -192,42 +228,59 @@ export default function CollapsibleTable({ stocks }) {
                 Prix (€)
               </TableSortLabel>
             </TableCell>
+            <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {sortedStocks.map((stock) => (
-            <Row key={stock._id} row={stock} />
+          {stocks.map((stock) => (
+            <Row key={stock._id} row={stock} onReassort={handleOpenModal} />
           ))}
         </TableBody>
       </Table>
+
+      {/* Modale de Réassort */}
+      <Modal open={modalOpen} onClose={handleCloseModal}>
+        <Box sx={modalStyle}>
+          <Typography variant="h6">Réassort du produit</Typography>
+          {selectedStock && (
+            <>
+              <TextField
+                label="Produit"
+                value={selectedStock.produit_id.nom}
+                disabled
+              />
+              <TextField
+                label="Quantité"
+                value={selectedStock.quantite_disponible}
+                disabled
+              />
+              <TextField label="Id" value={selectedStock._id} disabled />
+              <TextField
+                label="Quantité de réassort"
+                type="text" // Utilisation de "text" pour mieux contrôler l'entrée
+                value={reassortQuantity}
+                onChange={(e) => {
+                  const value = e.target.value
+                  if (/^[1-9]\d*$/.test(value) || value === "") {
+                    setReassortQuantity(value)
+                  }
+                }}
+                inputProps={{ maxLength: 6 }} // Optionnel : Limite à 6 chiffres max (modifiable)
+                fullWidth
+                variant="outlined"
+              />
+              <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
+                <Button onClick={handleCloseModal} color="error">
+                  Annuler
+                </Button>
+                <Button onClick={handleConfirmReassort} variant="contained">
+                  Confirmer
+                </Button>
+              </Box>
+            </>
+          )}
+        </Box>
+      </Modal>
     </TableContainer>
   )
-}
-
-CollapsibleTable.propTypes = {
-  stocks: PropTypes.arrayOf(
-    PropTypes.shape({
-      _id: PropTypes.string.isRequired,
-      produit_id: PropTypes.shape({
-        nom: PropTypes.string.isRequired,
-        reference: PropTypes.string.isRequired,
-        prix: PropTypes.number.isRequired,
-        categorie_id: PropTypes.shape({
-          nom: PropTypes.string.isRequired,
-        }).isRequired,
-        supplier_id: PropTypes.shape({
-          nom: PropTypes.string.isRequired,
-        }).isRequired,
-      }).isRequired,
-      quantite_disponible: PropTypes.number.isRequired,
-      stockLogs: PropTypes.arrayOf(
-        PropTypes.shape({
-          _id: PropTypes.string.isRequired,
-          evenement: PropTypes.string.isRequired,
-          quantite: PropTypes.number.isRequired,
-          date_evenement: PropTypes.string.isRequired,
-        })
-      ).isRequired,
-    })
-  ).isRequired,
 }
