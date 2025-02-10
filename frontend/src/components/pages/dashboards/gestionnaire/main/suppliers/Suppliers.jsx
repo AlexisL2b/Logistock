@@ -6,6 +6,12 @@ import EnhancedTable from "../../../../../reusable-ui/EnhancedTable"
 export default function Suppliers() {
   const [suppliers, setSuppliers] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
+  const fields = {
+    nom: { type: "text", label: "Nom", required: true },
+    telephone: { type: "tel", label: "Telephone", required: true },
+    email: { type: "email", label: "Email", required: true },
+    contact: { type: "text", label: "Contact", required: true },
+  }
 
   // Fonction pour recharger les données
   const fetchSuppliers = () => {
@@ -67,6 +73,7 @@ export default function Suppliers() {
 
       {/* Passe les fournisseurs filtrés à EnhancedTable */}
       <EnhancedTable
+        formStructure={fields}
         data={filteredSuppliers}
         coll={"suppliers"}
         onDataChange={handleDataChange}

@@ -1,6 +1,8 @@
 import UserDAO from "../dao/userDAO.js"
 import bcrypt from "bcrypt"
 import { getAuth } from "firebase-admin/auth"
+import userDAO from "../dao/userDAO.js"
+import admin from "../config/firebase.js"
 
 class UserService {
   async getAllUsers() {
@@ -8,7 +10,41 @@ class UserService {
   }
 
   async getBuyers() {
-    return await UserDAO.findAll().filter((user) => user.role === "Acheteur")
+    const allUsers = await userDAO.findAll()
+    const userIds = allUsers.map((user) => user.firebaseUid)
+
+    const usersWithClaims = await Promise.all(
+      userIds.map(async (uid) => {
+        try {
+          const userRecord = await admin.auth().getUser(uid)
+          const userFromDB = allUsers.find((user) => user.firebaseUid === uid)
+
+          if (!userFromDB) {
+            console.warn(`Utilisateur avec UID ${uid} non trouvé en BDD`)
+            return null
+          }
+
+          // Transformer en objet JS pur
+          const cleanUser = userFromDB.toObject()
+          cleanUser.customClaims = userRecord.customClaims
+
+          return cleanUser
+        } catch (error) {
+          console.error(
+            `Erreur lors de la récupération des claims pour ${uid}:`,
+            error
+          )
+          return null
+        }
+      })
+    )
+
+    // console.log("usersWithClaims", usersWithClaims)
+
+    // Filtrer les acheteurs et enlever les utilisateurs null
+    return usersWithClaims.filter(
+      (user) => user && user.customClaims?.role === "Acheteur"
+    )
   }
 
   async getUserById(id) {

@@ -53,7 +53,7 @@ class ProductService {
       // return { message: "Produit existant, stock créé", data: product }
       //   }
 
-      console.log("🆕 Création du produit et du stock associé")
+      console.log("🆕 productData", productData)
       product = await ProductDAO.create(productData)
       console.log(
         "//////////////////////////////product//////////////////////////////",

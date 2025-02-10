@@ -27,7 +27,7 @@ router.get("/me", authenticate, async (req, res) => {
 })
 
 router.get("/", getAllUsers)
-router.get("/buyers", getAllBuyers) // 🔥 Route pour récupérer uniquement les acheteurs
+router.get("/buyers", getAllBuyers) // 🔥 Route pour récupérer uniquement les acheteur
 router.get("/:id", getUserById)
 router.get("/uid/:uid", getUserByUid)
 router.post(

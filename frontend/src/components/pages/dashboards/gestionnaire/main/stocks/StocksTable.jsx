@@ -21,7 +21,6 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp"
 import axiosInstance from "../../../../../../axiosConfig"
 
-// Fonction pour styliser les événements
 const getEventStyle = (event) => {
   const styles = {
     entrée: { color: "green", fontWeight: "bold" },
@@ -36,7 +35,6 @@ function Row({ row, onReassort }) {
 
   return (
     <>
-      {/* Ligne principale du tableau */}
       <TableRow
         sx={{
           "& > *": { borderBottom: "unset" },
@@ -78,7 +76,6 @@ function Row({ row, onReassort }) {
         </TableCell>
       </TableRow>
 
-      {/* Volet avec les logs */}
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
           <Collapse in={open} timeout="auto" unmountOnExit>
@@ -130,7 +127,6 @@ Row.propTypes = {
   onReassort: PropTypes.func.isRequired,
 }
 
-// STYLES DE LA MODALE
 const modalStyle = {
   position: "absolute",
   top: "50%",
@@ -153,45 +149,46 @@ export default function CollapsibleTable({ stocks, onStockUpdated }) {
   const [modalOpen, setModalOpen] = React.useState(false)
   const [selectedStock, setSelectedStock] = React.useState(null)
   const [reassortQuantity, setReassortQuantity] = React.useState("")
+  const [error, setError] = React.useState("")
 
-  // Fonction de tri
   const handleSort = (property) => {
     const isAsc = orderBy === property && order === "asc"
     setOrder(isAsc ? "desc" : "asc")
     setOrderBy(property)
   }
 
-  // Ouvrir la modale
   const handleOpenModal = (stock) => {
     setSelectedStock(stock)
     setReassortQuantity("")
+    setError("")
     setModalOpen(true)
   }
 
-  // Fermer la modale
   const handleCloseModal = () => {
     setSelectedStock(null)
     setModalOpen(false)
   }
 
-  // Confirmer le réassort
   const handleConfirmReassort = async () => {
-    console.log("nikomok")
+    const quantity = parseInt(reassortQuantity, 10)
+
+    if (!reassortQuantity || isNaN(quantity) || quantity < 1) {
+      setError("Veuillez entrer une quantité valide (≥ 1).")
+      return
+    }
+
     try {
-      const response = await axiosInstance.put(
-        `/stocks/increment/${selectedStock._id}`,
-        {
-          quantite_disponible: reassortQuantity,
-        }
-      )
-      console.log(response)
+      await axiosInstance.put(`/stocks/increment/${selectedStock._id}`, {
+        quantite_disponible: quantity,
+      })
+
       await axiosInstance.post(`/stock_logs`, {
         produit_id: selectedStock.produit_id._id,
-        quantite: reassortQuantity,
+        quantite: quantity,
         evenement: "entrée",
         stock_id: selectedStock._id,
       })
-      console.log("Ok")
+
       onStockUpdated()
     } catch (error) {
       alert("Une erreur s'est produite : " + error.message)
@@ -219,15 +216,7 @@ export default function CollapsibleTable({ stocks, onStockUpdated }) {
                 Quantité
               </TableSortLabel>
             </TableCell>
-            <TableCell align="right">
-              <TableSortLabel
-                active={orderBy === "prix"}
-                direction={orderBy === "prix" ? order : "asc"}
-                onClick={() => handleSort("prix")}
-              >
-                Prix (€)
-              </TableSortLabel>
-            </TableCell>
+            <TableCell align="right">Prix (€)</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>
@@ -238,47 +227,35 @@ export default function CollapsibleTable({ stocks, onStockUpdated }) {
         </TableBody>
       </Table>
 
-      {/* Modale de Réassort */}
       <Modal open={modalOpen} onClose={handleCloseModal}>
         <Box sx={modalStyle}>
           <Typography variant="h6">Réassort du produit</Typography>
-          {selectedStock && (
-            <>
-              <TextField
-                label="Produit"
-                value={selectedStock.produit_id.nom}
-                disabled
-              />
-              <TextField
-                label="Quantité"
-                value={selectedStock.quantite_disponible}
-                disabled
-              />
-              <TextField label="Id" value={selectedStock._id} disabled />
-              <TextField
-                label="Quantité de réassort"
-                type="text" // Utilisation de "text" pour mieux contrôler l'entrée
-                value={reassortQuantity}
-                onChange={(e) => {
-                  const value = e.target.value
-                  if (/^[1-9]\d*$/.test(value) || value === "") {
-                    setReassortQuantity(value)
-                  }
-                }}
-                inputProps={{ maxLength: 6 }} // Optionnel : Limite à 6 chiffres max (modifiable)
-                fullWidth
-                variant="outlined"
-              />
-              <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
-                <Button onClick={handleCloseModal} color="error">
-                  Annuler
-                </Button>
-                <Button onClick={handleConfirmReassort} variant="contained">
-                  Confirmer
-                </Button>
-              </Box>
-            </>
-          )}
+          <TextField
+            label="Quantité de réassort"
+            type="number"
+            value={reassortQuantity}
+            onChange={(e) => {
+              setReassortQuantity(e.target.value)
+              setError("")
+            }}
+            error={Boolean(error)}
+            helperText={error}
+            fullWidth
+            variant="outlined"
+            inputProps={{ min: 1 }}
+          />
+          <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
+            <Button onClick={handleCloseModal} color="error">
+              Annuler
+            </Button>
+            <Button
+              onClick={handleConfirmReassort}
+              variant="contained"
+              disabled={Boolean(error)}
+            >
+              Confirmer
+            </Button>
+          </Box>
         </Box>
       </Modal>
     </TableContainer>

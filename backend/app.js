@@ -31,6 +31,7 @@ connectDB()
 const app = express()
 // Pour lire les JSON
 app.use(cookieParser())
+
 // ✅ Configuration CORS unique (placée AVANT les routes)
 app.use(
   cors({

@@ -17,19 +17,19 @@ import InventoryIcon from "@mui/icons-material/Inventory"
 import SellIcon from "@mui/icons-material/Sell"
 import MenuIcon from "@mui/icons-material/Menu"
 import LogoutIcon from "@mui/icons-material/Logout"
-
+import CompareArrowsIcon from "@mui/icons-material/CompareArrows"
 import { useDispatch } from "react-redux"
 import { logout } from "../../../../redux/slices/authSlice"
 import Menu from "../../../reusable-ui/Menu"
 import Categories from "./main/catégories/Categories"
 import Suppliers from "./main/suppliers/Suppliers"
-import SalesPoints from "./main/salesPoints/salesPoints"
 import Transporters from "./main/transporters/Transporters"
 import Users from "./main/users/Users"
 import Products from "./main/products/Products"
 import Main from "./main/Main"
 import Profile from "../user/main/profile/Profile"
 import Stocks from "./main/stocks/Stocks"
+import SalesPoints from "./main/salespoints/salesPoints"
 
 export default function DashboardGestionnaire() {
   const [activeComponent, setActiveComponent] = useState("dashboard")
@@ -66,7 +66,7 @@ export default function DashboardGestionnaire() {
     {
       path: "stocks",
       label: "Stocks",
-      icon: <CategoryIcon />,
+      icon: <CompareArrowsIcon />,
       component: <Stocks />,
     },
     {

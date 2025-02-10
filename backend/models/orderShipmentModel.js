@@ -17,7 +17,7 @@ const orderShipmentSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { collection: "order_shipments" }
+  { collection: "order_shipments", versionKey: false }
 )
 
 const OrderShipment = mongoose.model("order_shipments", orderShipmentSchema)

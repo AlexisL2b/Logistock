@@ -1,3 +1,4 @@
+import mongoose from "mongoose"
 import User from "../models/userModel.js"
 
 class UserDAO {
@@ -15,7 +16,16 @@ class UserDAO {
       "nom adresse"
     )
   }
+  async findBySalesPointId(point_vente_id) {
+    if (!mongoose.Types.ObjectId.isValid(point_vente_id)) {
+      throw new Error("ID de point de vente invalide.") // ✅ Vérification de l'ID
+    }
 
+    const users = await User.find({ point_vente_id }) // ✅ Recherche avec la clé correcte
+    console.log("Utilisateurs liés au point de vente :", users)
+
+    return users
+  }
   async findByEmail(email) {
     return await User.findOne({ email })
   }

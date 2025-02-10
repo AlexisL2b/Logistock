@@ -14,6 +14,7 @@ export const getAllUsers = async (req, res) => {
 export const getAllBuyers = async (req, res) => {
   try {
     const buyers = await UserService.getBuyers()
+    console.log("buyers", buyers)
     res.json(buyers)
   } catch (error) {
     res.status(500).json({ message: error.message })

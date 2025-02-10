@@ -376,6 +376,7 @@ export default function EnhancedTable({
             handleModalSubmit(updatedData)
             setOpenModal(false)
           }}
+          title="Ajouter un élément"
         />
       )}
     </Box>

@@ -11,6 +11,7 @@ import {
   Alert,
   Button,
   Typography,
+  CircularProgress,
 } from "@mui/material"
 import { fetchSalesPoints } from "../../../../../../redux/slices/salesPointSlice"
 import { fetchRoles } from "../../../../../../redux/slices/roleSlice"
@@ -29,6 +30,9 @@ const Profile = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
 
   const [isEditing, setIsEditing] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [errors, setErrors] = useState({})
+
   const [userProfile, setUserProfile] = useState({
     prenom: user?.prenom || "",
     nom: user?.nom || "",
@@ -49,7 +53,7 @@ const Profile = () => {
   useEffect(() => {
     dispatch(fetchSalesPoints())
     dispatch(fetchRoles())
-  }, [])
+  }, [dispatch])
 
   useEffect(() => {
     setUserProfile({
@@ -68,20 +72,46 @@ const Profile = () => {
   const handleCancel = () => {
     setUserProfile(prevUser)
     setIsEditing(false)
+    setErrors({})
   }
 
   const handleChange = (field, value) => {
     setUserProfile((prev) => ({ ...prev, [field]: value }))
+
+    // Réinitialiser l'erreur en cas de modification
+    setErrors((prevErrors) => ({ ...prevErrors, [field]: "" }))
+  }
+
+  // 🔹 Validation des champs obligatoires
+  const validateFields = () => {
+    let newErrors = {}
+
+    Object.keys(userProfile).forEach((field) => {
+      if (!userProfile[field]) {
+        newErrors[field] = "Ce champ est obligatoire."
+      }
+    })
+
+    if (
+      userProfile.email &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userProfile.email)
+    ) {
+      newErrors.email = "Veuillez entrer un email valide."
+    }
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
   const handleSave = async (event) => {
     event.preventDefault()
+    if (!validateFields()) return
+
+    setIsLoading(true)
 
     try {
       if (userProfile.email !== user.email) {
-        const usersResponse = await axiosInstance.get(
-          `http://localhost:5000/api/users`
-        )
+        const usersResponse = await axiosInstance.get(`/api/users`)
         const users = usersResponse.data || []
         const emailExists = users.some(
           (u) => u.email === userProfile.email && u._id !== user._id
@@ -91,6 +121,7 @@ const Profile = () => {
           setAlertMessage("Cette adresse e-mail est déjà utilisée.")
           setSeverity("error")
           setAlertOpen(true)
+          setIsLoading(false)
           return
         }
       }
@@ -112,12 +143,13 @@ const Profile = () => {
         setSeverity("success")
         setIsEditing(false)
       }
-      setAlertOpen(true)
     } catch (error) {
       setAlertMessage("Erreur de mise à jour.")
       setSeverity("error")
-      setAlertOpen(true)
     }
+
+    setIsLoading(false)
+    setAlertOpen(true)
   }
 
   return (
@@ -139,38 +171,25 @@ const Profile = () => {
         Profil Utilisateur
       </Typography>
 
-      {Object.keys(userProfile).map(
-        (field) =>
-          field !== "adresse" && (
-            <TextField
-              key={field}
-              label={field.charAt(0).toUpperCase() + field.slice(1)}
-              variant="outlined"
-              fullWidth
-              type={field === "email" ? "email" : "text"}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  bgcolor: isEditing ? "white" : "rgba(0, 0, 0, 0.04)",
-                  pointerEvents: isEditing ? "auto" : "none",
-                },
-              }}
-              value={userProfile[field] || ""}
-              onChange={(e) => handleChange(field, e.target.value)}
-              error={
-                field === "email" &&
-                userProfile.email &&
-                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userProfile.email)
-              }
-              helperText={
-                field === "email" &&
-                userProfile.email &&
-                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userProfile.email)
-                  ? "Veuillez entrer un email valide"
-                  : ""
-              }
-            />
-          )
-      )}
+      {Object.keys(userProfile).map((field) => (
+        <TextField
+          key={field}
+          label={field.charAt(0).toUpperCase() + field.slice(1)}
+          variant="outlined"
+          fullWidth
+          type={field === "email" ? "email" : "text"}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              bgcolor: isEditing ? "white" : "rgba(0, 0, 0, 0.04)",
+              pointerEvents: isEditing ? "auto" : "none",
+            },
+          }}
+          value={userProfile[field] || ""}
+          onChange={(e) => handleChange(field, e.target.value)}
+          error={Boolean(errors[field])}
+          helperText={errors[field] || ""}
+        />
+      ))}
 
       {user?.role_id === roleUser && (
         <>
@@ -179,71 +198,40 @@ const Profile = () => {
             variant="outlined"
             fullWidth
             value={user?.adresse || ""}
-            tabIndex={-1}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                bgcolor: "rgba(0, 0, 0, 0.04)",
-                pointerEvents: "none",
-              },
-            }}
+            disabled
           />
           <TextField
             label="Point de vente"
             variant="outlined"
             fullWidth
-            tabIndex={-1}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                bgcolor: "rgba(0, 0, 0, 0.04)",
-                pointerEvents: "none",
-              },
-            }}
             value={salePoint?.nom || ""}
+            disabled
           />
         </>
       )}
 
-      {/* Boutons Modifier / Annuler / Enregistrer */}
       <Box display="flex" justifyContent="center" gap={2} mt={2}>
         {isEditing ? (
           <>
             <Button
               variant="contained"
-              sx={{
-                bgcolor: "green",
-                "&:hover": { bgcolor: "darkgreen" },
-              }}
+              color="success"
               onClick={handleSave}
+              disabled={isLoading}
             >
-              Confirmer
+              {isLoading ? <CircularProgress size={24} /> : "Confirmer"}
             </Button>
-            <Button
-              variant="outlined"
-              sx={{
-                color: "red",
-                borderColor: "red",
-                "&:hover": { bgcolor: "rgba(255, 0, 0, 0.1)" },
-              }}
-              onClick={handleCancel}
-            >
+            <Button variant="outlined" color="error" onClick={handleCancel}>
               Annuler
             </Button>
           </>
         ) : (
-          <Button
-            variant="contained"
-            sx={{
-              bgcolor: "primary.main",
-              "&:hover": { bgcolor: "primary.dark" },
-            }}
-            onClick={handleEdit}
-          >
+          <Button variant="contained" onClick={handleEdit}>
             Modifier
           </Button>
         )}
       </Box>
 
-      {/* Snackbar MUI pour les notifications */}
       <Snackbar
         open={alertOpen}
         autoHideDuration={4000}

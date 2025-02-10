@@ -29,13 +29,13 @@ export default function BasicModal({
   title = "Modifier l'élément",
   objectData = {},
   dropdownData = {},
+  formStructure = {},
 }) {
   const [formData, setFormData] = useState(objectData)
   const [errors, setErrors] = useState({})
 
   useEffect(() => {
-    const initialData = objectData || {}
-    setFormData(initialData)
+    setFormData(objectData || {})
     setErrors({})
   }, [objectData])
 
@@ -45,55 +45,45 @@ export default function BasicModal({
       ...prevFormData,
       [name]: value,
     }))
-
-    // Nettoyer l'erreur lorsqu'on commence à taper
     setErrors((prevErrors) => ({
       ...prevErrors,
       [name]: "",
     }))
   }
 
-  // 🔍 Fonction de validation des champs
+  // 🔍 Fonction de validation dynamique
   const validateFields = () => {
     let newErrors = {}
 
-    // Vérifier les champs obligatoires
-    Object.keys(formData).forEach((key) => {
-      if (!formData[key] && key !== "_id") {
+    Object.keys(formStructure).forEach((key) => {
+      if (formStructure[key].required && !formData[key]) {
         newErrors[key] = "Ce champ est obligatoire."
+      }
+
+      if (formStructure[key].type === "number") {
+        const numValue = parseFloat(formData[key])
+        if (isNaN(numValue) || numValue < 0) {
+          newErrors[key] = "Veuillez entrer un nombre valide."
+        }
+      }
+
+      if (formStructure[key].type === "email") {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(formData[key])) {
+          newErrors[key] = "Veuillez entrer un email valide."
+        }
       }
     })
 
-    // Vérification spécifique des nombres (prix, quantité)
-    if (formData.prix && (isNaN(formData.prix) || formData.prix <= 0)) {
-      newErrors.prix = "Le prix doit être un nombre positif."
-    }
-
-    if (
-      formData.quantite_disponible &&
-      (isNaN(formData.quantite_disponible) || formData.quantite_disponible < 1)
-    ) {
-      newErrors.quantite_disponible = "La quantité doit être un entier positif."
-    }
-
     setErrors(newErrors)
-
-    return Object.keys(newErrors).length === 0 // ✅ Retourne true si tout est valide
+    return Object.keys(newErrors).length === 0
   }
 
   const handleSubmit = () => {
     if (validateFields()) {
-      onSubmit(formData) // Envoie les données si elles sont valides
-      onClose() // Ferme la modal
+      onSubmit(formData)
+      onClose()
     }
-  }
-
-  const findDropdownKey = (key) => {
-    const keyMapping = {
-      categorie_id: "/categories",
-      fournisseur_id: "/suppliers",
-    }
-    return keyMapping[key] || null
   }
 
   return (
@@ -106,57 +96,47 @@ export default function BasicModal({
           component="form"
           sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}
         >
-          {Object.keys(formData)
-            .filter((key) => key !== "_id" && key !== "__v")
-            .map((key) => {
-              const dropdownKey = findDropdownKey(key)
+          {Object.keys(formStructure).map((key) => {
+            const field = formStructure[key]
 
-              if (key.endsWith("_id") && dropdownData[dropdownKey]) {
-                return (
-                  <TextField
-                    select
-                    key={key}
-                    label={key.charAt(0).toUpperCase() + key.slice(1)}
-                    name={key}
-                    value={formData[key] || ""}
-                    onChange={handleInputChange}
-                    fullWidth
-                    error={!!errors[key]}
-                    helperText={errors[key]}
-                  >
-                    {dropdownData[dropdownKey]?.map((item) => (
-                      <MenuItem key={item._id} value={item._id}>
-                        {item.nom}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )
-              } else if (key.endsWith("_id")) {
-                return (
-                  <TextField
-                    key={key}
-                    label={key.charAt(0).toUpperCase() + key.slice(1)}
-                    name={key}
-                    value="Clé manquante dans dropdownData"
-                    disabled
-                    fullWidth
-                  />
-                )
-              }
-
+            // 🔹 Si c'est un champ de type `select`
+            if (field.type === "select" && dropdownData[key]) {
               return (
                 <TextField
+                  select
                   key={key}
-                  label={key.charAt(0).toUpperCase() + key.slice(1)}
+                  label={field.label}
                   name={key}
                   value={formData[key] || ""}
                   onChange={handleInputChange}
                   fullWidth
                   error={!!errors[key]}
                   helperText={errors[key]}
-                />
+                >
+                  {dropdownData[key].map((item) => (
+                    <MenuItem key={item._id} value={item._id}>
+                      {item.nom}
+                    </MenuItem>
+                  ))}
+                </TextField>
               )
-            })}
+            }
+
+            // 🔹 Si c'est un champ standard (text, number, email, etc.)
+            return (
+              <TextField
+                key={key}
+                label={field.label}
+                name={key}
+                type={field.type}
+                value={formData[key] || ""}
+                onChange={handleInputChange}
+                fullWidth
+                error={!!errors[key]}
+                helperText={errors[key]}
+              />
+            )
+          })}
           <Button
             variant="contained"
             color="primary"
@@ -178,4 +158,5 @@ BasicModal.propTypes = {
   title: PropTypes.string,
   objectData: PropTypes.object,
   dropdownData: PropTypes.object,
+  formStructure: PropTypes.object.isRequired, // 🔥 La structure du formulaire est obligatoire
 }

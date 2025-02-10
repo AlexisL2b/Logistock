@@ -39,6 +39,11 @@ export default function Transporters() {
     email: "Email",
   }
 
+  const fields = {
+    nom: { type: "text", label: "Nom", required: true },
+    telephone: { type: "tel", label: "Telephone", required: true },
+    email: { type: "email", label: "Email", required: true },
+  }
   console.log("data: ", transporters)
 
   // 🔍 Filtrage multi-critères : Nom, ID, Téléphone, Email
@@ -68,6 +73,7 @@ export default function Transporters() {
 
       {/* Passe les transporteurs filtrés à EnhancedTable */}
       <EnhancedTable
+        formStructure={fields}
         data={filteredTransporters}
         coll={"transporters"}
         onDataChange={handleDataChange}

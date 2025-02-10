@@ -7,7 +7,8 @@ const roleSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { collection: "roles" }
+  { collection: "roles" },
+  { versionKey: false }
 )
 
 const Role = mongoose.model("roles", roleSchema)

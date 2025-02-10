@@ -82,7 +82,7 @@ export default function LoginForm() {
           navigate("/user-dashboard")
       }
     } catch (err) {
-      console.error("Erreur lors de la connexion :", err)
+      console.error("Erreur lors de la connexion :", err.message)
       setError("Connexion échouée. Vérifiez vos identifiants.")
     }
   }

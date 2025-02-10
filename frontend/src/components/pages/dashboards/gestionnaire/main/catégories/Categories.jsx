@@ -33,7 +33,7 @@ export default function Categories() {
     _id: "ID",
     nom: "Nom",
   }
-
+  const fields = { nom: { type: "text", label: "Nom", required: true } }
   console.log("data: ", categories)
 
   // 🔍 Filtrage multi-critères : Nom, ID
@@ -60,6 +60,7 @@ export default function Categories() {
 
       {/* Passe les catégories filtrées à EnhancedTable */}
       <EnhancedTable
+        formStructure={fields}
         data={filteredCategories}
         coll={"categories"}
         onDataChange={handleDataChange}

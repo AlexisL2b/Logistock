@@ -65,9 +65,9 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
     try {
       console.log(data)
 
-      if (selectedRole !== "Acheteur" && admin) {
-        delete data.salesPoint
-      }
+      // if (selectedRole !== "Acheteur" && admin) {
+      //   delete data.salesPoint
+      // }
 
       // 🚨 Supprimer `roles` pour éviter qu'un gestionnaire attribue un rôle
 
@@ -83,9 +83,9 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
         message: "Inscription réussie !",
         severity: "success",
       })
-
       setModalOpen(false) // Ouvre la modale
       onUserAdded()
+      console.log("ici")
       onClose()
     } catch (error) {
       setSnackbar({
@@ -279,39 +279,40 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
           )}
 
           {/* Sélecteur de point de vente (Seulement si "Acheteur" est sélectionné) */}
-          {selectedRole === "Acheteur" && (
-            <Grid item xs={12}>
-              <Controller
-                name="salesPoint"
-                control={control}
-                defaultValue=""
-                rules={{
-                  required:
-                    selectedRole === "Acheteur"
-                      ? "Veuillez sélectionner un point de vente"
-                      : false,
-                }}
-                render={({ field }) => (
-                  <FormControl fullWidth>
-                    <InputLabel id="sales-point-label">
-                      Point de Vente
-                    </InputLabel>
-                    <Select
-                      {...field}
-                      labelId="sales-point-label"
-                      label="Point de Vente"
-                    >
-                      {salesPoints.map((point) => (
-                        <MenuItem key={point._id} value={point._id}>
-                          {point.nom}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
-              />
-            </Grid>
-          )}
+          {selectedRole === "Acheteur" ||
+            (!admin && (
+              <Grid item xs={12}>
+                <Controller
+                  name="salesPoint"
+                  control={control}
+                  defaultValue=""
+                  rules={{
+                    required:
+                      selectedRole === "Acheteur"
+                        ? "Veuillez sélectionner un point de vente"
+                        : false,
+                  }}
+                  render={({ field }) => (
+                    <FormControl fullWidth>
+                      <InputLabel id="sales-point-label">
+                        Point de Vente
+                      </InputLabel>
+                      <Select
+                        {...field}
+                        labelId="sales-point-label"
+                        label="Point de Vente"
+                      >
+                        {salesPoints.map((point) => (
+                          <MenuItem key={point._id} value={point._id}>
+                            {point.nom}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  )}
+                />
+              </Grid>
+            ))}
 
           {/* Bouton Soumettre */}
           <Grid item xs={12}>

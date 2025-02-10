@@ -14,7 +14,17 @@ import Checkbox from "@mui/material/Checkbox"
 import FormControlLabel from "@mui/material/FormControlLabel"
 import Switch from "@mui/material/Switch"
 import EditIcon from "@mui/icons-material/Edit"
-import { Alert, Button, IconButton, Snackbar } from "@mui/material"
+import {
+  Alert,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  Snackbar,
+} from "@mui/material"
 
 import BasicModal from "./BasicModal" // Import du composant modal
 import axiosInstance from "../../axiosConfig"
@@ -97,6 +107,7 @@ export default function EnhancedTable({
   coll,
   onDataChange,
   headerMapping,
+  formStructure,
 }) {
   const [order, setOrder] = useState("asc")
   const [orderBy, setOrderBy] = useState(Object.keys(data[0] || [])[0] || "")
@@ -107,7 +118,7 @@ export default function EnhancedTable({
   const [message, setMessage] = useState("") // Stocke le message d'erreur
   const [showAlert, setShowAlert] = useState(false) // Gère la visibilité de l'alerte
   const [severity, setSeverity] = useState("")
-
+  const [openConfirmDialog, setOpenConfirmDialog] = useState(false) // 🔥 État pour la confirmation
   // État pour gérer la modal
   const [openModal, setOpenModal] = useState(false)
   const [selectedRow, setSelectedRow] = useState(null)
@@ -124,12 +135,15 @@ export default function EnhancedTable({
   }
 
   const headCells = data.length
-    ? Object.keys(data[0]).map((key) => ({
-        id: key,
-        numeric: typeof data[0][key] === "number",
-        disablePadding: false,
-        label: headerMapping[key] || key.charAt(0).toUpperCase() + key.slice(1), // Utilise headerMapping pour les labels
-      }))
+    ? Object.keys(data[0])
+        .filter((key) => key !== "_id") // 🔥 Supprime la colonne ID
+        .map((key) => ({
+          id: key,
+          numeric: typeof data[0][key] === "number",
+          disablePadding: false,
+          label:
+            headerMapping[key] || key.charAt(0).toUpperCase() + key.slice(1),
+        }))
     : []
 
   const handleRequestSort = (event, property) => {
@@ -166,6 +180,48 @@ export default function EnhancedTable({
 
   const handleChangeDense = (event) => {
     setDense(event.target.checked)
+  }
+
+  const handleOpenConfirmDialog = () => {
+    if (selected.length === 0) {
+      setMessage("Aucun élément sélectionné pour suppression !")
+      setSeverity("warning")
+      setShowAlert(true)
+      return
+    }
+    setOpenConfirmDialog(true)
+  }
+
+  // 🔥 Ferme la boîte de dialogue de confirmation
+  const handleCloseConfirmDialog = () => {
+    setOpenConfirmDialog(false)
+  }
+
+  // 🔥 Supprime les éléments après confirmation
+  const handleDeleteConfirmed = async () => {
+    try {
+      for (const id of selected) {
+        const res = await axiosInstance.delete(
+          `http://localhost:5000/api/${coll}/${id}`
+        )
+        setMessage(res.data.message)
+        setSeverity("success")
+        setShowAlert(true)
+      }
+
+      setSelected([])
+      if (onDataChange) {
+        onDataChange()
+      }
+    } catch (error) {
+      setMessage(
+        error.response?.data?.message || "Erreur lors de la suppression."
+      )
+      setSeverity("error")
+      setShowAlert(true)
+    }
+
+    setOpenConfirmDialog(false)
   }
 
   const handleDelete = async () => {
@@ -225,9 +281,12 @@ export default function EnhancedTable({
   const handleModalSubmit = async (updatedData) => {
     try {
       if (updatedData._id) {
+        const updateDataToPut = Object.fromEntries(
+          Object.entries(updatedData).filter(([key]) => key !== "_id")
+        )
         const res = await axiosInstance.put(
           `http://localhost:5000/api/${coll}/${updatedData._id}`,
-          updatedData
+          updateDataToPut
         )
         setMessage(res.data.message || "Opération réussie")
         setSeverity("success")
@@ -375,7 +434,11 @@ export default function EnhancedTable({
         label="Dense padding"
       />
       <Box sx={{ display: "flex", gap: 2 }}>
-        <Button variant="contained" color="error" onClick={handleDelete}>
+        <Button
+          variant="contained"
+          color="error"
+          onClick={handleOpenConfirmDialog}
+        >
           Supprimer
         </Button>
         <Button
@@ -387,15 +450,33 @@ export default function EnhancedTable({
         </Button>
       </Box>
 
-      {/* Intégration du modal */}
       {selectedRow && (
         <BasicModal
+          formStructure={formStructure}
           open={openModal}
           onClose={handleCloseModal}
           onSubmit={handleModalSubmit}
           objectData={selectedRow}
         />
       )}
+      <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
+        <DialogTitle>Confirmation</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Êtes-vous sûr de vouloir supprimer ces éléments ?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirmDialog}>Annuler</Button>
+          <Button
+            onClick={handleDeleteConfirmed}
+            color="error"
+            variant="contained"
+          >
+            Confirmer
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

@@ -45,6 +45,7 @@ export default function Stocks() {
         )
       )
   }, [])
+
   const refreshStocks = () => {
     dispatch(fetchStocksWithProduct())
   }
@@ -61,16 +62,29 @@ export default function Stocks() {
 
   return (
     <Box>
-      {/* Filtres */}
-      <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+      {/* Filtres alignés proprement */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
         {/* Filtre par catégorie */}
-        <FormControl sx={{ minWidth: 200 }}>
-          <InputLabel>Catégorie</InputLabel>
+        <FormControl variant="outlined" sx={{ minWidth: 200 }}>
+          <InputLabel
+            shrink
+            sx={{
+              position: "absolute",
+              background: "white",
+              px: 1,
+              mt: -0.5, // Ajuste la hauteur pour éviter l'encadrement
+            }}
+          >
+            Catégorie
+          </InputLabel>
           <Select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
+            displayEmpty
           >
-            <MenuItem value="">Toutes les catégories</MenuItem>
+            <MenuItem value="" sx={{ fontSize: "0.85rem" }}>
+              Toutes les catégories
+            </MenuItem>
             {categories.map((cat) => (
               <MenuItem key={cat._id} value={cat._id}>
                 {cat.nom}
@@ -80,13 +94,26 @@ export default function Stocks() {
         </FormControl>
 
         {/* Filtre par fournisseur */}
-        <FormControl sx={{ minWidth: 200 }}>
-          <InputLabel>Fournisseur</InputLabel>
+        <FormControl variant="outlined" sx={{ minWidth: 200 }}>
+          <InputLabel
+            shrink
+            sx={{
+              position: "absolute",
+              background: "white",
+              px: 1,
+              mt: -0.5,
+            }}
+          >
+            Fournisseur
+          </InputLabel>
           <Select
             value={selectedSupplier}
             onChange={(e) => setSelectedSupplier(e.target.value)}
+            displayEmpty
           >
-            <MenuItem value="">Tous les fournisseurs</MenuItem>
+            <MenuItem value="" sx={{ fontSize: "0.85rem" }}>
+              Tous les fournisseurs
+            </MenuItem>
             {suppliers.map((sup) => (
               <MenuItem key={sup._id} value={sup._id}>
                 {sup.nom}
@@ -95,9 +122,11 @@ export default function Stocks() {
           </Select>
         </FormControl>
 
-        {/* Bouton de réinitialisation */}
+        {/* Bouton de réinitialisation (ajusté en hauteur) */}
         <Button
           variant="contained"
+          size="small"
+          sx={{ height: 40 }} // Ajustement précis de la hauteur
           onClick={() => {
             setSelectedCategory("")
             setSelectedSupplier("")

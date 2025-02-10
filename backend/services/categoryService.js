@@ -1,4 +1,6 @@
+import categoryDAO from "../dao/categoryDAO.js"
 import CategoryDAO from "../dao/categoryDAO.js"
+import productDAO from "../dao/productDAO.js"
 
 class CategoryService {
   async getAllCategories() {
@@ -17,22 +19,52 @@ class CategoryService {
     if (!categoryData.nom) {
       throw new Error("Le champ 'nom' est requis")
     }
-    return await CategoryDAO.create(categoryData)
+    const categories = await categoryDAO.findAll()
+
+    const existe = categories.some((item) => {
+      console.log(item) // ✅ Vérifie chaque item parcouru
+      return item.nom === categoryData.nom // ✅ Ajoute `return` pour que `some()` fonctionne
+    })
+
+    if (!existe) {
+      console.log("existe", existe)
+      console.log("categoryData", categoryData)
+
+      return await CategoryDAO.create(categoryData)
+    } else {
+      throw new Error("Cette catégorie existe déjà!")
+      console.log("existe", existe)
+    }
   }
 
   async updateCategory(id, categoryData) {
-    const updatedCategory = await CategoryDAO.update(id, categoryData)
-    if (!updatedCategory) {
-      throw new Error("Catégorie introuvable")
+    // if (!updatedCategory) {
+    //   throw new Error("Catégorie introuvable")
+    // }
+    const categories = await categoryDAO.findAll()
+
+    const existe = categories.some((item) => {
+      console.log(item) // ✅ Vérifie chaque item parcouru
+      return item.nom === categoryData.nom // ✅ Ajoute `return` pour que `some()` fonctionne
+    })
+    if (!existe) {
+      console.log("existe", existe)
+      console.log("categoryData", categoryData)
+
+      const updatedCategory = await CategoryDAO.update(id, categoryData)
+
+      return updatedCategory
+    } else {
+      throw new Error("Cette catégorie existe déjà!")
     }
-    return updatedCategory
   }
 
   async deleteCategory(id) {
     // Vérifier si la catégorie est associée à des produits avant de supprimer
-    const associatedProducts = await CategoryDAO.findAssociatedProducts(id)
-    if (associatedProducts.length > 0) {
-      const noms = associatedProducts.map((p) => p.nom).join(", ")
+    const products = await productDAO.findByCategoryId(id)
+    console.log(products)
+    if (products.length > 0) {
+      const noms = products.map((p) => p.nom).join(", ")
       throw new Error(
         `Impossible de supprimer la catégorie. Elle est associée aux produits suivants : ${noms}`
       )

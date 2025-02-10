@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react"
 import { Box, TextField } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
 import EnhancedTable from "../../../../../reusable-ui/EnhancedTable"
@@ -21,6 +20,10 @@ export default function SalesPoints() {
           error
         )
       })
+  }
+  const fields = {
+    nom: { type: "text", label: "Nom", required: true },
+    adresse: { type: "text", label: "Adresse", required: true },
   }
 
   // Chargement initial des points de vente
@@ -69,6 +72,7 @@ export default function SalesPoints() {
 
       {/* Passe les points de vente filtrés à EnhancedTable */}
       <EnhancedTable
+        formStructure={fields}
         data={filteredSalesPoints}
         coll={"sales_points"}
         onDataChange={handleDataChange}

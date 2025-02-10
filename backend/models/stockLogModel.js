@@ -26,7 +26,7 @@ const stockLogSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { collection: "stock_log" }
+  { collection: "stock_log", versionKey: false }
 )
 
 const StockLog = mongoose.model("stock_log", stockLogSchema)

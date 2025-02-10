@@ -4,7 +4,7 @@ const categorySchema = new mongoose.Schema(
   {
     nom: { type: String, required: true },
   },
-  { collection: "categories" }
+  { collection: "categories", versionKey: false }
 )
 
 const Category = mongoose.model("Category", categorySchema)

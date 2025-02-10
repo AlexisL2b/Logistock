@@ -11,7 +11,7 @@ const salesPointSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { collection: "sales_points" }
+  { collection: "sales_points", versionKey: false }
 )
 
 const SalesPoint = mongoose.model("SalesPoint", salesPointSchema)

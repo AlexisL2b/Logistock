@@ -1,3 +1,4 @@
+import productDAO from "../dao/productDAO.js"
 import SupplierDAO from "../dao/supplierDAO.js"
 
 class SupplierService {
@@ -29,7 +30,7 @@ class SupplierService {
   }
 
   async deleteSupplier(id) {
-    const associatedProducts = await SupplierDAO.findAssociatedProducts(id)
+    const associatedProducts = await productDAO.findBySupplierId(id)
 
     if (associatedProducts.length > 0) {
       const noms = associatedProducts.map((product) => product.nom).join(", ")

@@ -1,3 +1,4 @@
+import mongoose from "mongoose"
 import Product from "../models/productModel.js"
 import Stock from "../models/stockModel.js"
 
@@ -6,6 +7,24 @@ class ProductDAO {
 
   async findByReference(reference) {
     return await Product.findOne({ reference })
+  }
+  async findByCategoryId(categorie_id) {
+    if (!mongoose.Types.ObjectId.isValid(categorie_id)) {
+      throw new Error("ID de catégorie invalide.") // ✅ Vérification de l'ID
+    }
+
+    const products = await Product.find({ categorie_id }) // 🔥 Optionnel : récupérer les infos de la catégorie
+    console.log("products dans productsDAO findbycategorieId", products)
+    return products
+  }
+  async findBySupplierId(supplier_id) {
+    if (!mongoose.Types.ObjectId.isValid(supplier_id)) {
+      throw new Error("ID de fournisseur invalide.") // ✅ Vérification de l'ID
+    }
+
+    const products = await Product.find({ supplier_id }) // 🔥 Optionnel : récupérer les infos de la catégorie
+    console.log("products dans productsDAO findbySupplierId", products)
+    return products
   }
 
   // ✅ Récupérer tous les produits avec options de filtrage et pagination

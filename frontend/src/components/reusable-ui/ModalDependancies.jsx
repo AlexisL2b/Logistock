@@ -36,23 +36,25 @@ export default function BasicModal({
   const [formData, setFormData] = useState({
     name: "",
     reference: "",
-    price: "",
+    prix: "",
     quantite_disponible: "",
-    category_id: "",
+    description: "", // ✅ Ajout de la description
+    categorie_id: "",
     supplier_id: "",
     sales_point_id: "",
   })
 
-  const [errors, setErrors] = useState({}) // ✅ État des erreurs
+  const [errors, setErrors] = useState({})
 
   useEffect(() => {
     if (objectData) {
       setFormData({
-        name: objectData.name || "",
+        name: objectData.nom || "",
         reference: objectData.reference || "",
-        price: objectData.price || "",
+        prix: objectData.prix || "",
         quantite_disponible: objectData.quantite_disponible || "",
-        category_id: objectData.category_id?._id || "",
+        description: objectData.description || "", // ✅ Remplissage si disponible
+        categorie_id: objectData.categorie_id?._id || "",
         supplier_id: objectData.supplier_id?._id || "",
         sales_point_id: objectData.sales_point_id || "",
       })
@@ -67,19 +69,20 @@ export default function BasicModal({
     }))
   }
 
-  // ✅ Fonction de validation
   const validateForm = () => {
     let newErrors = {}
 
-    if (!formData.name.trim()) newErrors.name = "Le nom est obligatoire."
+    if (!formData.nom.trim()) newErrors.nom = "Le nom est obligatoire."
     if (!formData.reference.trim())
       newErrors.reference = "La référence est obligatoire."
-    if (!formData.price || formData.price <= 0)
-      newErrors.price = "Le prix doit être supérieur à 0."
+    if (!formData.prix || formData.prix <= 0)
+      newErrors.prix = "Le prix doit être supérieur à 0."
     if (!formData.quantite_disponible || formData.quantite_disponible <= 0)
       newErrors.quantite_disponible = "Quantité invalide."
-    if (!formData.category_id)
-      newErrors.category_id = "Veuillez sélectionner une catégorie."
+    if (!formData.description.trim())
+      newErrors.description = "La description est obligatoire." // ✅ Ajout validation description
+    if (!formData.categorie_id)
+      newErrors.categorie_id = "Veuillez sélectionner une catégorie."
     if (!formData.supplier_id)
       newErrors.supplier_id = "Veuillez sélectionner un fournisseur."
     if (!formData.sales_point_id)
@@ -108,11 +111,11 @@ export default function BasicModal({
           {/* 🔥 Nom */}
           <TextField
             label="Nom"
-            name="name"
-            value={formData.name}
+            name="nom"
+            value={formData.nom}
             onChange={handleInputChange}
-            error={!!errors.name}
-            helperText={errors.name}
+            error={!!errors.nom}
+            helperText={errors.nom}
             fullWidth
           />
 
@@ -130,15 +133,12 @@ export default function BasicModal({
           {/* 🔥 Prix */}
           <TextField
             label="Prix"
-            name="price"
+            name="prix"
             type="number"
-            value={formData.price}
+            value={formData.prix}
             onChange={handleInputChange}
-            onInput={(e) => {
-              e.target.value = e.target.value.replace(/[^0-9]/g, "") // 🔥 Seulement les chiffres
-            }}
-            error={!!errors.price}
-            helperText={errors.price}
+            error={!!errors.prix}
+            helperText={errors.prix}
             fullWidth
           />
 
@@ -149,20 +149,30 @@ export default function BasicModal({
             type="number"
             value={formData.quantite_disponible}
             onChange={handleInputChange}
-            onInput={(e) => {
-              e.target.value = e.target.value.replace(/[^0-9]/g, "")
-            }}
             error={!!errors.quantite_disponible}
             helperText={errors.quantite_disponible}
             fullWidth
           />
 
+          {/* 🔥 Description */}
+          <TextField
+            label="Description"
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            error={!!errors.description}
+            helperText={errors.description}
+            fullWidth
+            multiline // ✅ Permet plusieurs lignes
+            rows={3} // ✅ Définit la hauteur initiale
+          />
+
           {/* 🔥 Catégorie */}
-          <FormControl fullWidth error={!!errors.category_id}>
+          <FormControl fullWidth error={!!errors.categorie_id}>
             <InputLabel>Catégorie</InputLabel>
             <Select
-              name="category_id"
-              value={formData.category_id}
+              name="categorie_id"
+              value={formData.categorie_id}
               onChange={handleInputChange}
             >
               {dropdownData["/categories"]?.map((item) => (
@@ -171,7 +181,7 @@ export default function BasicModal({
                 </MenuItem>
               ))}
             </Select>
-            <FormHelperText>{errors.category_id}</FormHelperText>
+            <FormHelperText>{errors.categorie_id}</FormHelperText>
           </FormControl>
 
           {/* 🔥 Fournisseur */}
