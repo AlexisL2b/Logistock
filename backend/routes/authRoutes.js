@@ -2,47 +2,34 @@ import express from "express"
 import {
   createUser,
   loginUser,
-  storeToken,
+  getUserProfile,
 } from "../controllers/authController.js"
-import authenticate from "../middlewares/authenticate.js"
-import User from "../models/userModel.js"
+import validate from "../middlewares/validate.js"
+import { registerSchema, loginSchema } from "../validation/authValidation.js"
+import { protect } from "../middlewares/authMiddleware.js"
 import checkRole from "../middlewares/checkRole.js"
 
 const router = express.Router()
 
-// Route d'inscription
+/**
+ * 🔹 Route d'inscription
+ */
 router.post(
   "/register",
-  authenticate,
-  checkRole("Admin", "admin", "Gestionnaire"),
+  protect, // Vérifie que l'utilisateur est connecté
+  checkRole("admin", "gestionnaire"), // Seuls les admins ou gestionnaires peuvent créer des utilisateurs
+  validate(registerSchema),
   createUser
 )
-router.post("/store-token", storeToken)
-// Route de connexion
-router.post("/login", loginUser)
 
-// Route pour récupérer les informations utilisateur via le firebaseUid
-router.get("/profile", authenticate, async (req, res) => {
-  try {
-    const firebaseUid = req.user.uid
+/**
+ * 🔹 Route de connexion
+ */
+router.post("/login", validate(loginSchema), loginUser)
 
-    const user = await User.findOne({ firebaseUid })
-    if (!user) {
-      return res
-        .status(404)
-        .json({ message: "Utilisateur introuvable dans MongoDB" })
-    }
-    res.status(200).json({
-      message: "Informations utilisateur récupérées avec succès",
-      user,
-    })
-  } catch (error) {
-    console.error(
-      "Erreur lors de la récupération de l'utilisateur depuiis authRoutes :",
-      error
-    )
-    res.status(500).json({ message: "Erreur serveur" })
-  }
-})
+/**
+ * 🔹 Route protégée : Récupération du profil utilisateur
+ */
+router.get("/profile", protect, getUserProfile)
 
 export default router
