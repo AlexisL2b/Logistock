@@ -1,94 +1,120 @@
-import axios from "axios"
-import admin from "../config/firebase.js" // Firebase Admin SDK
-import User from "../models/userModel.js" // Modèle MongoDB pour les utilisateurs
+import jwt from "jsonwebtoken"
+import bcrypt from "bcryptjs"
+import User from "../models/userModel.js" // Modèle utilisateur MongoDB
+import Role from "../models/roleModel.js" // Modèle des rôles
 
 class AuthService {
-  // ✅ Création d'un utilisateur (Firebase + MongoDB)
-  async createUser(userData, currentUserRole) {
-    const { email, password, prenom, nom, adresse, salesPoint, roles } =
-      userData
-    console.log("🚨🚨🚨🚨currentUserRole🚨🚨🚨🚨", currentUserRole)
-    console.log("🚨🚨🚨🚨roles🚨🚨🚨🚨", roles)
-    // ✅ Étape 1 : Création de l'utilisateur Firebase
-    const userRecord = await admin.auth().createUser({
-      email,
-      password,
-    })
-
-    // 🔥 Étape 2 : Attribution sécurisée du rôle
-    let assignedRole = "Acheteur" // 🚨 Rôle par défaut pour les gestionnaires
-
-    if (currentUserRole === "admin" && roles) {
-      // ✅ Si un admin crée un utilisateur, il peut définir un rôle spécifique
-      assignedRole = roles
-    }
-
-    // ✅ Étape 3 : Ajouter le rôle dans Firebase Custom Claims
-    await admin
-      .auth()
-      .setCustomUserClaims(userRecord.uid, { role: assignedRole })
-
-    // ✅ Étape 4 : Enregistrement sécurisé en MongoDB
-    const newUser = new User({
-      firebaseUid: userRecord.uid, // UID Firebase
-      email: userRecord.email,
-      role_id: assignedRole, // Stocké en base de données
-      prenom,
-      nom,
-      adresse,
-      ...(salesPoint && { point_vente_id: salesPoint }), // Ajoute uniquement si salesPoint existe
-    })
-
-    return await newUser.save()
+  /**
+   * 🔹 Génération du Token JWT
+   */
+  async generateToken(user) {
+    return jwt.sign(
+      { id: user._id, email: user.email, role: user.role_id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    )
   }
 
-  // ✅ Connexion de l'utilisateur (Firebase + Vérification MongoDB)
-  async loginUser(email, password) {
+  /**
+   * 🔹 Création d'un utilisateur (MongoDB)
+   */
+  async createUser(userData, currentUserRole) {
     try {
-      // Étape 1 : Authentifier avec Firebase
-      const response = await axios.post(
-        `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY}`,
-        {
-          email,
-          password,
-          returnSecureToken: true,
-        }
-      )
+      const { email, password, prenom, nom, adresse, salesPoint, roles } =
+        userData
 
-      // Étape 2 : Vérifier l'existence de l'utilisateur dans MongoDB
-      const dbUser = await User.findOne({ email })
-      if (!dbUser) {
-        throw new Error("Utilisateur introuvable dans MongoDB.")
+      console.log("🚨🚨🚨 currentUserRole :", currentUserRole)
+      console.log("🚨🚨🚨 roles :", roles)
+
+      // Vérifier si l'utilisateur existe déjà
+      const userExists = await User.findOne({ email })
+      if (userExists) {
+        throw new Error("L'utilisateur existe déjà !")
       }
 
-      // ✅ Étape 3 : Générer un `customToken` Firebase
-      const customToken = await admin
-        .auth()
-        .createCustomToken(dbUser.firebaseUid)
-      console.log("🔹 Custom Token généré :", customToken)
+      // 🔹 Hashage du mot de passe
+      const hashedPassword = await bcrypt.hash(password, 10)
+
+      // 🔥 Attribution sécurisée du rôle par défaut
+      let assignedRole = await Role.findOne({ name: "Acheteur" })
+
+      if (currentUserRole === "admin" && roles) {
+        // ✅ Si un admin crée un utilisateur, il peut définir un rôle spécifique
+        const roleExists = await Role.findById(roles)
+        if (!roleExists) throw new Error("Le rôle spécifié n'existe pas.")
+        assignedRole = roleExists
+      }
+
+      // ✅ Étape : Enregistrement sécurisé en MongoDB
+      const newUser = new User({
+        email,
+        password: hashedPassword,
+        role_id: assignedRole._id, // Associer un ObjectId de rôle MongoDB
+        prenom,
+        nom,
+        adresse,
+        ...(salesPoint && { point_vente_id: salesPoint }), // Ajoute uniquement si salesPoint existe
+      })
+
+      await newUser.save()
+      return { message: "Utilisateur créé avec succès !" }
+    } catch (error) {
+      throw new Error(error.message)
+    }
+  }
+
+  /**
+   * 🔹 Connexion d'un utilisateur (MongoDB)
+   */
+  async loginUser(email, password) {
+    try {
+      // Vérifier si l'utilisateur existe en base
+      const user = await User.findOne({ email }).populate("role_id")
+      if (!user) {
+        throw new Error("Utilisateur introuvable.")
+      }
+
+      // Vérification du mot de passe
+      const isMatch = await bcrypt.compare(password, user.password)
+      if (!isMatch) {
+        throw new Error("Mot de passe incorrect.")
+      }
+
+      // ✅ Générer le token JWT
+      const token = await this.generateToken(user)
 
       return {
         message: "Connexion réussie",
-        customToken,
+        token,
+        user: {
+          id: user._id,
+          email: user.email,
+          role: user.role_id.name, // Nom du rôle (admin, user, manager...)
+        },
       }
     } catch (error) {
-      console.error("Erreur lors de la connexion :", error.message)
-      throw new Error("Identifiants incorrects")
+      throw new Error(error.message)
     }
   }
 
-  // ✅ Récupérer les infos utilisateur par `firebaseUid`
-  async getUserProfile(firebaseUid) {
-    const user = await User.findOne({ firebaseUid }).populate(
-      "point_vente_id",
-      "nom adresse"
-    )
+  /**
+   * 🔹 Récupérer le profil utilisateur
+   */
+  async getUserProfile(userId) {
+    try {
+      const user = await User.findById(userId).populate(
+        "point_vente_id",
+        "nom adresse"
+      )
 
-    if (!user) {
-      throw new Error("Utilisateur introuvable dans MongoDB")
+      if (!user) {
+        throw new Error("Utilisateur introuvable.")
+      }
+
+      return user
+    } catch (error) {
+      throw new Error(error.message)
     }
-
-    return user
   }
 }
 
