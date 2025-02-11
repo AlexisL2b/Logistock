@@ -33,9 +33,14 @@ export const userSchema = Joi.object({
     "any.required": "Le mot de passe est obligatoire.",
   }),
 
-  role: Joi.string().valid("admin", "user", "manager").optional().messages({
-    "any.only": "Le rôle doit être 'admin', 'user' ou 'manager'.",
-  }),
+  role_id: Joi.string()
+    .regex(/^[0-9a-fA-F]{24}$/)
+    .required()
+    .messages({
+      "string.pattern.base":
+        "L'ID du rôle doit être un ObjectId MongoDB valide.",
+      "any.required": "Le rôle est obligatoire.",
+    }),
 
   point_vente_id: Joi.string()
     .regex(/^[0-9a-fA-F]{24}$/)

@@ -48,10 +48,10 @@ const userSchema = new mongoose.Schema(
       minlength: 6, // Sécurité minimale
     },
 
-    role: {
-      type: String,
-      enum: ["admin", "user", "manager"],
-      default: "user",
+    role_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Role", // Référence à la collection Role
+      required: true,
     },
 
     point_vente_id: {
