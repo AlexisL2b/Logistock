@@ -1,99 +1,65 @@
-import axios from "axios"
-import admin from "../config/firebase.js" // Firebase Admin SDK
-import User from "../models/userModel.js" // Modèle MongoDB pour les utilisateurs
+import AuthService from "../services/authService.js"
 
+/**
+ * 🔹 Inscription utilisateur
+ */
 export const createUser = async (req, res) => {
   try {
-    // Étape 1 : Extraire les données du corps de la requête
-    const { email, password, prenom, nom, adresse, salesPoint, role_id } =
-      req.body
+    const currentUserRole = req.user?.role || "Acheteur" // Rôle par défaut si non défini
+    console.log("🔹 Rôle du créateur :", currentUserRole)
 
-    // Étape 2 : Créer l'utilisateur dans Firebase Authentication
-    const userRecord = await admin.auth().createUser({
-      email,
-      password,
-    })
+    const newUser = await AuthService.createUser(req.body, currentUserRole)
 
-    //("Utilisateur créé dans Firebase :", userRecord.password)
-
-    // Étape 3 : Enregistrer l'utilisateur dans MongoDB
-    const newUser = new User({
-      firebaseUid: userRecord.uid, // UID de Firebase
-      email: userRecord.email,
-      role_id: "677cf977b39853e4a17727e3", // Rôle par défaut
-      prenom,
-      nom,
-      adresse,
-      point_vente_id: salesPoint || "", // Valeur par défaut : adresse
-    })
-
-    const savedUser = await newUser.save()
-
-    // Étape 4 : Répondre au client
     res.status(201).json({
       message: "Utilisateur créé avec succès",
-      data: savedUser,
+      data: newUser,
     })
   } catch (error) {
-    console.error(
-      "Erreur lors de la création de l'utilisateur :",
-      error.message
-    )
-
-    res.status(500).json({
-      message: "Erreur lors de la création de l'utilisateur",
-      error: error.message,
-    })
+    res.status(500).json({ message: error.message })
   }
 }
-// Connexion
 
+/**
+ * 🔹 Connexion utilisateur
+ */
 export const loginUser = async (req, res) => {
-  const { email, password } = req.body
-
   try {
-    // Authentifier l'utilisateur avec Firebase REST API
-    const response = await axios.post(
-      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.FIREBASE_API_KEY}`,
-      {
-        email,
-        password,
-        returnSecureToken: true,
-      }
-    )
+    const { email, password } = req.body
 
-    // Vérifier si l'utilisateur existe dans MongoDB
-    const dbUser = await User.findOne({ email: email })
-    if (!dbUser) {
-      return res.status(404).json({
-        message: "Utilisateur introuvable dans MongoDB.",
-      })
-    }
+    // Authentification avec JWT
+    const result = await AuthService.loginUser(email, password)
 
-    // ✅ Générer un `customToken` à partir de Firebase Admin
-    const customToken = await admin.auth().createCustomToken(dbUser.firebaseUid)
+    // ✅ Stocker le token JWT dans un cookie HTTPOnly sécurisé
+    res.cookie("token", result.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+      maxAge: 3600000, // Expiration : 1h
+    })
 
-    // Réponse avec le `customToken` (PAS `idToken`)
     res.status(200).json({
       message: "Connexion réussie",
-      customToken, // C'est ce token qu'on doit utiliser pour `signInWithCustomToken()`
-      user: {
-        email: dbUser.email,
-        role: dbUser.role,
-        firstName: dbUser.firstName,
-        lastName: dbUser.lastName,
-        address: dbUser.address,
-        sale_point: dbUser.sale_point,
-      },
+      token: result.token,
+      user: result.user,
     })
   } catch (error) {
-    console.error(
-      "Erreur lors de la connexion :",
-      error.response?.data || error.message
-    )
-    res.status(401).json({
-      message: "Identifiants incorrects",
-      error: error.response?.data || error.message,
+    res.status(401).json({ message: error.message })
+  }
+}
+
+/**
+ * 🔹 Récupération du profil utilisateur (JWT)
+ */
+export const getUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.id
+    const user = await AuthService.getUserProfile(userId)
+
+    res.status(200).json({
+      message: "Profil utilisateur récupéré avec succès",
+      user,
     })
+  } catch (error) {
+    res.status(404).json({ message: error.message })
   }
 }

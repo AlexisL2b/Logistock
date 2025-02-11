@@ -16,8 +16,22 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    stripePayment: {
+      paymentIntentId: { type: String, default: null }, // 🔥 Stocker l’ID Stripe
+      status: {
+        type: String,
+        enum: ["pending", "succeeded", "failed"],
+        default: "pending",
+      }, // 🔥 Suivi du paiement
+    },
+    totalAmount: {
+      // 🔥 Ajoute ce champ
+      type: Number,
+      required: true,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
+  { versionKey: false }
 )
 
 const Order = mongoose.model("Orders", orderSchema)

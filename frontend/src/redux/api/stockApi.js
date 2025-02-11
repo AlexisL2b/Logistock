@@ -11,13 +11,29 @@ export const getStockByProductId = async (productId) => {
 // Mettre à jour un stock par son ID
 export const updateStockById = async (stockId, stockUpdates) => {
   const response = await axiosInstance.put(
-    `/api/stocks/${stockId}`,
+    `http://localhost:5000/api/stocks/${stockId}`,
     stockUpdates
   )
   return response.data
 }
 
 export const getStock = async () => {
-  const response = await axiosInstance.get(`/api/stocks/all`)
+  const response = await axiosInstance.get(
+    `http://localhost:5000/api/stocks/all`
+  )
   return response.data
+}
+export const decrementStock = async (orderDetails) => {
+  const response = await axiosInstance.post(
+    `http://localhost:5000/api/stocks/decrement`,
+    { orderDetails }
+  )
+  return response.data
+}
+
+export const getStockWithProducts = async () => {
+  const response = await axiosInstance.get(
+    "http://localhost:5000/api/stocks/stocks-with-products"
+  )
+  return response.data.data
 }

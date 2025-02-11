@@ -1,17 +1,16 @@
 import React from "react"
-import { Box, Typography, Button } from "@mui/material"
+import { Box, Typography, Button, IconButton } from "@mui/material"
 import { useDispatch, useSelector } from "react-redux"
 import {
   addToCart,
   decrementFromCart,
   removeFromCart,
 } from "../../../../../redux/slices/cartSlice"
+import DeleteIcon from "@mui/icons-material/Delete"
+import AddIcon from "@mui/icons-material/Add"
+import RemoveIcon from "@mui/icons-material/Remove"
 
-export default function CartCardModal({
-  product,
-
-  onRemove,
-}) {
+export default function CartCardModal({ product }) {
   const { nom, prix, quantite_disponible, quantity = 0 } = product
   const dispatch = useDispatch()
   const cartItem = useSelector((state) =>
@@ -20,7 +19,6 @@ export default function CartCardModal({
   const userId = useSelector((state) => state.auth.user._id)
 
   const handleAddToCart = () => {
-    //("cartItem", cartItem)
     dispatch(
       addToCart({
         userId,
@@ -35,6 +33,7 @@ export default function CartCardModal({
       dispatch(decrementFromCart({ userId, produit_id: cartItem.produit_id }))
     }
   }
+
   const handleRemove = () => {
     dispatch(removeFromCart({ userId, produit_id: cartItem.produit_id }))
   }
@@ -43,54 +42,86 @@ export default function CartCardModal({
     <Box
       sx={{
         display: "flex",
-        justifyContent: "space-between",
+        flexDirection: { xs: "column", sm: "row" },
         alignItems: "center",
+        justifyContent: "space-between",
         mb: 2,
         p: 2,
         border: "1px solid #e0e0e0",
         borderRadius: 2,
+        boxShadow: 2,
+        bgcolor: "background.paper",
+        transition: "all 0.3s ease",
+        "&:hover": {
+          boxShadow: 4,
+        },
       }}
     >
       {/* Informations sur le produit */}
-      <Box>
-        <Typography variant="h6" component="div">
+      <Box sx={{ flex: 1, textAlign: { xs: "center", sm: "left" } }}>
+        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
           {nom}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          {`Prix : ${prix} €`}
+          Prix : <strong>{prix ? `${prix} €` : "Non défini"}</strong>
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          {`Quantité disponible : ${quantite_disponible}`}
+          Quantité disponible :{" "}
+          <strong>{quantite_disponible ?? "Non défini"}</strong>
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          {`Dans le panier : ${quantity}`}
+          Dans le panier : <strong>{quantity}</strong>
         </Typography>
       </Box>
 
       {/* Actions sur le produit */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Button
-          variant="outlined"
-          color="secondary"
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          mt: { xs: 2, sm: 0 },
+        }}
+      >
+        <IconButton
+          size="small"
+          color="primary"
           onClick={handleDecrement}
           disabled={quantity === 0}
+          sx={{ border: "1px solid", borderRadius: "8px", p: 1 }}
         >
-          -
-        </Button>
-        <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+          <RemoveIcon />
+        </IconButton>
+
+        <Typography
+          variant="body1"
+          sx={{ fontWeight: "bold", minWidth: "30px", textAlign: "center" }}
+        >
           {quantity}
         </Typography>
-        <Button
-          variant="outlined"
+
+        <IconButton
+          size="small"
           color="primary"
           onClick={handleAddToCart}
           disabled={quantity >= quantite_disponible}
+          sx={{ border: "1px solid", borderRadius: "8px", p: 1 }}
         >
-          +
-        </Button>
-        <Button variant="text" color="error" onClick={handleRemove}>
-          Supprimer
-        </Button>
+          <AddIcon />
+        </IconButton>
+
+        <IconButton
+          size="small"
+          color="error"
+          onClick={handleRemove}
+          sx={{
+            borderRadius: "8px",
+            transition: "all 0.2s ease",
+            "&:hover": { bgcolor: "error.light" },
+          }}
+        >
+          <DeleteIcon />
+        </IconButton>
       </Box>
     </Box>
   )

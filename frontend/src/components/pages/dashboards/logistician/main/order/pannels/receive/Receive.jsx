@@ -27,7 +27,7 @@ export default function Receive() {
   // 🔄 Rafraîchir les données toutes les 45 secondes avec comparaison
   useEffect(() => {
     const interval = setInterval(() => {
-      console.log("🔄 Tentative de rafraîchissement des commandes et stocks...")
+      console.log("   ")
 
       // Comparer les commandes et les stocks avec leur état précédent
       if (!_.isEqual(orders, prevOrdersRef.current)) {
@@ -35,7 +35,6 @@ export default function Receive() {
         dispatch(fetchOrdersWithDetails())
         prevOrdersRef.current = orders // Mettre à jour la référence
       } else {
-        console.log("✅ Les commandes n'ont pas changé")
       }
 
       if (!_.isEqual(stocks, prevStocksRef.current)) {
@@ -43,7 +42,6 @@ export default function Receive() {
         dispatch(fetchStocks())
         prevStocksRef.current = stocks // Mettre à jour la référence
       } else {
-        console.log("✅ Les stocks n'ont pas changé")
       }
     }, 4500) // 45000 ms = 45 secondes
 

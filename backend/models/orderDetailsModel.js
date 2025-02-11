@@ -30,7 +30,7 @@ const orderDetailsSchema = new mongoose.Schema(
     },
   },
   // { timestamps: true },
-  { collection: "orders_details" }
+  { collection: "orders_details", versionKey: false }
 )
 
 const OrderDetails = mongoose.model("orders_details", orderDetailsSchema)

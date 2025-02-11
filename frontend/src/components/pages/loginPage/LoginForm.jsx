@@ -1,10 +1,9 @@
 import { Box, TextField, Typography, Button } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import { getAuth, signInWithCustomToken, signOut } from "firebase/auth"
-import { useNavigate } from "react-router" // Remplace Link pour la navigation
-
+import { useNavigate } from "react-router"
 import { useDispatch } from "react-redux"
-import { fetchUserProfile, setUser } from "../../../redux/slices/authSlice"
+import { setUser } from "../../../redux/slices/authSlice"
 import axiosInstance from "../../../axiosConfig"
 import { saveToLocalStorage } from "../../../utils/localStorage"
 
@@ -17,78 +16,93 @@ export default function LoginForm() {
 
   useEffect(() => {
     const auth = getAuth()
-    signOut(auth) // Déconnecte l'utilisateur au chargement de la page
-      .then(() => {
-        //("Session Firebase nettoyée")
-      })
-      .catch((error) => {
-        console.error("Erreur lors de la déconnexion Firebase :", error)
-      })
+    signOut(auth).catch((error) =>
+      console.error("Erreur lors de la déconnexion Firebase :", error)
+    )
   }, [])
+
   const handleLogin = async () => {
     try {
-      // Envoyer les identifiants au backend pour vérifier l'authentification
       const loginRes = await axiosInstance.post(
         "http://localhost:5000/api/auth/login",
         { email, password }
       )
 
-      const { customToken } = loginRes.data // Ceci est un ID token et NON un custom token
+      const customToken = loginRes.data.customToken
+      if (!customToken) {
+        console.error("❌ Erreur : Aucun customToken reçu !")
+        setError("Erreur d'authentification. Token manquant.")
+        return
+      }
 
-      // Stocker le token dans le localStorage ou sessionStorage
-      localStorage.setItem("customToken", customToken)
+      console.log("✅ Custom Token reçu :", customToken)
+
+      // 🔥 Se connecter avec le Custom Token pour obtenir un ID Token
       const auth = getAuth()
       const userCredential = await signInWithCustomToken(auth, customToken)
-      const idToken = await userCredential.user.getIdToken()
-      // Récupérer les données utilisateur depuis le backend avec ce token
-      const profileRes = await axiosInstance
-        .get("http://localhost:5000/api/auth/profile")
-        .then((response) => console.log("✅ Réponse API :", response.data))
-        .catch((error) =>
-          console.error(
-            "❌ Erreur API :",
-            error.response?.data || error.message
-          )
-        )
-      console.log(userCredential.user.uid)
-      const uid = userCredential.user.uid
-      const response = await axiosInstance.get(
-        `http://localhost:5000/api/users/uid/${uid}`
+      const idTokenResult = await userCredential.user.getIdTokenResult() // 🔥 Récupère l'ID Token avec les claims Firebase
+
+      console.log("✅ ID Token obtenu :", idTokenResult.token)
+
+      // 🔥 Extraire le rôle depuis Firebase Claims
+      const role = idTokenResult.claims.role || "user" // 🔥 Récupère le rôle sécurisé depuis Firebase
+      console.log("✅ Rôle extrait du token :", role)
+
+      // 🔥 Stocker l'ID Token en backend via un cookie
+      const storeTokenRes = await axiosInstance.post(
+        "http://localhost:5000/api/auth/store-token",
+        { idToken: idTokenResult.token }
       )
-      const user = response.data.user
-      console.log("user", user)
-      console.log("response", response)
-      // Dispatcher les données utilisateur dans Redux
-      dispatch(setUser(user))
-      saveToLocalStorage(`user_${user._id}`, user)
-      console.log(user)
-      // Redirection en fonction du rôle
-      if (user.role_id === "677cf977b39853e4a17727e0") {
-        navigate("/admin-dashboard")
-      } else if (user.role_id === "677cf977b39853e4a17727e3") {
-        navigate("/user-dashboard")
-      } else {
-        navigate("/logisticien-dashboard")
+
+      console.log(
+        "✅ Réponse du backend après stockage du token :",
+        storeTokenRes.data
+      )
+
+      // ⏳ Attendre 500ms pour être sûr que le cookie est bien stocké
+      await new Promise((resolve) => setTimeout(resolve, 500))
+
+      // 🔥 Enregistre l'utilisateur avec son rôle
+      dispatch(setUser({ uid: userCredential.user.uid, role }))
+      // 🔥 Redirige en fonction du rôle
+      switch (role) {
+        case "admin":
+          navigate("/admin-dashboard")
+          break
+        case "Admin":
+          navigate("/admin-dashboard")
+          break
+        case "Gestionnaire":
+          navigate("/gestionnaire-dashboard")
+          break
+        case "Logisticien":
+          navigate("/logisticien-dashboard")
+          break
+        default:
+          navigate("/user-dashboard")
       }
     } catch (err) {
-      console.error("Erreur lors de la connexion :", err)
-      setError("Connexion échouée.")
+      console.error("Erreur lors de la connexion :", err.message)
+      setError("Connexion échouée. Vérifiez vos identifiants.")
     }
   }
 
   return (
     <Box
       sx={{
-        background: "rgba(255, 255, 255, 0.1)", // Semi-transparence
-        border: "1px solid rgba(255, 255, 255, 0.3)",
-        borderRadius: 2,
+        backgroundColor: "rgba(0, 0, 0, 0.6)", // Fond plus opaque
+        borderRadius: "12px",
         padding: 4,
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
+        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
         textAlign: "center",
-        width: 300,
+        width: { xs: "90%", sm: "400px" },
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        color: "#fff",
       }}
     >
-      <Typography variant="h5" color="primary" gutterBottom>
+      <Typography variant="h5" gutterBottom>
         Connexion
       </Typography>
       {error && (
@@ -96,6 +110,7 @@ export default function LoginForm() {
           {error}
         </Typography>
       )}
+
       <TextField
         label="Email"
         variant="outlined"
@@ -103,23 +118,24 @@ export default function LoginForm() {
         margin="normal"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        InputLabelProps={{ style: { color: "#fff" } }}
         sx={{
           "& .MuiOutlinedInput-root": {
             "& fieldset": {
-              borderWidth: "2px",
-              borderColor: "white",
+              borderColor: "#fff",
             },
             "&:hover fieldset": {
-              borderWidth: "2px",
-              borderColor: "secondary.main",
+              borderColor: "#2196F3",
             },
             "&.Mui-focused fieldset": {
-              borderWidth: "3px",
-              borderColor: "secondary.main",
+              borderColor: "#2196F3",
             },
+            color: "#fff",
           },
+          input: { color: "#fff" },
         }}
       />
+
       <TextField
         label="Mot de passe"
         type="password"
@@ -128,37 +144,40 @@ export default function LoginForm() {
         margin="normal"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        InputLabelProps={{ style: { color: "#fff" } }}
         sx={{
           "& .MuiOutlinedInput-root": {
             "& fieldset": {
-              borderWidth: "2px",
-              borderColor: "white",
+              borderColor: "#fff",
             },
             "&:hover fieldset": {
-              borderWidth: "2px",
-              borderColor: "secondary.main",
+              borderColor: "#2196F3",
             },
             "&.Mui-focused fieldset": {
-              borderWidth: "3px",
-              borderColor: "secondary.main",
+              borderColor: "#2196F3",
             },
+            color: "#fff",
           },
+          input: { color: "#fff" },
         }}
       />
+
       <Button
         variant="contained"
         fullWidth
         sx={{
           marginTop: 2,
-          color: "primary.contrastText",
-          backgroundColor: "primary.main",
+          padding: "12px",
+          fontSize: "16px",
+          fontWeight: "bold",
+          backgroundColor: "#1976D2",
           "&:hover": {
-            backgroundColor: "primary.dark",
+            backgroundColor: "#1565C0",
           },
         }}
         onClick={handleLogin}
       >
-        Se connecter
+        SE CONNECTER
       </Button>
     </Box>
   )

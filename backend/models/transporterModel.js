@@ -13,7 +13,7 @@ const transporterSchema = new mongoose.Schema(
       type: String,
     },
   },
-  { timestamps: true }
+  { versionKey: false }
 )
 
 const Transporter = mongoose.model("Transporters", transporterSchema)

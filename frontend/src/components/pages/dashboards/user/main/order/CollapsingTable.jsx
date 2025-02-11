@@ -13,14 +13,22 @@ import {
   Typography,
   Paper,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material"
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material"
-
-import _ from "lodash"
 import axiosInstance from "../../../../../../axiosConfig"
+import _ from "lodash"
 
 function Row({ row, onStatusUpdate }) {
   const [open, setOpen] = useState(false)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const theme = useTheme()
+  const fullScreen = useMediaQuery(theme.breakpoints.down("sm"))
 
   // Définition des couleurs pour les statuts
   const color = {
@@ -28,22 +36,19 @@ function Row({ row, onStatusUpdate }) {
     validée: "green",
     expédiée: "blue",
     annulée: "red",
-    réceptionné: "purple", // Nouveau statut
+    réceptionné: "purple",
   }
 
   const handleReception = async () => {
-    if (!window.confirm("Confirmez-vous la réception de cette commande ?"))
-      return
-
     try {
-      // Envoyer la requête pour mettre à jour le statut en BDD
       const response = await axiosInstance.put(
         `http://localhost:5000/api/orders/${row.order_id}`,
         { statut: "réceptionné" }
       )
 
       if (response.status === 200) {
-        onStatusUpdate(row.order_id, "réceptionné") // Mise à jour locale
+        onStatusUpdate(row.order_id, "réceptionné")
+        setDialogOpen(false)
       }
     } catch (error) {
       console.error("Erreur lors de la mise à jour du statut :", error)
@@ -52,7 +57,6 @@ function Row({ row, onStatusUpdate }) {
 
   return (
     <>
-      {/* Ligne principale */}
       <TableRow>
         <TableCell>
           <IconButton
@@ -66,16 +70,12 @@ function Row({ row, onStatusUpdate }) {
         <TableCell>{row.order_id}</TableCell>
         <TableCell>{new Date(row.date_commande).toLocaleString()}</TableCell>
         <TableCell
-          sx={{
-            color: color[row.statut] || "black",
-            fontWeight: "700",
-          }}
+          sx={{ color: color[row.statut] || "black", fontWeight: "700" }}
         >
           {_.capitalize(row.statut)}
         </TableCell>
       </TableRow>
 
-      {/* Volet collapsible pour les détails + Bouton Réceptionné */}
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
           <Collapse in={open} timeout="auto" unmountOnExit>
@@ -108,13 +108,12 @@ function Row({ row, onStatusUpdate }) {
                 </TableBody>
               </Table>
 
-              {/* Bouton Réceptionné DANS le volet collapsible */}
               <Box mt={2} textAlign="right">
                 {row.statut !== "réceptionné" && (
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={handleReception}
+                    onClick={() => setDialogOpen(true)}
                     disabled={row.statut === "annulée"}
                   >
                     Réceptionné
@@ -125,6 +124,27 @@ function Row({ row, onStatusUpdate }) {
           </Collapse>
         </TableCell>
       </TableRow>
+
+      <Dialog
+        fullScreen={fullScreen}
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+      >
+        <DialogTitle>Confirmation</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Confirmez-vous la réception de cette commande ?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDialogOpen(false)} color="secondary">
+            Annuler
+          </Button>
+          <Button onClick={handleReception} color="primary" variant="contained">
+            Confirmer
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }
@@ -159,7 +179,7 @@ export default function CollapsingTable({ data }) {
   }
 
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
       <Table>
         <TableHead>
           <TableRow>
@@ -184,20 +204,5 @@ export default function CollapsingTable({ data }) {
 }
 
 CollapsingTable.propTypes = {
-  data: PropTypes.arrayOf(
-    PropTypes.shape({
-      order_id: PropTypes.string.isRequired,
-      date_commande: PropTypes.string.isRequired,
-      statut: PropTypes.string.isRequired,
-      produitDetails: PropTypes.arrayOf(
-        PropTypes.shape({
-          _id: PropTypes.string.isRequired,
-          commande_id: PropTypes.string.isRequired,
-          produit_id: PropTypes.string.isRequired,
-          quantite: PropTypes.number.isRequired,
-          prix_unitaire: PropTypes.number.isRequired,
-        })
-      ).isRequired,
-    })
-  ).isRequired,
+  data: PropTypes.arrayOf(Row.propTypes.row).isRequired,
 }

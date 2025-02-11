@@ -36,7 +36,6 @@ const clearUserFromLocalStorage = () => {
 }
 
 // 🔹 Écoute les changements d'auth Firebase
-
 export const listenToAuthState = createAsyncThunk(
   "auth/listenToAuthState",
   async (_, { dispatch, rejectWithValue }) => {
@@ -45,53 +44,37 @@ export const listenToAuthState = createAsyncThunk(
 
       return new Promise(async (resolve) => {
         onAuthStateChanged(auth, async (user) => {
-          // console.log("🔍 onAuthStateChanged détecté après refresh :", user)
-
           if (user) {
-            const idToken = await user.getIdToken(true)
-            // console.log("✅ Token récupéré après refresh :", idToken)
+            try {
+              // ✅ Attendre 500ms pour éviter la déconnexion intempestive
+              await new Promise((resolve) => setTimeout(resolve, 500))
 
-            // Récupérer les infos utilisateur depuis le backend
-            const response = await axiosInstance.get(
-              `http://localhost:5000/api/users/me`,
-              {
-                headers: { Authorization: `Bearer ${idToken}` },
-              }
-            )
+              // 🔥 Vérifier l'authentification auprès du backend
+              const response = await axiosInstance.get(
+                "http://localhost:5000/api/users/me"
+              )
 
-            const userData = response.data
-            saveUserToLocalStorage(userData)
-            dispatch(setUser(userData))
-            resolve(userData)
+              const userData = response.data
+
+              saveUserToLocalStorage(userData)
+              dispatch(setUser(userData))
+              resolve(userData)
+            } catch (error) {
+              console.warn("🚨 Échec de vérification du token, déconnexion...")
+              dispatch(logout())
+              resolve(null)
+            }
           } else {
-            // 🚨 Firebase a perdu la session : Tentative de reconnexion avec `customToken`
-            const storedToken = localStorage.getItem("customToken")
-            if (storedToken) {
-              try {
-                console.log("🔄 Tentative de reconnexion avec Firebase...")
-                const userCredential = await signInWithCustomToken(
-                  auth,
-                  storedToken
-                )
-                const refreshedToken = await userCredential.user.getIdToken(
-                  true
-                )
-
-                localStorage.setItem("token", refreshedToken)
-                console.log("✅ Reconnexion réussie !")
-                resolve(userCredential.user)
-              } catch (error) {
-                console.error(
-                  "🚨 Impossible de reconnecter l'utilisateur :",
-                  error
+            // ⏳ Attendre un peu avant de forcer la déconnexion pour éviter un faux `null`
+            setTimeout(() => {
+              if (!auth.currentUser) {
+                console.log(
+                  "🚨 Aucun utilisateur Firebase détecté, déconnexion..."
                 )
                 dispatch(logout())
                 resolve(null)
               }
-            } else {
-              dispatch(logout())
-              resolve(null)
-            }
+            }, 1000)
           }
         })
       })
@@ -114,10 +97,7 @@ export const fetchUserProfile = createAsyncThunk(
 
       const idToken = await auth.currentUser.getIdToken(true)
       const response = await axiosInstance.get(
-        "http://localhost:5000/api/users/me",
-        {
-          headers: { Authorization: `Bearer ${idToken}` },
-        }
+        "http://localhost:5000/api/users/me"
       )
 
       return response.data

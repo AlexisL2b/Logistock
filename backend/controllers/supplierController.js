@@ -1,96 +1,54 @@
-import mongoose from "mongoose"
-import Product from "../models/productModel.js"
-import Supplier from "../models/supplierModel.js"
+import SupplierService from "../services/supplierService.js"
 
+// Récupérer tous les fournisseurs
 export const getAllSuppliers = async (req, res) => {
   try {
-    const suppliers = await Supplier.find()
+    const suppliers = await SupplierService.getAllSuppliers()
     res.json(suppliers)
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur lors de la récupération des fournisseurs",
-      error,
-    })
+    res.status(500).json({ message: error.message })
   }
 }
 
+// Récupérer un fournisseur par ID
 export const getSupplierById = async (req, res) => {
   try {
-    const supplier = await Supplier.findById(req.params.id)
-    if (!supplier)
-      return res.status(404).json({ message: "Fournisseur introuvable" })
+    const supplier = await SupplierService.getSupplierById(req.params.id)
     res.json(supplier)
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Erreur lors de la récupération du fournisseur", error })
+    res.status(404).json({ message: error.message })
   }
 }
 
+// Ajouter un nouveau fournisseur
 export const addSupplier = async (req, res) => {
   try {
-    const newSupplier = new Supplier(req.body)
-    const savedSupplier = await newSupplier.save()
-    res.status(201).json(savedSupplier)
+    const newSupplier = await SupplierService.addSupplier(req.body)
+    res.status(201).json(newSupplier)
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Erreur lors de l'ajout du fournisseur", error })
+    res.status(400).json({ message: error.message })
   }
 }
 
+// Mettre à jour un fournisseur par ID
 export const updateSupplier = async (req, res) => {
   try {
-    const updatedSupplier = await Supplier.findByIdAndUpdate(
+    const updatedSupplier = await SupplierService.updateSupplier(
       req.params.id,
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      }
+      req.body
     )
-    if (!updatedSupplier)
-      return res.status(404).json({ message: "Fournisseur introuvable" })
     res.json(updatedSupplier)
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Erreur lors de la mise à jour du fournisseur", error })
+    res.status(404).json({ message: error.message })
   }
 }
 
+// Supprimer un fournisseur par ID
 export const deleteSupplier = async (req, res) => {
   try {
-    // Convertir l'ID en ObjectId
-    const supplierId = new mongoose.Types.ObjectId(req.params.id)
-    console.log("supplierId", supplierId)
-    // Vérifier si des produits sont associés au fournisseur
-    const associatedProducts = await Product.find({
-      supplier_id: supplierId,
-    })
-    console.log("associatedProducts:", associatedProducts)
-    //("supplierId:", supplierId)
-
-    if (associatedProducts.length > 0) {
-      // Créer une liste des noms des produits associés
-      const noms = associatedProducts.map((product) => product.nom).join(",")
-      return res.status(400).json({
-        message: `Impossible de supprimer le fournisseur, il est associé aux produits suivants : ${noms}`,
-      })
-    }
-
-    // Supprimer le fournisseur
-    const deletedSupplier = await Supplier.findByIdAndDelete(req.params.id)
-    if (!deletedSupplier) {
-      return res.status(404).json({ message: "Fournisseur introuvable" })
-    }
-
-    res.json({ message: "Fournisseur supprimé avec succès" })
+    const result = await SupplierService.deleteSupplier(req.params.id)
+    res.json(result)
   } catch (error) {
-    console.error("Erreur lors de la suppression du fournisseur :", error)
-    res.status(500).json({
-      message: "Erreur lors de la suppression du fournisseur",
-      error,
-    })
+    res.status(400).json({ message: error.message })
   }
 }

@@ -11,7 +11,8 @@ export default function Awaiting() {
   const { orders, status, error } = useSelector((state) => state.orders)
   const { stocks } = useSelector((state) => state.stocks)
   const [searchTerm, setSearchTerm] = useState("")
-
+  console.log("stocks", stocks)
+  console.log("orders", orders)
   // Références pour stocker les versions précédentes des données
   const prevOrdersRef = useRef(orders)
   const prevStocksRef = useRef(stocks)
@@ -25,15 +26,12 @@ export default function Awaiting() {
   // 🔄 Rafraîchir les données toutes les 45 secondes avec comparaison
   useEffect(() => {
     const interval = setInterval(() => {
-      console.log("🔄 Tentative de rafraîchissement des commandes et stocks...")
-
       // Comparer les commandes et les stocks avec leur état précédent
       if (!_.isEqual(orders, prevOrdersRef.current)) {
         console.log("🔄 Mise à jour des commandes détectée")
         dispatch(fetchOrdersWithDetails())
         prevOrdersRef.current = orders // Mettre à jour la référence
       } else {
-        console.log("✅ Les commandes n'ont pas changé")
       }
 
       if (!_.isEqual(stocks, prevStocksRef.current)) {
@@ -41,7 +39,6 @@ export default function Awaiting() {
         dispatch(fetchStocks())
         prevStocksRef.current = stocks // Mettre à jour la référence
       } else {
-        console.log("✅ Les stocks n'ont pas changé")
       }
     }, 4500) // 45000 ms = 45 secondes
 

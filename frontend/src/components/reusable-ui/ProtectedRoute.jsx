@@ -14,25 +14,14 @@ const ProtectedRoute = ({ children }) => {
     return null
   }
 
-  const localStorageUser = getUserFromLocalStorage()
-
-  // Si aucun utilisateur trouvé dans le localStorage, on prend l'utilisateur depuis Redux
   const reduxUser = useSelector((state) => state.auth.user)
-  const status = useSelector((state) => state.auth.status)
 
-  const user = localStorageUser || reduxUser
-
-  if (status === "loading") {
-    // Afficher un écran de chargement pendant l'initialisation
-    return <div>Chargement...</div>
-  }
-
+  const user = reduxUser
+  // console.log("user from redux", user)
   if (!user) {
-    // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
     return <Navigate to="/" />
   }
 
-  // Afficher la route protégée
   return children
 }
 

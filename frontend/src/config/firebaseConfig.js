@@ -17,14 +17,22 @@ setPersistence(auth, browserLocalPersistence)
   .then(() => console.log("✅ Persistence activée"))
   .catch((error) => console.error("⚠️ Erreur de persistence Firebase :", error))
 // Exportez l'instance Firebase et l'auth
+let hasTokenRefreshed = false // Empêche le double refresh
+
 auth.onIdTokenChanged(async (user) => {
-  if (user) {
-    const idToken = await user.getIdToken()
-    // console.log("🔑 Token Firebase après refresh :", idToken)
-  } else {
-    console.log("❌ Aucun utilisateur après refresh.")
+  if (!hasTokenRefreshed) {
+    hasTokenRefreshed = true
+    console.log("📢 onIdTokenChanged déclenché une seule fois.")
+
+    if (user) {
+      const idToken = await user.getIdToken()
+      console.log("🔑 Token Firebase après refresh :", idToken)
+    } else {
+      console.log("❌ Aucun utilisateur après refresh.")
+    }
   }
 })
+
 export default { app, auth }
 
 // Obtenir l'instance Firebase Auth

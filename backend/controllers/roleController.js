@@ -1,96 +1,51 @@
-import Role from "../models/roleModel.js"
+import roleService from "../services/roleService.js"
 
 // Récupérer tous les rôles
 export const getAllRoles = async (req, res) => {
   try {
-    const roles = await Role.find()
-    res.json({
-      message: "Rôles récupérés avec succès",
-      data: roles,
-    })
+    const roles = await roleService.getAllRoles()
+    res.json(roles)
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur lors de la récupération des rôles",
-      error,
-    })
+    res.status(500).json({ message: error.message })
   }
 }
 
 // Récupérer un rôle par ID
 export const getRoleById = async (req, res) => {
   try {
-    const role = await Role.findById(req.params.id)
-    if (!role) {
-      return res.status(404).json({ message: "Rôle introuvable" })
-    }
-    res.json({
-      message: "Rôle récupéré avec succès",
-      data: role,
-    })
+    const role = await roleService.getRoleById(req.params.id)
+    res.json(role)
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur lors de la récupération du rôle",
-      error,
-    })
+    res.status(404).json({ message: error.message })
   }
 }
 
-// Ajouter un nouveau rôle
+// Ajouter un rôle
 export const addRole = async (req, res) => {
   try {
-    const newRole = new Role(req.body)
-    const savedRole = await newRole.save()
-    res.status(201).json({
-      message: "Rôle ajouté avec succès",
-      data: savedRole,
-    })
+    const newRole = await roleService.addRole(req.body)
+    res.status(201).json(newRole)
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur lors de l'ajout du rôle",
-      error,
-    })
+    res.status(400).json({ message: error.message })
   }
 }
 
-// Mettre à jour un rôle par ID
+// Mettre à jour un rôle
 export const updateRole = async (req, res) => {
   try {
-    const updatedRole = await Role.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    })
-    if (!updatedRole) {
-      return res.status(404).json({ message: "Rôle introuvable" })
-    }
-    res.json({
-      message: "Rôle mis à jour avec succès",
-      data: updatedRole,
-    })
+    const updatedRole = await roleService.updateRole(req.params.id, req.body)
+    res.json(updatedRole)
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur lors de la mise à jour du rôle",
-      error,
-    })
+    res.status(404).json({ message: error.message })
   }
 }
 
-// Supprimer un rôle par ID
+// Supprimer un rôle
 export const deleteRole = async (req, res) => {
   try {
-    const deletedRole = await Role.findByIdAndDelete(req.params.id)
-    if (!deletedRole) {
-      return res.status(404).json({ message: "Rôle introuvable" })
-    }
-    res.json({
-      message: "Rôle supprimé avec succès",
-      data: deletedRole,
-    })
+    const deletedRole = await roleService.deleteRole(req.params.id)
+    res.json({ message: "Rôle supprimé avec succès", data: deletedRole })
   } catch (error) {
-    res.status(500).json({
-      message: "Erreur lors de la suppression du rôle",
-      error,
-    })
+    res.status(400).json({ message: error.message })
   }
 }
-
-// Routes associées

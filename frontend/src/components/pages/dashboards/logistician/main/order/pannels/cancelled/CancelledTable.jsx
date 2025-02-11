@@ -95,6 +95,7 @@ function Row({ row }) {
                 <TableHead>
                   <TableRow>
                     <TableCell>ID Produit</TableCell>
+                    <TableCell>Nom du produit</TableCell>
                     <TableCell>Quantité</TableCell>
                     <TableCell>Prix Unitaire</TableCell>
                     <TableCell>Stock Disponible</TableCell>
@@ -108,10 +109,12 @@ function Row({ row }) {
                     return (
                       <TableRow key={product._id}>
                         <TableCell>{product.produit_id}</TableCell>
+                        <TableCell>{product.name}</TableCell>
+
                         <TableCell>{product.quantite}</TableCell>
                         <TableCell>{product.prix_unitaire}</TableCell>
                         <TableCell>
-                          {stockInfo ? stockInfo.quantite_totale : "N/A"}
+                          {stockInfo ? stockInfo.quantite_disponible : "N/A"}
                         </TableCell>
                       </TableRow>
                     )

@@ -7,9 +7,14 @@ const stockLogSchema = new mongoose.Schema(
       ref: "Product",
       required: true,
     },
+    stock_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Stock",
+      required: true,
+    },
     evenement: {
       type: String,
-      enum: ["entree", "sortie", "ajustement"],
+      enum: ["entrée", "sortie", "création", "suppression"],
       required: true,
     },
     quantite: {
@@ -21,8 +26,7 @@ const stockLogSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { timestamps: true },
-  { collection: "stock_log" }
+  { collection: "stock_log", versionKey: false }
 )
 
 const StockLog = mongoose.model("stock_log", stockLogSchema)

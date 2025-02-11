@@ -7,7 +7,7 @@ const supplierSchema = new mongoose.Schema(
     telephone: { type: String },
     email: { type: String },
   },
-  { collection: "suppliers" }
+  { collection: "suppliers", versionKey: false }
 )
 
 const Supplier = mongoose.model("Supplier", supplierSchema)

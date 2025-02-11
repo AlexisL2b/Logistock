@@ -1,8 +1,12 @@
 import admin from "firebase-admin"
 import dotenv from "dotenv"
-
-// Charger les variables d'environnement
 dotenv.config()
+
+console.log("✅ .env chargé")
+// console.log(
+//   "🔍 FIREBASE_PRIVATE_KEY:",
+//   process.env.FIREBASE_PRIVATE_KEY ? "Définie" : "❌ NON définie"
+// )
 
 const serviceAccount = {
   type: process.env.FIREBASE_TYPE,

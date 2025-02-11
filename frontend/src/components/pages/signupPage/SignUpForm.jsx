@@ -3,8 +3,6 @@ import { useForm, Controller } from "react-hook-form"
 import {
   TextField,
   Button,
-  Checkbox,
-  FormControlLabel,
   Grid,
   Typography,
   Box,
@@ -12,15 +10,28 @@ import {
   Select,
   InputLabel,
   FormControl,
+  Snackbar,
+  Alert,
+  Modal,
 } from "@mui/material"
 import axiosInstance from "../../../axiosConfig"
 
-import User from "../../../../../backend/models/userModel"
+const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
+  const [salesPoints, setSalesPoints] = useState([])
+  const [roles, setRoles] = useState([
+    { nom: "Admin", id: 1 },
+    { nom: "Gestionnaire", id: 2 },
+    { nom: "Logisticien", id: 3 },
+    { nom: "Acheteur", id: 4 },
+  ])
+  const [selectedRole, setSelectedRole] = useState("") // Stocke le rôle sélectionné
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  })
+  const [modalOpen, setModalOpen] = useState(false) // État pour afficher la modale
 
-const FormulaireInscription = () => {
-  const [salesPoints, setSalesPoints] = useState([]) // State pour stocker les points de vente
-
-  // Initialisation de React Hook Form
   const {
     handleSubmit,
     control,
@@ -28,57 +39,65 @@ const FormulaireInscription = () => {
     formState: { errors },
   } = useForm()
 
-  // Récupérer les points de vente depuis l'API
-  useEffect(() => {
-    const fetchSalesPoints = () => {
-      axiosInstance
-        .get("/sales_points") // URL relative correcte si axiosInstance est bien configuré
-        .then((response) => {
-          setSalesPoints(response.data.data) // Mise à jour des points de vente dans le state
-          //("Points de vente récupérés :", response.data.data)
-        })
-        .catch((error) => {
-          console.error(
-            "Erreur lors de la récupération des points de vente :",
-            error
-          )
-        })
-    }
+  const password = watch("password")
+  const selectedSalesPoint = watch("salesPoint") // Récupère la valeur du point de vente
 
-    fetchSalesPoints()
+  function cleanObject(obj) {
+    return Object.fromEntries(
+      Object.entries(obj).filter(
+        ([_, value]) => value !== "" && value !== null && value !== undefined
+      )
+    )
+  }
+
+  useEffect(() => {
+    axiosInstance
+      .get("/sales_points")
+      .then((response) => {
+        console.log("Réponse API salesPoints :", response.data),
+          setSalesPoints(response.data),
+          console.log(salesPoints)
+      })
+      .catch((error) => console.error("Erreur points de vente :", error))
   }, [])
-  //("////////////////////", salesPoints)
-  // Fonction appelée lors de la soumission du formulaire
 
   const onSubmit = async (data) => {
     try {
-      //("Données soumises :", data)
+      console.log(data)
 
-      // Envoyer les données au backend
-      const res = await axiosInstance.post(
+      // if (selectedRole !== "Acheteur" && admin) {
+      //   delete data.salesPoint
+      // }
+
+      // 🚨 Supprimer `roles` pour éviter qu'un gestionnaire attribue un rôle
+
+      const cleanedData = cleanObject(data)
+      console.log(cleanedData)
+
+      await axiosInstance.post(
         "http://localhost:5000/api/auth/register",
-        data
+        cleanedData
       )
-
-      //("Réponse du backend :", res.data)
-
-      // Afficher un message de succès ou rediriger
-      alert("Inscription réussie !")
+      setSnackbar({
+        open: true,
+        message: "Inscription réussie !",
+        severity: "success",
+      })
+      setModalOpen(false) // Ouvre la modale
+      onUserAdded()
+      console.log("ici")
+      onClose()
     } catch (error) {
-      console.error("Erreur lors de l'inscription :", error)
-
-      // Afficher un message d'erreur à l'utilisateur
-      alert("Une erreur est survenue. Veuillez réessayer.")
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || "Une erreur est survenue.",
+        severity: "error",
+      })
     }
   }
-  // Récupérer la valeur actuelle du mot de passe pour la validation de confirmation
-  const password = watch("password")
 
   return (
     <Box sx={{ maxWidth: 500, margin: "0 auto", mt: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Inscription
-      </Typography>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2}>
           {/* Champ Prénom */}
@@ -151,7 +170,7 @@ const FormulaireInscription = () => {
                 required: "L'email est requis",
                 pattern: {
                   value: /^[^@ ]+@[^@ ]+\.[^@ ]+$/,
-                  message: "Veuillez entrer un email valide",
+                  message: "Email invalide",
                 },
               }}
               render={({ field }) => (
@@ -167,8 +186,6 @@ const FormulaireInscription = () => {
               )}
             />
           </Grid>
-
-          {/* Champ Mot de passe */}
           {/* Champ Mot de passe */}
           <Grid item xs={12}>
             <Controller
@@ -178,31 +195,13 @@ const FormulaireInscription = () => {
               rules={{
                 required: "Le mot de passe est requis",
                 validate: (value) => {
-                  // Vérification de la longueur minimale
-                  if (value.length < 12) {
-                    return "Le mot de passe doit contenir au moins 12 caractères"
-                  }
-
-                  // Vérification des types de caractères
-                  const hasUpperCase = /[A-Z]/.test(value) // Lettres majuscules
-                  const hasLowerCase = /[a-z]/.test(value) // Lettres minuscules
-                  const hasNumber = /[0-9]/.test(value) // Chiffres
-                  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(value) // Caractères spéciaux
-
-                  if (!hasUpperCase) {
-                    return "Le mot de passe doit contenir au moins une lettre majuscule"
-                  }
-                  if (!hasLowerCase) {
-                    return "Le mot de passe doit contenir au moins une lettre minuscule"
-                  }
-                  if (!hasNumber) {
-                    return "Le mot de passe doit contenir au moins un chiffre"
-                  }
-                  if (!hasSpecialChar) {
-                    return "Le mot de passe doit contenir au moins un caractère spécial"
-                  }
-
-                  return true // Valide si toutes les conditions sont remplies
+                  if (value.length < 12) return "Min. 12 caractères"
+                  if (!/[A-Z]/.test(value)) return "Une majuscule requise"
+                  if (!/[a-z]/.test(value)) return "Une minuscule requise"
+                  if (!/[0-9]/.test(value)) return "Un chiffre requis"
+                  if (!/[!@#$%^&*]/.test(value))
+                    return "Un caractère spécial requis"
+                  return true
                 },
               }}
               render={({ field }) => (
@@ -219,14 +218,14 @@ const FormulaireInscription = () => {
             />
           </Grid>
 
-          {/* Champ Confirmation de mot de passe */}
+          {/* Confirmation de mot de passe */}
           <Grid item xs={12}>
             <Controller
               name="confirmPassword"
               control={control}
               defaultValue=""
               rules={{
-                required: "La confirmation du mot de passe est requise",
+                required: "Confirmez votre mot de passe",
                 validate: (value) =>
                   value === password ||
                   "Les mots de passe ne correspondent pas",
@@ -245,64 +244,75 @@ const FormulaireInscription = () => {
             />
           </Grid>
 
-          {/* DropDown pour les points de vente */}
-          <Grid item xs={12}>
-            <Controller
-              name="salesPoint"
-              control={control}
-              defaultValue=""
-              rules={{ required: "Veuillez sélectionner un point de vente" }}
-              render={({ field }) => (
-                <FormControl fullWidth error={!!errors.salesPoint}>
-                  <InputLabel id="sales-point-label">Point de Vente</InputLabel>
-                  <Select
-                    {...field}
-                    labelId="sales-point-label"
-                    label="Point de Vente"
-                  >
-                    {salesPoints.map((point) => (
-                      <MenuItem key={point._id} value={point._id}>
-                        {point.nom}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                  {errors.salesPoint && (
-                    <Typography color="error" variant="body2">
-                      {errors.salesPoint.message}
-                    </Typography>
-                  )}
-                </FormControl>
-              )}
-            />
-          </Grid>
-
-          {/* Checkbox pour accepter les conditions */}
-          <Grid item xs={12}>
-            <Controller
-              name="conditions"
-              control={control}
-              defaultValue={false}
-              rules={{
-                required: "Vous devez accepter les conditions d'utilisation",
-              }}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={
-                    <Checkbox
+          {/* Sélecteur de rôle */}
+          {admin ? (
+            <Grid item xs={12}>
+              <Controller
+                name="roles"
+                control={control}
+                defaultValue=""
+                rules={{ required: "Veuillez sélectionner un rôle" }}
+                render={({ field }) => (
+                  <FormControl fullWidth>
+                    <InputLabel id="roles-label">Rôle</InputLabel>
+                    <Select
                       {...field}
-                      checked={field.value} // Spécifie la valeur de la checkbox
-                    />
-                  }
-                  label="J'accepte les conditions d'utilisation"
+                      labelId="roles-label"
+                      label="Rôle"
+                      onChange={(e) => {
+                        field.onChange(e) // Met à jour React Hook Form
+                        setSelectedRole(e.target.value) // Met à jour l'état
+                      }}
+                    >
+                      {roles?.map((role) => (
+                        <MenuItem key={role.id} value={role.nom}>
+                          {role.nom}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              />
+            </Grid>
+          ) : (
+            ""
+          )}
+
+          {/* Sélecteur de point de vente (Seulement si "Acheteur" est sélectionné) */}
+          {selectedRole === "Acheteur" ||
+            (!admin && (
+              <Grid item xs={12}>
+                <Controller
+                  name="salesPoint"
+                  control={control}
+                  defaultValue=""
+                  rules={{
+                    required:
+                      selectedRole === "Acheteur"
+                        ? "Veuillez sélectionner un point de vente"
+                        : false,
+                  }}
+                  render={({ field }) => (
+                    <FormControl fullWidth>
+                      <InputLabel id="sales-point-label">
+                        Point de Vente
+                      </InputLabel>
+                      <Select
+                        {...field}
+                        labelId="sales-point-label"
+                        label="Point de Vente"
+                      >
+                        {salesPoints.map((point) => (
+                          <MenuItem key={point._id} value={point._id}>
+                            {point.nom}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  )}
                 />
-              )}
-            />
-            {errors.conditions && (
-              <Typography color="error" variant="body2">
-                {errors.conditions.message}
-              </Typography>
-            )}
-          </Grid>
+              </Grid>
+            ))}
 
           {/* Bouton Soumettre */}
           <Grid item xs={12}>
@@ -312,6 +322,17 @@ const FormulaireInscription = () => {
           </Grid>
         </Grid>
       </form>
+
+      {/* Snackbar pour les messages */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={5000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert severity={snackbar.severity} sx={{ width: "100%" }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }

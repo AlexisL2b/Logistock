@@ -18,6 +18,7 @@ import { Alert, Button, IconButton, Snackbar } from "@mui/material"
 
 import ModalDependancies from "./ModalDependancies" // Import du composant modal
 import { useEffect } from "react"
+import axiosInstance from "../../axiosConfig"
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1
@@ -114,11 +115,12 @@ export default function EnhancedTable({
       try {
         const fetchedData = {}
         for (const endpoint of endpoints) {
-          const response = await axiosInstance.get("/api" + endpoint)
+          const response = await axiosInstance.get(endpoint)
           console.log(`Réponse API pour ${endpoint}:`, response.data) // 🔍 Ajoute ce log
           fetchedData[endpoint] = response.data
         }
         setDropdownData(fetchedData)
+        console.log("dropdownData", dropdownData)
       } catch (error) {
         console.error("Erreur lors de la récupération des données :", error)
       }
@@ -142,15 +144,15 @@ export default function EnhancedTable({
   const [selectedRow, setSelectedRow] = useState(null)
 
   // Générer un objet vide basé sur la structure
-  const generateEmptyObject = () => {
-    if (data.length === 0) return {}
-    const firstItem = data[0]
-    const emptyObject = {}
-    Object.keys(firstItem).forEach((key) => {
-      emptyObject[key] = key === "_id" ? undefined : "" // `_id` reste vide
-    })
-    return emptyObject
-  }
+  // const generateEmptyObject = () => {
+  //   if (data.length === 0) return {}
+  //   const firstItem = data[0]
+  //   const emptyObject = {}
+  //   Object.keys(firstItem).forEach((key) => {
+  //     emptyObject[key] = key === "_id" ? undefined : "" // `_id` reste vide
+  //   })
+  //   return emptyObject
+  // }
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc"
@@ -233,7 +235,15 @@ export default function EnhancedTable({
   }
 
   const handleOpenModalForAdd = () => {
-    const emptyObject = generateEmptyObject()
+    const emptyObject = {
+      nom: "",
+      reference: "",
+      description: "",
+      prix: "",
+      categorie_id: "",
+      supplier_id: "",
+      quantite: "",
+    }
     setSelectedRow(emptyObject)
     setOpenModal(true)
   }
@@ -366,6 +376,7 @@ export default function EnhancedTable({
             handleModalSubmit(updatedData)
             setOpenModal(false)
           }}
+          title="Ajouter un élément"
         />
       )}
     </Box>

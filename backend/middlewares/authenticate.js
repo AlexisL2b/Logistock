@@ -1,27 +1,33 @@
 import admin from "../config/firebase.js"
 
 const authenticate = async (req, res, next) => {
-  //("Middleware authenticate appelé") // Vérifie que le middleware est appelé
-
-  const token = req.header("Authorization")?.split(" ")[1]
-  console.log("Token reçu :", token) // Vérifie si le token est bien extrait
-
-  //("Token reçu :", token) // Vérifie si le token est bien extrait
+  const token = req.cookies.token
 
   if (!token) {
-    //("Token manquant")
-    return res.status(401).json({ message: "Token manquant. Accès refusé." })
+    return res.status(401).json({ message: "Accès refusé, aucun token trouvé" })
   }
 
   try {
-    //("Vérification du token en cours...")
+    // 🔥 Vérifier l'ID Token
     const decodedToken = await admin.auth().verifyIdToken(token)
-    //("Utilisateur décodé :", decodedToken) // Vérifie si Firebase a bien validé le token
-    req.user = decodedToken
-    next() // Passe à la route suivante
-  } catch (error) {
-    console.error("Erreur lors de la validation du token :", error.message)
-    res.status(403).json({ message: "Token invalide." })
+
+    // 🔥 Récupérer l'utilisateur complet depuis Firebase (pour avoir le rôle)
+    const userRecord = await admin.auth().getUser(decodedToken.uid)
+    const customClaims = userRecord.customClaims || {}
+
+    // 📌 Ajouter les informations dans `req.user`
+    console.log("📌📌📌📌 `req.user`", customClaims.role)
+
+    req.user = {
+      uid: decodedToken.uid,
+      email: decodedToken.email,
+      role: customClaims.role || "Acheteur", // 🔥 Rôle par défaut si inexistant
+    }
+
+    next()
+  } catch (err) {
+    console.error("❌ Erreur de vérification Firebase :", err)
+    res.status(403).json({ message: "Token invalide ou expiré" })
   }
 }
 

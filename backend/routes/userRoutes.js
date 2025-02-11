@@ -5,17 +5,18 @@ import {
   addUser,
   updateUser,
   deleteUser,
-  getUserProfile,
   getUserByUid,
-  getUserByEmail,
+  getAllBuyers,
 } from "../controllers/userController.js"
 import authenticate from "../middlewares/authenticate.js"
 import User from "../models/userModel.js"
+import checkRole from "../middlewares/checkRole.js"
 
 const router = express.Router()
+
 router.get("/me", authenticate, async (req, res) => {
   try {
-    const user = await User.findOne({ firebaseUid: req.user.uid }) // Cherche l'utilisateur par son UID Firebase
+    const user = await User.findOne({ firebaseUid: req.user.uid })
     if (!user) {
       return res.status(404).json({ message: "Utilisateur non trouvé" })
     }
@@ -24,12 +25,28 @@ router.get("/me", authenticate, async (req, res) => {
     res.status(500).json({ message: "Erreur serveur", error: error.message })
   }
 })
-router.get("/", getAllUsers) // GET /api/users
-router.get("/:id", getUserById) // GET /api/users/:id
-router.get("/email/:email", getUserByEmail) // GET /api/users/:id
-router.get("/uid/:uid", getUserByUid) // GET /api/users/:id
-router.post("/", addUser) // POST /api/users
-router.put("/:id", updateUser) // PUT /api/users/:id
-router.delete("/:id", deleteUser) // DELETE /api/users/:id
+
+router.get("/", getAllUsers)
+router.get("/buyers", getAllBuyers) // 🔥 Route pour récupérer uniquement les acheteur
+router.get("/:id", getUserById)
+router.get("/uid/:uid", getUserByUid)
+router.post(
+  "/",
+  authenticate,
+  checkRole("Admin", "admin", "Gestionnaire"),
+  addUser
+)
+router.put(
+  "/:id",
+  authenticate,
+  checkRole("Admin", "admin", "Gestionnaire"),
+  updateUser
+)
+router.delete(
+  "/:id",
+  authenticate,
+  checkRole("Admin", "admin", "Gestionnaire"),
+  deleteUser
+)
 
 export default router
