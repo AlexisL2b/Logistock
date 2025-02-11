@@ -1,13 +1,15 @@
 import AuthService from "../services/authService.js"
 
-// ✅ Inscription utilisateur
+/**
+ * 🔹 Inscription utilisateur
+ */
 export const createUser = async (req, res) => {
   try {
-    const currentUserRole = req.user?.role || "Acheteur" // 🔥 Vérifie qui fait la requête
-    console.log(" 🔥 🔥 🔥 🔥req.user?.roles 🔥 🔥 🔥 🔥", req.user?.role)
+    const currentUserRole = req.user?.role || "Acheteur" // Rôle par défaut si non défini
+    console.log("🔹 Rôle du créateur :", currentUserRole)
 
     const newUser = await AuthService.createUser(req.body, currentUserRole)
-    // console.log("// ✅ Inscription utilisateur", newUser)
+
     res.status(201).json({
       message: "Utilisateur créé avec succès",
       data: newUser,
@@ -17,64 +19,44 @@ export const createUser = async (req, res) => {
   }
 }
 
-// ✅ Connexion utilisateur
+/**
+ * 🔹 Connexion utilisateur
+ */
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body
 
-    // 🔥 On récupère `result` depuis AuthService
+    // Authentification avec JWT
     const result = await AuthService.loginUser(email, password)
 
-    // ✅ Vérification que result contient bien le `customToken`
-    if (!result.customToken) {
-      return res.status(400).json({ message: "Token manquant dans la réponse" })
-    }
-
-    // ✅ Stocker le token en cookie HTTPOnly
-    res.cookie("token", result.customToken, {
+    // ✅ Stocker le token JWT dans un cookie HTTPOnly sécurisé
+    res.cookie("token", result.token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "Strict",
-      maxAge: 3600000, // 1h
+      maxAge: 3600000, // Expiration : 1h
     })
 
-    // 🔥 On renvoie aussi temporairement le token pour le frontend
     res.status(200).json({
       message: "Connexion réussie",
-      customToken: result.customToken, // 👉 Firebase en a besoin pour `signInWithCustomToken`
+      token: result.token,
+      user: result.user,
     })
   } catch (error) {
     res.status(401).json({ message: error.message })
   }
 }
-export const storeToken = async (req, res) => {
-  try {
-    const { idToken } = req.body
-    if (!idToken) {
-      return res.status(400).json({ message: "ID Token manquant" })
-    }
 
-    // 🔥 Stocker le token en cookie HTTPOnly
-    res.cookie("token", idToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
-      maxAge: 3600000, // 1h
-    })
-
-    res.status(200).json({ message: "Token stocké avec succès" })
-  } catch (error) {
-    res.status(500).json({ message: "Erreur serveur", error: error.message })
-  }
-}
-
-// ✅ Récupérer le profil utilisateur via Firebase UID
+/**
+ * 🔹 Récupération du profil utilisateur (JWT)
+ */
 export const getUserProfile = async (req, res) => {
   try {
-    const firebaseUid = req.user.uid
-    const user = await AuthService.getUserProfile(firebaseUid)
+    const userId = req.user.id
+    const user = await AuthService.getUserProfile(userId)
+
     res.status(200).json({
-      message: "Informations utilisateur récupérées avec succès",
+      message: "Profil utilisateur récupéré avec succès",
       user,
     })
   } catch (error) {
