@@ -12,7 +12,7 @@ import CartDrawer from "./cart/cartDrawer"
 import Orders from "./main/order/Orders"
 import { useDispatch, useSelector } from "react-redux"
 import { loadCart } from "../../../../redux/slices/cartSlice"
-import { logout } from "../../../../redux/slices/authSlice"
+import { logoutUser } from "../../../../redux/slices/authSlice"
 import { loadUserFromLocalStorage } from "../../../../utils/localStorage"
 import { useTheme } from "@mui/material/styles"
 import useMediaQuery from "@mui/material/useMediaQuery"
@@ -35,7 +35,7 @@ export default function DashboardUser() {
     }
   }, [userId, dispatch])
   const handleLogout = () => {
-    dispatch(logout())
+    dispatch(logoutUser())
   }
 
   const cartItems = useSelector((state) => state.cart.items)
@@ -127,7 +127,7 @@ export default function DashboardUser() {
           <Button
             variant="outlined"
             color="error"
-            onClick={() => dispatch(logout())}
+            onClick={() => dispatch(logoutUser())}
             sx={{
               mt: "auto",
               borderColor: "transparent",

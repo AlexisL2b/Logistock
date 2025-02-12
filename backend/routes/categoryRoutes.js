@@ -9,7 +9,7 @@ import {
 import validate from "../middlewares/validate.js"
 import { categorySchema } from "../validations/categoryValidation.js"
 import authenticate from "../middlewares/authenticate.js"
-import checkRole from "../middlewares/checkRole.js"
+import { checkRole } from "../middlewares/checkRole.js"
 
 const router = express.Router()
 

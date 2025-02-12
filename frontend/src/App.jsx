@@ -14,25 +14,22 @@ import ErrorPage from "./components/pages/error/ErrorPage"
 // import Home from "./components/pages/dashboard/home/Home"
 import SignUpPage from "./components/pages/signupPage/SignUpPage"
 import DashboardUser from "./components/pages/dashboards/user/DashboardUser"
-import { listenToAuthState } from "./redux/slices/authSlice"
 import ProtectedRoute from "./components/reusable-ui/ProtectedRoute"
 import DashboardLogistician from "./components/pages/dashboards/logistician/DashboardLogistician"
 
 import DashboardGestionnaire from "./components/pages/dashboards/gestionnaire/DashboardGestionnaire"
+import { getFromLocalStorage } from "./utils/localStorage"
+import { setUser } from "./redux/slices/authSlice"
 
 function App() {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    let isMounted = true
-    console.log("🚀 useEffect de l'auth s'exécute")
+    const savedUser = getFromLocalStorage("user")
+    const token = getFromLocalStorage("authToken")
 
-    if (isMounted) {
-      dispatch(listenToAuthState()) // Vérifie l'utilisateur connecté
-    }
-
-    return () => {
-      isMounted = false // Empêche le second appel
+    if (savedUser && token) {
+      dispatch(setUser({ ...savedUser, token }))
     }
   }, [dispatch])
 

@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import {
-  fetchUserProfile,
-  updateUser,
-} from "../../../../../../redux/slices/authSlice"
+import { fetchUserProfile } from "../../../../../../redux/slices/authSlice"
 import {
   Box,
   TextField,
@@ -25,7 +22,7 @@ const Profile = () => {
   const { salesPoints } = useSelector((state) => state.salesPoints)
   const { roles } = useSelector((state) => state.roles)
   const roleUser = "677cf977b39853e4a17727e3"
-
+  console.log(user)
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
 
@@ -57,10 +54,10 @@ const Profile = () => {
 
   useEffect(() => {
     setUserProfile({
-      prenom: user?.prenom || "",
-      nom: user?.nom || "",
+      prenom: user?.firstname || "",
+      nom: user?.lastname || "",
       email: user?.email || "",
-      adresse: user?.adresse || "",
+      adresse: user?.adress || "",
     })
   }, [user])
 
@@ -103,54 +100,54 @@ const Profile = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSave = async (event) => {
-    event.preventDefault()
-    if (!validateFields()) return
+  // const handleSave = async (event) => {
+  //   event.preventDefault()
+  //   if (!validateFields()) return
 
-    setIsLoading(true)
+  //   setIsLoading(true)
 
-    try {
-      if (userProfile.email !== user.email) {
-        const usersResponse = await axiosInstance.get(`/api/users`)
-        const users = usersResponse.data || []
-        const emailExists = users.some(
-          (u) => u.email === userProfile.email && u._id !== user._id
-        )
+  //   try {
+  //     if (userProfile.email !== user.email) {
+  //       const usersResponse = await axiosInstance.get(`/api/users`)
+  //       const users = usersResponse.data || []
+  //       const emailExists = users.some(
+  //         (u) => u.email === userProfile.email && u._id !== user._id
+  //       )
 
-        if (emailExists) {
-          setAlertMessage("Cette adresse e-mail est déjà utilisée.")
-          setSeverity("error")
-          setAlertOpen(true)
-          setIsLoading(false)
-          return
-        }
-      }
+  //       if (emailExists) {
+  //         setAlertMessage("Cette adresse e-mail est déjà utilisée.")
+  //         setSeverity("error")
+  //         setAlertOpen(true)
+  //         setIsLoading(false)
+  //         return
+  //       }
+  //     }
 
-      const result = await dispatch(
-        updateUser({
-          userId: user._id,
-          updatedFields: userProfile,
-        })
-      )
+  //     const result = await dispatch(
+  //       updateUser({
+  //         userId: user._id,
+  //         updatedFields: userProfile,
+  //       })
+  //     )
 
-      dispatch(fetchUserProfile())
+  //     dispatch(fetchUserProfile())
 
-      if (result.error) {
-        setAlertMessage(result.error.message || "Une erreur est survenue.")
-        setSeverity("error")
-      } else {
-        setAlertMessage("Mise à jour réussie !")
-        setSeverity("success")
-        setIsEditing(false)
-      }
-    } catch (error) {
-      setAlertMessage("Erreur de mise à jour.")
-      setSeverity("error")
-    }
+  //     if (result.error) {
+  //       setAlertMessage(result.error.message || "Une erreur est survenue.")
+  //       setSeverity("error")
+  //     } else {
+  //       setAlertMessage("Mise à jour réussie !")
+  //       setSeverity("success")
+  //       setIsEditing(false)
+  //     }
+  //   } catch (error) {
+  //     setAlertMessage("Erreur de mise à jour.")
+  //     setSeverity("error")
+  //   }
 
-    setIsLoading(false)
-    setAlertOpen(true)
-  }
+  //   setIsLoading(false)
+  //   setAlertOpen(true)
+  // }
 
   return (
     <Box
@@ -216,7 +213,7 @@ const Profile = () => {
             <Button
               variant="contained"
               color="success"
-              onClick={handleSave}
+              onClick={() => console.log("bv")}
               disabled={isLoading}
             >
               {isLoading ? <CircularProgress size={24} /> : "Confirmer"}

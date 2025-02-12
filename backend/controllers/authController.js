@@ -1,7 +1,7 @@
 import AuthService from "../services/authService.js"
 
 /**
- * 🔹 Inscription utilisateur
+ * 🔹 Inscription utilisateur avec rôle en ObjectId
  */
 export const createUser = async (req, res) => {
   try {
@@ -25,30 +25,16 @@ export const createUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body
+    const response = await AuthService.loginUser(email, password, res)
 
-    // Authentification avec JWT
-    const result = await AuthService.loginUser(email, password)
-
-    // ✅ Stocker le token JWT dans un cookie HTTPOnly sécurisé
-    res.cookie("token", result.token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
-      maxAge: 3600000, // Expiration : 1h
-    })
-
-    res.status(200).json({
-      message: "Connexion réussie",
-      token: result.token,
-      user: result.user,
-    })
+    res.status(200).json(response)
   } catch (error) {
     res.status(401).json({ message: error.message })
   }
 }
 
 /**
- * 🔹 Récupération du profil utilisateur (JWT)
+ * 🔹 Récupération du profil utilisateur
  */
 export const getUserProfile = async (req, res) => {
   try {

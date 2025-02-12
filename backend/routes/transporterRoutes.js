@@ -8,7 +8,8 @@ import {
 } from "../controllers/transporterController.js"
 import validate from "../middlewares/validate.js"
 import { transporterSchema } from "../validations/transporterValidation.js"
-import checkRole from "../middlewares/checkRole.js"
+import { checkRole } from "../middlewares/checkRole.js"
+
 import authenticate from "../middlewares/authenticate.js"
 
 const router = express.Router()

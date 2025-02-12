@@ -1,20 +1,10 @@
-const checkRole = (...allowedRoles) => {
+export const checkRole = (...allowedRoles) => {
   return (req, res, next) => {
-    if (!req.user || !req.user.role) {
-      return res
-        .status(403)
-        .json({ message: "Accès interdit. Rôle non défini." })
+    if (!req.user || !allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({
+        message: "Accès refusé. Vous n'avez pas les permissions nécessaires.",
+      })
     }
-
-    // Vérifie si l'utilisateur a l'un des rôles autorisés
-    if (!allowedRoles.includes(req.user.role)) {
-      return res
-        .status(403)
-        .json({ message: "Accès interdit. Rôle insuffisant." })
-    }
-
-    next() // ✅ Passe à l'action suivante si l'utilisateur a le bon rôle
+    next()
   }
 }
-
-export default checkRole

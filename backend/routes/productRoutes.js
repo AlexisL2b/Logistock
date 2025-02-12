@@ -7,7 +7,7 @@ import {
   deleteProduct,
 } from "../controllers/productController.js"
 import authenticate from "../middlewares/authenticate.js"
-import checkRole from "../middlewares/checkRole.js"
+import { checkRole } from "../middlewares/checkRole.js"
 
 const router = express.Router()
 

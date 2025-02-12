@@ -2,7 +2,7 @@ import { Box, Button, Drawer, IconButton } from "@mui/material"
 import Menu from "../../../reusable-ui/Menu" // Composant Menu
 import React, { useState } from "react"
 import { useDispatch } from "react-redux"
-import { logout } from "../../../../redux/slices/authSlice"
+import { logoutUser } from "../../../../redux/slices/authSlice"
 import AccountTreeIcon from "@mui/icons-material/AccountTree"
 import AccountCircleIcon from "@mui/icons-material/AccountCircle"
 import MenuIcon from "@mui/icons-material/Menu"
@@ -38,7 +38,7 @@ export default function DashboardLogistician() {
   )?.component
 
   const handleLogout = () => {
-    dispatch(logout())
+    dispatch(logoutUser())
   }
 
   return (

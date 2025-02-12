@@ -19,7 +19,6 @@ const testConnection = async () => {
 
     // Test : Création d'un utilisateur temporaire
     const testUser = new User({
-      firebaseUid: "123456789",
       nom: "Dupont",
       prenom: "Jean",
       adresse: "123 Rue de Paris",

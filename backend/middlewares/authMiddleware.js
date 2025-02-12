@@ -1,16 +1,15 @@
 import jwt from "jsonwebtoken"
 
 export const protect = (req, res, next) => {
-  let token = req.headers.authorization
+  const token = req.cookies.authToken // 🔥 Récupération depuis le cookie
 
-  if (!token || !token.startsWith("Bearer ")) {
+  if (!token) {
     return res.status(401).json({ message: "Accès refusé, token manquant !" })
   }
 
   try {
-    token = token.split(" ")[1] // Récupérer uniquement le token
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
-    req.user = decoded // Ajouter l'utilisateur décodé à req.user
+    req.user = decoded // 🔹 Associe l'utilisateur décodé à `req.user`
     next()
   } catch (error) {
     res.status(401).json({ message: "Token invalide !" })

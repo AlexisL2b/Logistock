@@ -15,7 +15,7 @@ import MenuIcon from "@mui/icons-material/Menu"
 import LogoutIcon from "@mui/icons-material/Logout"
 
 import { useDispatch } from "react-redux"
-import { logout } from "../../../../redux/slices/authSlice"
+import { logoutUser } from "../../../../redux/slices/authSlice"
 import Menu from "../../../reusable-ui/Menu"
 
 import Users from "./main/users/Users"
@@ -31,7 +31,7 @@ export default function DashboardAdmin() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"))
 
   const handleLogout = () => {
-    dispatch(logout())
+    dispatch(logoutUser())
   }
 
   const links = [

@@ -21,6 +21,16 @@ export const loadFromLocalStorage = (key) => {
   }
 }
 
+export const getFromLocalStorage = (key) => {
+  try {
+    const value = localStorage.getItem(key)
+    return value ? JSON.parse(value) : null
+  } catch (error) {
+    console.error("Erreur lors de la récupération depuis localStorage", error)
+    return null
+  }
+}
+
 export const loadUserFromLocalStorage = () => {
   try {
     const keys = Object.keys(localStorage).filter((key) =>
