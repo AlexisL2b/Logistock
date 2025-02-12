@@ -29,12 +29,12 @@ const Profile = () => {
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState({})
-
+  console.log("user", user)
   const [userProfile, setUserProfile] = useState({
-    prenom: user?.prenom || "",
-    nom: user?.nom || "",
+    prenom: user?.firstname || "",
+    nom: user?.lastname || "",
     email: user?.email || "",
-    adresse: user?.adresse || "",
+    adresse: user?.address || "",
   })
 
   const salePoint = salesPoints?.data?.find(

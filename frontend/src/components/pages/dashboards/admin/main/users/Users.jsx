@@ -31,7 +31,7 @@ export default function Users() {
       prenom: user.firstname,
       adresse: user.address,
       email: user.email,
-      sale_point_id: user.point_vente_id?.nom || "N/A",
+      "point de vente": user.sale_point_id?.name || "N/A",
       rôle: user.role_id?.name || "N/A",
     }))
     setUsersFiltered(userTab) // Mise à jour propre du state

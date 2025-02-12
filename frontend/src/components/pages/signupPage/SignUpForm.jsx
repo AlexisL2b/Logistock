@@ -18,12 +18,7 @@ import axiosInstance from "../../../axiosConfig"
 
 const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
   const [salesPoints, setSalesPoints] = useState([])
-  const [roles, setRoles] = useState([
-    { nom: "Admin", id: 1 },
-    { nom: "Gestionnaire", id: 2 },
-    { nom: "Logisticien", id: 3 },
-    { nom: "Acheteur", id: 4 },
-  ])
+  const [roles, setRoles] = useState([])
   const [selectedRole, setSelectedRole] = useState("") // Stocke le rôle sélectionné
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -50,15 +45,37 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
     )
   }
 
+  const fetchSalesPoints = async () => {
+    try {
+      const response = await axiosInstance.get("/sales_points")
+      console.log("Points de ventes reçus :", response.data)
+
+      const salesPoints = response.data || [] // Sécurisation des données
+
+      setSalesPoints(salesPoints) // Mise à jour du state
+    } catch (error) {
+      console.error(
+        "Erreur lors de la récupération des Points de ventes :",
+        error
+      )
+    }
+  }
+  const fetchRoles = async () => {
+    try {
+      const response = await axiosInstance.get("/roles")
+      console.log("Rôles reçus :", response)
+
+      const rolesData = response.data || [] // Sécurisation des données
+
+      setRoles(rolesData) // Mise à jour du state
+    } catch (error) {
+      console.error("Erreur lors de la récupération des Rôles :", error)
+    }
+  }
+
   useEffect(() => {
-    axiosInstance
-      .get("/sales_points")
-      .then((response) => {
-        console.log("Réponse API salesPoints :", response.data),
-          setSalesPoints(response.data),
-          console.log(salesPoints)
-      })
-      .catch((error) => console.error("Erreur points de vente :", error))
+    fetchSalesPoints()
+    fetchRoles()
   }, [])
 
   const onSubmit = async (data) => {
@@ -68,16 +85,13 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
       // if (selectedRole !== "Acheteur" && admin) {
       //   delete data.salesPoint
       // }
-
+      const { confirmPassword, ...userData } = data
       // 🚨 Supprimer `roles` pour éviter qu'un gestionnaire attribue un rôle
 
-      const cleanedData = cleanObject(data)
-      console.log(cleanedData)
+      // const cleanedData = cleanObject(data)
+      console.log("userData", userData)
 
-      await axiosInstance.post(
-        "http://localhost:5000/api/auth/register",
-        cleanedData
-      )
+      await axiosInstance.post("http://localhost:5000/api/users", userData)
       setSnackbar({
         open: true,
         message: "Inscription réussie !",
@@ -103,7 +117,7 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
           {/* Champ Prénom */}
           <Grid item xs={12}>
             <Controller
-              name="prenom"
+              name="firstname"
               control={control}
               defaultValue=""
               rules={{ required: "Le prénom est requis" }}
@@ -123,7 +137,7 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
           {/* Champ Nom */}
           <Grid item xs={12}>
             <Controller
-              name="nom"
+              name="lastname"
               control={control}
               defaultValue=""
               rules={{ required: "Le nom est requis" }}
@@ -143,7 +157,7 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
           {/* Champ Adresse */}
           <Grid item xs={12}>
             <Controller
-              name="adresse"
+              name="address"
               control={control}
               defaultValue=""
               rules={{ required: "L'adresse est requise" }}
@@ -248,7 +262,7 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
           {admin ? (
             <Grid item xs={12}>
               <Controller
-                name="roles"
+                name="role_id"
                 control={control}
                 defaultValue=""
                 rules={{ required: "Veuillez sélectionner un rôle" }}
@@ -261,12 +275,16 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
                       label="Rôle"
                       onChange={(e) => {
                         field.onChange(e) // Met à jour React Hook Form
-                        setSelectedRole(e.target.value) // Met à jour l'état
+                        const selectedRoleObject = roles.find(
+                          (role) => role._id === e.target.value
+                        )
+                        setSelectedRole(selectedRoleObject) // Stocke l'objet entier du rôle
+                        console.log("Rôle sélectionné :", selectedRoleObject)
                       }}
                     >
                       {roles?.map((role) => (
-                        <MenuItem key={role.id} value={role.nom}>
-                          {role.nom}
+                        <MenuItem key={role._id} value={role._id}>
+                          {role.name}
                         </MenuItem>
                       ))}
                     </Select>
@@ -279,40 +297,36 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
           )}
 
           {/* Sélecteur de point de vente (Seulement si "Acheteur" est sélectionné) */}
-          {selectedRole === "Acheteur" ||
-            (!admin && (
-              <Grid item xs={12}>
-                <Controller
-                  name="salesPoint"
-                  control={control}
-                  defaultValue=""
-                  rules={{
-                    required:
-                      selectedRole === "Acheteur"
-                        ? "Veuillez sélectionner un point de vente"
-                        : false,
-                  }}
-                  render={({ field }) => (
-                    <FormControl fullWidth>
-                      <InputLabel id="sales-point-label">
-                        Point de Vente
-                      </InputLabel>
-                      <Select
-                        {...field}
-                        labelId="sales-point-label"
-                        label="Point de Vente"
-                      >
-                        {salesPoints.map((point) => (
-                          <MenuItem key={point._id} value={point._id}>
-                            {point.nom}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  )}
-                />
-              </Grid>
-            ))}
+          {selectedRole?.name === "Acheteur" && (
+            <Grid item xs={12}>
+              <Controller
+                name="sale_point_id"
+                control={control}
+                defaultValue=""
+                rules={{
+                  required: "Veuillez sélectionner un point de vente",
+                }}
+                render={({ field }) => (
+                  <FormControl fullWidth>
+                    <InputLabel id="sales-point-label">
+                      Point de Vente
+                    </InputLabel>
+                    <Select
+                      {...field}
+                      labelId="sales-point-label"
+                      label="Point de Vente"
+                    >
+                      {salesPoints.map((point) => (
+                        <MenuItem key={point._id} value={point._id}>
+                          {point.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              />
+            </Grid>
+          )}
 
           {/* Bouton Soumettre */}
           <Grid item xs={12}>

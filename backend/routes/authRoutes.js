@@ -14,13 +14,13 @@ const router = express.Router()
 /**
  * 🔹 Route d'inscription (seulement admin et gestionnaire)
  */
-router.post(
-  "/register",
-  protect,
-  checkRole("admin", "gestionnaire"), // 🚀 Seuls les admins & gestionnaires peuvent créer des utilisateurs
-  validate(registerSchema),
-  createUser
-)
+// router.post(
+//   "/register",
+//   protect,
+//   checkRole("admin", "gestionnaire"), // 🚀 Seuls les admins & gestionnaires peuvent créer des utilisateurs
+//   validate(registerSchema),
+//   createUser
+// )
 /**
  * 🔹 Route de connexion
  */

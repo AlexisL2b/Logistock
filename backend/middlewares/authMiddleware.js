@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken"
 
 export const protect = (req, res, next) => {
   const token = req.cookies.authToken // 🔥 Récupération depuis le cookie
-
+  console.log("ton token de session depuis le middleware protect", token)
   if (!token) {
     return res.status(401).json({ message: "Accès refusé, token manquant !" })
   }

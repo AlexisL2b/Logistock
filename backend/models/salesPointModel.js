@@ -2,11 +2,11 @@ import mongoose from "mongoose"
 
 const salesPointSchema = new mongoose.Schema(
   {
-    nom: {
+    name: {
       type: String,
       required: true,
     },
-    adresse: {
+    address: {
       type: String,
       required: true,
     },

@@ -1,31 +1,31 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import axiosInstance from "../../axiosConfig"
-import {
-  getFromLocalStorage,
-  saveToLocalStorage,
-} from "../../utils/localStorage"
 
 // 🔹 Fonction pour récupérer le profil utilisateur depuis l'API
 export const fetchUserProfile = createAsyncThunk(
   "auth/fetchUserProfile",
-  async (_, { getState, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const token = getState().auth.token || getFromLocalStorage("authToken")
-      if (!token) throw new Error("Token manquant")
-
-      const response = await axiosInstance.get("/api/auth/profile", {
-        headers: { Authorization: `Bearer ${token}` },
+      console.log(
+        "🔹 Envoi de la requête pour récupérer le profil utilisateur..."
+      )
+      const response = await axiosInstance.get("/users/profile", {
+        withCredentials: true,
       })
+      console.log("✅ Profil utilisateur récupéré :", response.data)
       return response.data.user
     } catch (error) {
+      console.error(
+        "❌ Erreur lors de la récupération du profil :",
+        error.response?.data?.message || error.message
+      )
       return rejectWithValue(error.response?.data?.message || error.message)
     }
   }
 )
 
 const initialState = {
-  user: getFromLocalStorage("user") || null,
-  token: getFromLocalStorage("authToken") || null,
+  user: null,
   loading: false,
   error: null,
 }
@@ -36,15 +36,9 @@ const authSlice = createSlice({
   reducers: {
     setUser: (state, action) => {
       state.user = action.payload
-      state.token = action.payload.token
-      saveToLocalStorage("user", action.payload)
-      saveToLocalStorage("authToken", action.payload.token)
     },
     logoutUser: (state) => {
       state.user = null
-      state.token = null
-      localStorage.removeItem("user")
-      localStorage.removeItem("authToken")
     },
   },
   extraReducers: (builder) => {
@@ -56,7 +50,6 @@ const authSlice = createSlice({
       .addCase(fetchUserProfile.fulfilled, (state, action) => {
         state.loading = false
         state.user = action.payload
-        saveToLocalStorage("user", action.payload)
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.loading = false

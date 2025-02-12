@@ -19,24 +19,20 @@ import DashboardLogistician from "./components/pages/dashboards/logistician/Dash
 
 import DashboardGestionnaire from "./components/pages/dashboards/gestionnaire/DashboardGestionnaire"
 import { getFromLocalStorage } from "./utils/localStorage"
-import { setUser } from "./redux/slices/authSlice"
+import { fetchUserProfile, setUser } from "./redux/slices/authSlice"
 
 function App() {
   const dispatch = useDispatch()
 
   useEffect(() => {
-    const savedUser = getFromLocalStorage("user")
-    const token = getFromLocalStorage("authToken")
-
-    if (savedUser && token) {
-      dispatch(setUser({ ...savedUser, token }))
-    }
+    console.log("🔹 Récupération du profil utilisateur...")
+    dispatch(fetchUserProfile()) // 🔹 Charger le profil utilisateur au montage
   }, [dispatch])
 
   return (
     <Routes>
       <Route path="/" element={<LoginPage />} />
-      <Route path="/passwordforgot" element={<PasswordForgot />} />
+      {/* <Route path="/passwordforgot" element={<PasswordForgot />} /> */}
       <Route path="*" element={<ErrorPage />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route
