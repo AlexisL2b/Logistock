@@ -64,7 +64,7 @@ function EnhancedTableHead(props) {
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-            align={headCell.numeric ? "right" : "left"}
+            // align={headCell.numeric ? "right" : "left"}
             padding={headCell.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
@@ -132,7 +132,7 @@ export default function EnhancedTable({
   }, [])
   const headCells = data.length
     ? Object.keys(data[0])
-        .filter((key) => !key.startsWith("_")) // Exclure les clés commençant par "_"
+        .filter((key) => !key.startsWith("_") && key !== "quantity") // Exclure les clés commençant par "_"
         .map((key) => ({
           id: key,
           numeric: typeof data[0][key] === "number",
@@ -142,20 +142,11 @@ export default function EnhancedTable({
         }))
     : []
 
+  console.log("headCells", headCells)
+
   // État pour gérer la modal
   const [openModal, setOpenModal] = useState(false)
   const [selectedRow, setSelectedRow] = useState(null)
-
-  // Générer un objet vide basé sur la structure
-  // const generateEmptyObject = () => {
-  //   if (data.length === 0) return {}
-  //   const firstItem = data[0]
-  //   const emptyObject = {}
-  //   Object.keys(firstItem).forEach((key) => {
-  //     emptyObject[key] = key === "_id" ? undefined : "" // `_id` reste vide
-  //   })
-  //   return emptyObject
-  // }
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc"

@@ -13,7 +13,12 @@ import { checkRole } from "../middlewares/checkRole.js"
 
 const router = express.Router()
 
-router.get("/", protect, checkRole("admin", "Gestionnaire"), getAllCategories)
+router.get(
+  "/",
+  protect,
+  checkRole("admin", "Gestionnaire", "Acheteur"),
+  getAllCategories
+)
 router.get("/:id", getCategoryById)
 router.post(
   "/",

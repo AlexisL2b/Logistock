@@ -40,7 +40,7 @@ export default function DashboardUser() {
 
   const cartItems = useSelector((state) => state.cart.items)
   const total = cartItems.reduce(
-    (acc, item) => acc + item.detailsProduit.prix * item.quantity,
+    (acc, item) => acc + item.detailsProduit.price * item.quantity,
     0
   )
   const cartCount = cartItems.length // Nombre total d'articles

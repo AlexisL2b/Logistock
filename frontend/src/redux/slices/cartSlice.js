@@ -60,7 +60,7 @@ const cartSlice = createSlice({
       )
 
       if (existingProduct) {
-        if (existingProduct.quantity < detailsProduit.quantite_disponible) {
+        if (existingProduct.quantity < detailsProduit.quantity) {
           existingProduct.quantity += 1
           //(`[Cart] Quantité augmentée pour ${produit_id}`)
         } else {
@@ -69,7 +69,7 @@ const cartSlice = createSlice({
           )
         }
       } else {
-        if (detailsProduit.quantite_disponible > 0) {
+        if (detailsProduit.quantity > 0) {
           state.items.push({ produit_id, detailsProduit, quantity: 1 })
           //(`[Cart] Produit ajouté au panier : ${produit_id}`)
         } else {
@@ -78,8 +78,6 @@ const cartSlice = createSlice({
           )
         }
       }
-      // //("userId from addToCart in slice", userId)
-      //("action.payload", action.payload)
 
       // Sauvegarde après modification
       saveToLocalStorage(userId, state.items)

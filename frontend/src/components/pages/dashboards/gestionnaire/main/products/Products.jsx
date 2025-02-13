@@ -67,7 +67,8 @@ export default function Products() {
   const headerMapping = {
     supplier_id: "Fournisseur",
     category_id: "Categorie",
-    quantity: "Quantité",
+    // quantity: "Quantité",
+    price: "Prix",
     reference: "Référence",
   }
 

@@ -33,9 +33,7 @@ export const getFromLocalStorage = (key) => {
 
 export const loadUserFromLocalStorage = () => {
   try {
-    const keys = Object.keys(localStorage).filter((key) =>
-      key.startsWith("user_")
-    )
+    const keys = Object.keys(localStorage).filter((key) => key.startsWith("id"))
     if (keys.length > 0) {
       const userData = localStorage.getItem(keys[0])
       return userData ? JSON.parse(userData) : null

@@ -55,7 +55,7 @@ export default function Shop() {
           <MenuItem value="">Toutes les catégories</MenuItem>
           {categories.map((category) => (
             <MenuItem key={category._id} value={category._id}>
-              {category.nom}
+              {category.name}
             </MenuItem>
           ))}
         </Select>

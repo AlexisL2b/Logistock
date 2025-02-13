@@ -9,7 +9,10 @@ import {
 } from "@mui/material"
 import CloseIcon from "@mui/icons-material/Close"
 import CartCardModal from "./CartCardModal"
-import { loadUserFromLocalStorage } from "../../../../../utils/localStorage"
+import {
+  getFromLocalStorage,
+  loadUserFromLocalStorage,
+} from "../../../../../utils/localStorage"
 import { useDispatch } from "react-redux"
 import { clearCart } from "../../../../../redux/slices/cartSlice"
 import axiosInstance from "../../../../../axiosConfig"
@@ -23,8 +26,9 @@ export default function CartDrawer({
   onDecrement,
   onRemove,
 }) {
-  const user = loadUserFromLocalStorage()
-  const userId = user._id
+  const user = getFromLocalStorage("user")
+  console.log("user", user)
+  const userId = user.id
   const dispatch = useDispatch()
   const [clientSecret, setClientSecret] = useState(null)
   const [orderId, setOrderId] = useState(null)
@@ -46,7 +50,7 @@ export default function CartDrawer({
         const total = Number(
           cartItems
             .reduce(
-              (sum, item) => sum + item.detailsProduit.prix * item.quantity,
+              (sum, item) => sum + item.detailsProduit.price * item.quantity,
               0
             )
             .toFixed(2)
