@@ -15,7 +15,7 @@ class SupplierService {
   }
 
   async addSupplier(supplierData) {
-    if (!supplierData.nom) {
+    if (!supplierData.name) {
       throw new Error("Le champ 'nom' est requis")
     }
     return await SupplierDAO.create(supplierData)
@@ -33,7 +33,7 @@ class SupplierService {
     const associatedProducts = await productDAO.findBySupplierId(id)
 
     if (associatedProducts.length > 0) {
-      const noms = associatedProducts.map((product) => product.nom).join(", ")
+      const noms = associatedProducts.map((product) => product.name).join(", ")
       throw new Error(
         `Impossible de supprimer le fournisseur, il est associé aux produits suivants : ${noms}`
       )

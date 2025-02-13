@@ -1,6 +1,7 @@
 import { Box, TextField } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
 import EnhancedTable from "../../../../../reusable-ui/EnhancedTable"
+import { useEffect, useState } from "react"
 
 export default function SalesPoints() {
   const [salesPoints, setSalesPoints] = useState([])
@@ -22,8 +23,8 @@ export default function SalesPoints() {
       })
   }
   const fields = {
-    nom: { type: "text", label: "Nom", required: true },
-    adresse: { type: "text", label: "Adresse", required: true },
+    name: { type: "text", label: "Nom", required: true },
+    address: { type: "text", label: "Adresse", required: true },
   }
 
   // Chargement initial des points de vente
@@ -50,7 +51,7 @@ export default function SalesPoints() {
     const searchLower = searchTerm.toLowerCase()
 
     return (
-      salesPoint.nom.toLowerCase().includes(searchLower) || // Nom du point de vente
+      salesPoint.name.toLowerCase().includes(searchLower) || // Nom du point de vente
       salesPoint._id.toLowerCase().includes(searchLower) || // ID du point de vente
       (salesPoint.adresse &&
         salesPoint.adresse.toLowerCase().includes(searchLower)) || // Adresse

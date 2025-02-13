@@ -2,11 +2,11 @@ import mongoose from "mongoose"
 
 const transporterSchema = new mongoose.Schema(
   {
-    nom: {
+    name: {
       type: String,
       required: true,
     },
-    telephone: {
+    phone: {
       type: String,
     },
     email: {

@@ -1,15 +1,24 @@
 import User from "../models/userModel.js"
-import bcrypt from "bcryptjs"
 
 const UserDAO = {
   async findById(userId) {
     return await User.findById(userId).populate("role_id", "name")
   },
+
   async findAll() {
     return await User.find().populate([
       { path: "role_id", select: "name" },
       { path: "sale_point_id", select: "name" },
     ])
+  },
+  async findBuyers() {
+    return await User.find({ role_id: "677cf977b39853e4a17727e3" }).populate([
+      { path: "role_id", select: "name" },
+      { path: "sale_point_id", select: "name" },
+    ])
+  },
+  async findBySalesPointId(sale_point_id) {
+    return await User.find({ sale_point_id })
   },
 
   async findByEmail(email) {
@@ -17,8 +26,8 @@ const UserDAO = {
   },
 
   async createUser(userData) {
-    const hashedPassword = await bcrypt.hash(userData.password, 10)
-    const user = new User({ ...userData, password: hashedPassword })
+    console.log("🔹 Création d'utilisateur avec les données :", userData)
+    const user = new User(userData)
     return await user.save()
   },
 

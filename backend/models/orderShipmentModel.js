@@ -2,17 +2,17 @@ import mongoose from "mongoose"
 
 const orderShipmentSchema = new mongoose.Schema(
   {
-    commande_id: {
+    order_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Order",
       required: true,
     },
-    transporteur_id: {
+    transporter_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Transporter",
       required: true,
     },
-    date_depart: {
+    date_shipment: {
       type: Date,
       default: Date.now,
     },

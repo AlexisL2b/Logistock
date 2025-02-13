@@ -16,14 +16,14 @@ class CategoryService {
   }
 
   async addCategory(categoryData) {
-    if (!categoryData.nom) {
+    if (!categoryData.name) {
       throw new Error("Le champ 'nom' est requis")
     }
     const categories = await categoryDAO.findAll()
 
     const existe = categories.some((item) => {
       console.log(item) // ✅ Vérifie chaque item parcouru
-      return item.nom === categoryData.nom // ✅ Ajoute `return` pour que `some()` fonctionne
+      return item.name === categoryData.name // ✅ Ajoute `return` pour que `some()` fonctionne
     })
 
     if (!existe) {
@@ -64,7 +64,7 @@ class CategoryService {
     const products = await productDAO.findByCategoryId(id)
     console.log(products)
     if (products.length > 0) {
-      const noms = products.map((p) => p.nom).join(", ")
+      const noms = products.map((p) => p.name).join(", ")
       throw new Error(
         `Impossible de supprimer la catégorie. Elle est associée aux produits suivants : ${noms}`
       )

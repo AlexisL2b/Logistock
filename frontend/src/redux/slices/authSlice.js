@@ -1,24 +1,35 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import axiosInstance from "../../axiosConfig"
 
-// 🔹 Fonction pour récupérer le profil utilisateur depuis l'API
+// 🔹 Récupérer le profil utilisateur
 export const fetchUserProfile = createAsyncThunk(
   "auth/fetchUserProfile",
   async (_, { rejectWithValue }) => {
     try {
-      console.log(
-        "🔹 Envoi de la requête pour récupérer le profil utilisateur..."
-      )
       const response = await axiosInstance.get("/users/profile", {
         withCredentials: true,
       })
-      console.log("✅ Profil utilisateur récupéré :", response.data)
       return response.data.user
     } catch (error) {
-      console.error(
-        "❌ Erreur lors de la récupération du profil :",
-        error.response?.data?.message || error.message
+      return rejectWithValue(error.response?.data?.message || error.message)
+    }
+  }
+)
+
+// 🔹 Mettre à jour les infos utilisateur
+export const updateUser = createAsyncThunk(
+  "auth/updateUser",
+  async ({ userId, updatedFields }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(
+        `/users/${userId}`,
+        updatedFields,
+        {
+          withCredentials: true, // Assure la persistance du cookie JWT
+        }
       )
+      return response.data.user // Retourne uniquement l'utilisateur mis à jour
+    } catch (error) {
       return rejectWithValue(error.response?.data?.message || error.message)
     }
   }
@@ -54,6 +65,9 @@ const authSlice = createSlice({
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
+      })
+      .addCase(updateUser.fulfilled, (state, action) => {
+        state.user = { ...state.user, ...action.payload } // Mise à jour sans toucher au token
       })
   },
 })

@@ -35,7 +35,7 @@ export const userSchema = Joi.object({
 
   role_id: Joi.string()
     .regex(/^[0-9a-fA-F]{24}$/)
-    .required()
+    .optional()
     .messages({
       "string.pattern.base":
         "L'ID du rôle doit être un ObjectId MongoDB valide.",

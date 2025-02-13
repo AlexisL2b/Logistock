@@ -1,6 +1,5 @@
 import OrderDetailsDAO from "../dao/orderDetailsDAO.js"
 import OrderDAO from "../dao/orderDAO.js"
-import stripe from "../config/stripeConfig.js"
 
 class OrderDetailsService {
   // ✅ Ajouter des détails de commande ET mettre à jour le paiement

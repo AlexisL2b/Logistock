@@ -31,9 +31,9 @@ export default function Categories() {
 
   const headerMapping = {
     _id: "ID",
-    nom: "Nom",
+    name: "Nom",
   }
-  const fields = { nom: { type: "text", label: "Nom", required: true } }
+  const fields = { name: { type: "text", label: "Nom", required: true } }
   console.log("data: ", categories)
 
   // 🔍 Filtrage multi-critères : Nom, ID
@@ -41,7 +41,7 @@ export default function Categories() {
     const searchLower = searchTerm.toLowerCase()
 
     return (
-      category.nom.toLowerCase().includes(searchLower) || // Nom de la catégorie
+      category.name.toLowerCase().includes(searchLower) || // Nom de la catégorie
       category._id.toLowerCase().includes(searchLower) // ID de la catégorie
     )
   })

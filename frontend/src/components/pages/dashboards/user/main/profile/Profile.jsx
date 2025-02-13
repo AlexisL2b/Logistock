@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { fetchUserProfile } from "../../../../../../redux/slices/authSlice"
+import {
+  fetchUserProfile,
+  setUser,
+} from "../../../../../../redux/slices/authSlice"
 import {
   Box,
   TextField,
@@ -12,40 +15,32 @@ import {
 } from "@mui/material"
 import { fetchSalesPoints } from "../../../../../../redux/slices/salesPointSlice"
 import { fetchRoles } from "../../../../../../redux/slices/roleSlice"
-import axiosInstance from "../../../../../../axiosConfig"
 import { useTheme } from "@mui/material/styles"
 import useMediaQuery from "@mui/material/useMediaQuery"
+import axiosInstance from "../../../../../../axiosConfig"
 
 const Profile = () => {
   const dispatch = useDispatch()
   const { user } = useSelector((state) => state.auth)
   const { salesPoints } = useSelector((state) => state.salesPoints)
-  const { roles } = useSelector((state) => state.roles)
-  const roleUser = "677cf977b39853e4a17727e3"
-  console.log(user)
+
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
 
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState({})
-  console.log("user", user)
-  const [userProfile, setUserProfile] = useState({
-    prenom: user?.firstname || "",
-    nom: user?.lastname || "",
-    email: user?.email || "",
-    adresse: user?.address || "",
-  })
-
-  const salePoint = salesPoints?.data?.find(
-    (s) => s._id === user?.point_vente_id
-  )
-  const [prevUser, setPrevUser] = useState(userProfile)
-
-  // État pour la notification
   const [alertOpen, setAlertOpen] = useState(false)
   const [alertMessage, setAlertMessage] = useState("")
   const [severity, setSeverity] = useState("info")
+
+  const [userProfile, setUserProfile] = useState({
+    firstname: user?.firstname || "",
+    lastname: user?.lastname || "",
+    email: user?.email || "",
+    address: user?.address || "",
+  })
+  const roleUser = "677cf977b39853e4a17727e3"
 
   useEffect(() => {
     dispatch(fetchSalesPoints())
@@ -54,35 +49,35 @@ const Profile = () => {
 
   useEffect(() => {
     setUserProfile({
-      prenom: user?.firstname || "",
-      nom: user?.lastname || "",
+      firstname: user?.firstname || "",
+      lastname: user?.lastname || "",
       email: user?.email || "",
-      adresse: user?.adress || "",
+      address: user?.address || "",
     })
   }, [user])
 
   const handleEdit = () => {
-    setPrevUser(userProfile)
     setIsEditing(true)
   }
 
   const handleCancel = () => {
-    setUserProfile(prevUser)
+    setUserProfile({
+      firstname: user?.firstname || "",
+      lastname: user?.lastname || "",
+      email: user?.email || "",
+      address: user?.address || "",
+    })
     setIsEditing(false)
     setErrors({})
   }
 
   const handleChange = (field, value) => {
     setUserProfile((prev) => ({ ...prev, [field]: value }))
-
-    // Réinitialiser l'erreur en cas de modification
     setErrors((prevErrors) => ({ ...prevErrors, [field]: "" }))
   }
 
-  // 🔹 Validation des champs obligatoires
   const validateFields = () => {
     let newErrors = {}
-
     Object.keys(userProfile).forEach((field) => {
       if (!userProfile[field]) {
         newErrors[field] = "Ce champ est obligatoire."
@@ -100,54 +95,62 @@ const Profile = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  // const handleSave = async (event) => {
-  //   event.preventDefault()
-  //   if (!validateFields()) return
+  const handleSave = async () => {
+    if (!validateFields()) return
+    setIsLoading(true)
 
-  //   setIsLoading(true)
+    try {
+      console.log("🚀 Envoi des modifications utilisateur...")
 
-  //   try {
-  //     if (userProfile.email !== user.email) {
-  //       const usersResponse = await axiosInstance.get(`/api/users`)
-  //       const users = usersResponse.data || []
-  //       const emailExists = users.some(
-  //         (u) => u.email === userProfile.email && u._id !== user._id
-  //       )
+      const updatedFields = {}
+      Object.keys(userProfile).forEach((key) => {
+        if (userProfile[key] !== user[key]) {
+          updatedFields[key] = userProfile[key]
+        }
+      })
 
-  //       if (emailExists) {
-  //         setAlertMessage("Cette adresse e-mail est déjà utilisée.")
-  //         setSeverity("error")
-  //         setAlertOpen(true)
-  //         setIsLoading(false)
-  //         return
-  //       }
-  //     }
+      if (Object.keys(updatedFields).length === 0) {
+        setAlertMessage("Aucune modification détectée.")
+        setSeverity("info")
+        setAlertOpen(true)
+        setIsLoading(false)
+        return
+      }
 
-  //     const result = await dispatch(
-  //       updateUser({
-  //         userId: user._id,
-  //         updatedFields: userProfile,
-  //       })
-  //     )
+      const response = await axiosInstance.put(
+        `/users/${user._id}`,
+        updatedFields,
+        { withCredentials: true }
+      )
 
-  //     dispatch(fetchUserProfile())
+      console.log("✅ Réponse mise à jour :", response.data)
 
-  //     if (result.error) {
-  //       setAlertMessage(result.error.message || "Une erreur est survenue.")
-  //       setSeverity("error")
-  //     } else {
-  //       setAlertMessage("Mise à jour réussie !")
-  //       setSeverity("success")
-  //       setIsEditing(false)
-  //     }
-  //   } catch (error) {
-  //     setAlertMessage("Erreur de mise à jour.")
-  //     setSeverity("error")
-  //   }
+      const updatedUser = response.data.user
+      if (updatedUser) {
+        dispatch(setUser(updatedUser))
+        setUserProfile(updatedUser)
+      }
 
-  //   setIsLoading(false)
-  //   setAlertOpen(true)
-  // }
+      setAlertMessage("Mise à jour réussie !")
+      setSeverity("success")
+      setIsEditing(false)
+    } catch (error) {
+      console.error("❌ Erreur lors de la mise à jour :", error)
+      setAlertMessage("Erreur de mise à jour.")
+      setSeverity("error")
+    }
+
+    setIsLoading(false)
+    setAlertOpen(true)
+  }
+
+  // 🔹 Dictionnaire des labels en français
+  const fieldLabels = {
+    firstname: "Prénom",
+    lastname: "Nom",
+    email: "Email",
+    address: "Adresse",
+  }
 
   return (
     <Box
@@ -171,7 +174,7 @@ const Profile = () => {
       {Object.keys(userProfile).map((field) => (
         <TextField
           key={field}
-          label={field.charAt(0).toUpperCase() + field.slice(1)}
+          label={fieldLabels[field]} // 🔹 Utilise les labels en français
           variant="outlined"
           fullWidth
           type={field === "email" ? "email" : "text"}
@@ -194,14 +197,17 @@ const Profile = () => {
             label="Adresse"
             variant="outlined"
             fullWidth
-            value={user?.adresse || ""}
+            value={user?.address || ""}
             disabled
           />
           <TextField
             label="Point de vente"
             variant="outlined"
             fullWidth
-            value={salePoint?.nom || ""}
+            value={
+              salesPoints?.find((s) => s._id === user?.point_vente_id)?.nom ||
+              ""
+            }
             disabled
           />
         </>
@@ -213,7 +219,7 @@ const Profile = () => {
             <Button
               variant="contained"
               color="success"
-              onClick={() => console.log("bv")}
+              onClick={handleSave}
               disabled={isLoading}
             >
               {isLoading ? <CircularProgress size={24} /> : "Confirmer"}

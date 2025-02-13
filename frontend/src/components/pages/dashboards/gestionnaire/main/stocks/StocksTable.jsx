@@ -32,7 +32,7 @@ const getEventStyle = (event) => {
 
 function Row({ row, onReassort }) {
   const [open, setOpen] = React.useState(false)
-
+  console.log("rowrowrowrowrowrow", row)
   return (
     <>
       <TableRow
@@ -50,22 +50,17 @@ function Row({ row, onReassort }) {
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
-        <TableCell>{row.produit_id.nom}</TableCell>
-        <TableCell>{row.produit_id.reference}</TableCell>
-        <TableCell>{row.produit_id.categorie_id.nom}</TableCell>
-        <TableCell>{row.produit_id.supplier_id.nom}</TableCell>
+        <TableCell>{row.product_id.name}</TableCell>
+        <TableCell>{row.product_id.reference}</TableCell>
+        <TableCell>{row.product_id.category_id.name}</TableCell>
+        <TableCell>{row.product_id.supplier_id.name}</TableCell>
         <TableCell
-          align="right"
-          style={
-            row.quantite_disponible < 50
-              ? { color: "red", fontWeight: "bold" }
-              : {}
-          }
+          style={row.quantity < 50 ? { color: "red", fontWeight: "bold" } : {}}
         >
-          {row.quantite_disponible}
+          {row.quantity}
         </TableCell>
-        <TableCell align="right">{row.produit_id.prix} €</TableCell>
-        <TableCell align="right">
+        <TableCell>{row.product_id.price} €</TableCell>
+        <TableCell>
           <Button
             variant="contained"
             color="primary"
@@ -88,21 +83,21 @@ function Row({ row, onReassort }) {
                   <TableRow>
                     <TableCell>Événement</TableCell>
                     <TableCell>Date</TableCell>
-                    <TableCell align="right">Quantité</TableCell>
+                    <TableCell>Quantité</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {row.stockLogs.length > 0 ? (
                     row.stockLogs.map((log) => (
                       <TableRow key={log._id}>
-                        <TableCell style={getEventStyle(log.evenement)}>
-                          {log.evenement.charAt(0).toUpperCase() +
-                            log.evenement.slice(1)}
+                        <TableCell style={getEventStyle(log.event)}>
+                          {log.event.charAt(0).toUpperCase() +
+                            log.event.slice(1)}
                         </TableCell>
                         <TableCell>
-                          {new Date(log.date_evenement).toLocaleString()}
+                          {new Date(log.date_event).toLocaleString()}
                         </TableCell>
-                        <TableCell align="right">{log.quantite}</TableCell>
+                        <TableCell>{log.quantity}</TableCell>
                       </TableRow>
                     ))
                   ) : (
@@ -179,13 +174,13 @@ export default function CollapsibleTable({ stocks, onStockUpdated }) {
 
     try {
       await axiosInstance.put(`/stocks/increment/${selectedStock._id}`, {
-        quantite_disponible: quantity,
+        quantity: quantity,
       })
 
       await axiosInstance.post(`/stock_logs`, {
-        produit_id: selectedStock.produit_id._id,
-        quantite: quantity,
-        evenement: "entrée",
+        product_id: selectedStock.product_id._id,
+        quantity: quantity,
+        event: "entrée",
         stock_id: selectedStock._id,
       })
 
@@ -207,16 +202,16 @@ export default function CollapsibleTable({ stocks, onStockUpdated }) {
             <TableCell>Référence</TableCell>
             <TableCell>Catégorie</TableCell>
             <TableCell>Fournisseur</TableCell>
-            <TableCell align="right">
+            <TableCell>
               <TableSortLabel
-                active={orderBy === "quantite_disponible"}
-                direction={orderBy === "quantite_disponible" ? order : "asc"}
-                onClick={() => handleSort("quantite_disponible")}
+                active={orderBy === "quantity"}
+                direction={orderBy === "quantity" ? order : "asc"}
+                onClick={() => handleSort("quantity")}
               >
                 Quantité
               </TableSortLabel>
             </TableCell>
-            <TableCell align="right">Prix (€)</TableCell>
+            <TableCell>Prix (€)</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>

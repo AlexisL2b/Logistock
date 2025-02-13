@@ -20,6 +20,9 @@ export default function LoginForm() {
         { email, password },
         { withCredentials: true } // 🔥 Nécessaire pour gérer les cookies HTTPOnly
       )
+      console.log("🔹 Mot de passe envoyé au backend :", password)
+
+      console.log("response from login", response)
 
       const { user } = response.data
       if (!user) {
@@ -35,7 +38,7 @@ export default function LoginForm() {
         case "admin":
           navigate("/admin-dashboard")
           break
-        case "gestionnaire":
+        case "Gestionnaire":
           navigate("/gestionnaire-dashboard")
           break
         case "logisticien":

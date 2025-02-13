@@ -66,9 +66,9 @@ export default function Products() {
 
   const headerMapping = {
     supplier_id: "Fournisseur",
-    categorie_id: "Categorie",
-    quantite_stock: "Quantité",
-    ref: "Référence",
+    category_id: "Categorie",
+    quantity: "Quantité",
+    reference: "Référence",
   }
 
   // 🔍 **Filtrage des produits par recherche, catégorie et fournisseur**
@@ -77,17 +77,18 @@ export default function Products() {
 
     // Vérification du filtre de recherche
     const matchesSearch =
-      product.nom.toLowerCase().includes(searchLower) ||
+      product.name.toLowerCase().includes(searchLower) ||
       product._id.toLowerCase().includes(searchLower) ||
-      (product.categorie_id?.nom &&
-        product.categorie_id.nom.toLowerCase().includes(searchLower)) ||
-      (product.supplier_id?.nom &&
-        product.supplier_id.nom.toLowerCase().includes(searchLower)) ||
-      (product.ref && product.ref.toLowerCase().includes(searchLower))
+      (product.category_id?.name &&
+        product.category_id.name.toLowerCase().includes(searchLower)) ||
+      (product.supplier_id?.name &&
+        product.supplier_id.name.toLowerCase().includes(searchLower)) ||
+      (product.reference &&
+        product.reference.toLowerCase().includes(searchLower))
 
     // Vérification du filtre par catégorie
     const matchesCategory =
-      selectedCategory === "" || product.categorie_id?._id === selectedCategory
+      selectedCategory === "" || product.category_id?._id === selectedCategory
 
     // Vérification du filtre par fournisseur
     const matchesSupplier =
@@ -100,7 +101,7 @@ export default function Products() {
     <Box>
       {/* 🔍 Barre de recherche multi-critères */}
       <TextField
-        label="Rechercher par Nom, ID, Catégorie, Fournisseur, Référence"
+        label="Rechercher par name, ID, Catégorie, Fournisseur, Référence"
         variant="outlined"
         fullWidth
         margin="normal"
@@ -119,7 +120,7 @@ export default function Products() {
             <MenuItem value="">Toutes les catégories</MenuItem>
             {categories.map((category) => (
               <MenuItem key={category._id} value={category._id}>
-                {category.nom}
+                {category.name}
               </MenuItem>
             ))}
           </Select>
@@ -135,7 +136,7 @@ export default function Products() {
             <MenuItem value="">Tous les fournisseurs</MenuItem>
             {suppliers.map((supplier) => (
               <MenuItem key={supplier._id} value={supplier._id}>
-                {supplier.nom}
+                {supplier.name}
               </MenuItem>
             ))}
           </Select>

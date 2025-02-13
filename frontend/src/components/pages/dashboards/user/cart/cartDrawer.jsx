@@ -13,9 +13,6 @@ import { loadUserFromLocalStorage } from "../../../../../utils/localStorage"
 import { useDispatch } from "react-redux"
 import { clearCart } from "../../../../../redux/slices/cartSlice"
 import axiosInstance from "../../../../../axiosConfig"
-import { Elements } from "@stripe/react-stripe-js"
-import stripePromise from "../../../../../config/stripeConfig" // Import de Stripe
-import StripeModal from "../stripeModal/stripeModal"
 
 export default function CartDrawer({
   open,
@@ -29,8 +26,6 @@ export default function CartDrawer({
   const user = loadUserFromLocalStorage()
   const userId = user._id
   const dispatch = useDispatch()
-  // 🔥 Ajout d’un state pour gérer la modale Stripe
-  const [openStripeModal, setOpenStripeModal] = useState(false)
   const [clientSecret, setClientSecret] = useState(null)
   const [orderId, setOrderId] = useState(null)
   console.log("cartItems from cartDrawer.jsx", cartItems)
@@ -100,8 +95,6 @@ export default function CartDrawer({
 
         // 🔥 Étape 4 : Sauvegarder l'ID de commande et ouvrir Stripe
         setOrderId(orderId)
-        setClientSecret(clientSecret)
-        setOpenStripeModal(true)
       }
     } catch (error) {
       console.error("❌ Erreur lors du checkout :", error.message)
@@ -187,20 +180,6 @@ export default function CartDrawer({
       </Box>
 
       {/* 🔥 Modale Stripe pour paiement */}
-      {clientSecret && orderId && (
-        <Elements stripe={stripePromise}>
-          <StripeModal
-            open={openStripeModal}
-            handleClose={handleCloseStripeModal}
-            clientSecret={clientSecret}
-            orderId={orderId}
-            onSuccess={() => {
-              dispatch(clearCart())
-              onClose()
-            }}
-          />
-        </Elements>
-      )}
     </Drawer>
   )
 }

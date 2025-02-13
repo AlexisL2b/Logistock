@@ -18,43 +18,42 @@ class AuthService {
   /**
    * 🔹 Création d'un utilisateur avec un rôle lié par ObjectId
    */
-  async createUser(userData, currentUserRole) {
-    try {
-      const { email, password, prenom, nom, adresse, salesPoint, role_id } =
-        userData
+  // async createUser(userData, currentUserRole) {
+  //   try {
+  //     const { email, password, prenom, nom, adresse, salesPoint, role_id } =
+  //       userData
 
-      // Vérifier si l'utilisateur existe déjà
-      const userExists = await User.findOne({ email })
-      if (userExists) {
-        throw new Error("L'utilisateur existe déjà !")
-      }
+  //     // Vérifier si l'utilisateur existe déjà
+  //     const userExists = await User.findOne({ email })
+  //     if (userExists) {
+  //       throw new Error("L'utilisateur existe déjà !")
+  //     }
 
-      // 🔹 Vérifier si le rôle existe en base
-      const assignedRole = await Role.findById(role_id)
-      if (!assignedRole) {
-        throw new Error("Le rôle spécifié n'existe pas !")
-      }
+  //     // 🔹 Vérifier si le rôle existe en base
+  //     const assignedRole = await Role.findById(role_id)
+  //     if (!assignedRole) {
+  //       throw new Error("Le rôle spécifié n'existe pas !")
+  //     }
 
-      // 🔹 Hashage du mot de passe
-      const hashedPassword = await bcrypt.hash(password, 10)
+  //     // 🔹 Hashage du mot de passe
 
-      // 🔹 Enregistrement de l'utilisateur en MongoDB
-      const newUser = new User({
-        email,
-        password: hashedPassword,
-        role_id: assignedRole._id,
-        prenom,
-        nom,
-        adresse,
-        ...(salesPoint && { point_vente_id: salesPoint }),
-      })
+  //     // 🔹 Enregistrement de l'utilisateur en MongoDB
+  //     const newUser = new User({
+  //       email,
+  //       password: hashedPassword,
+  //       role_id: assignedRole._id,
+  //       prenom,
+  //       nom,
+  //       adresse,
+  //       ...(salesPoint && { point_vente_id: salesPoint }),
+  //     })
 
-      await newUser.save()
-      return { message: "Utilisateur créé avec succès !" }
-    } catch (error) {
-      throw new Error(error.message)
-    }
-  }
+  //     await newUser.save()
+  //     return { message: "Utilisateur créé avec succès !" }
+  //   } catch (error) {
+  //     throw new Error(error.message)
+  //   }
+  // }
 
   /**
    * 🔹 Connexion utilisateur et récupération du rôle
@@ -73,7 +72,12 @@ class AuthService {
       }
 
       // Vérification du mot de passe
+      console.log("🔹 Mot de passe en clair reçu :", password)
+      console.log("🔹 Mot de passe hashé stocké :", user.password)
+
+      // Vérification du mot de passe
       const isMatch = await bcrypt.compare(password, user.password)
+      console.log("🔹 bcrypt.compare() résultat :", isMatch)
       if (!isMatch) {
         throw new Error("Mot de passe incorrect.")
       }

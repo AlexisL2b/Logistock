@@ -327,6 +327,36 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
               />
             </Grid>
           )}
+          {!admin && (
+            <Grid item xs={12}>
+              <Controller
+                name="sale_point_id"
+                control={control}
+                defaultValue=""
+                rules={{
+                  required: "Veuillez sélectionner un point de vente",
+                }}
+                render={({ field }) => (
+                  <FormControl fullWidth>
+                    <InputLabel id="sales-point-label">
+                      Point de Vente
+                    </InputLabel>
+                    <Select
+                      {...field}
+                      labelId="sales-point-label"
+                      label="Point de Vente"
+                    >
+                      {salesPoints.map((point) => (
+                        <MenuItem key={point._id} value={point._id}>
+                          {point.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              />
+            </Grid>
+          )}
 
           {/* Bouton Soumettre */}
           <Grid item xs={12}>

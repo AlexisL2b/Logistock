@@ -1,4 +1,3 @@
-import stripe from "../config/stripeConfig.js"
 import OrderDAO from "../dao/orderDAO.js"
 
 class OrderService {
@@ -18,7 +17,6 @@ class OrderService {
     }
     return updatedOrder
   }
-  // ✅ Étape 1 : Créer une commande et son PaymentIntent Stripe
   async addOrder(acheteur_id, totalAmount) {
     try {
       const montantTotal = Math.round(Number(totalAmount) * 100) // Convertir en centimes
@@ -32,13 +30,6 @@ class OrderService {
       const newOrder = await OrderDAO.createOrder(acheteur_id, totalAmount)
 
       console.log("✅ Commande créée :", newOrder)
-
-      // 🔥 Étape 2 : Créer un paiement Stripe
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: montantTotal, // Stripe exige un entier en centimes
-        currency: "eur",
-        metadata: { orderId: newOrder._id.toString() },
-      })
 
       console.log("✅ Payment Intent créé :", paymentIntent.id)
 

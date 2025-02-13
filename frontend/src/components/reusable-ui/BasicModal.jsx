@@ -81,6 +81,7 @@ export default function BasicModal({
 
   const handleSubmit = () => {
     if (validateFields()) {
+      console.log("formData", formData)
       onSubmit(formData)
       onClose()
     }
@@ -98,7 +99,7 @@ export default function BasicModal({
         >
           {Object.keys(formStructure).map((key) => {
             const field = formStructure[key]
-
+            console.log("field log //////////////", field)
             // 🔹 Si c'est un champ de type `select`
             if (field.type === "select" && dropdownData[key]) {
               return (

@@ -131,12 +131,15 @@ export default function EnhancedTable({
     }
   }, [])
   const headCells = data.length
-    ? Object.keys(data[0]).map((key) => ({
-        id: key,
-        numeric: typeof data[0][key] === "number",
-        disablePadding: false,
-        label: headerMapping[key] || key.charAt(0).toUpperCase() + key.slice(1), // Utilise headerMapping pour les labels
-      }))
+    ? Object.keys(data[0])
+        .filter((key) => !key.startsWith("_")) // Exclure les clés commençant par "_"
+        .map((key) => ({
+          id: key,
+          numeric: typeof data[0][key] === "number",
+          disablePadding: false,
+          label:
+            headerMapping[key] || key.charAt(0).toUpperCase() + key.slice(1), // Utilise headerMapping pour les labels
+        }))
     : []
 
   // État pour gérer la modal
@@ -236,13 +239,13 @@ export default function EnhancedTable({
 
   const handleOpenModalForAdd = () => {
     const emptyObject = {
-      nom: "",
+      name: "",
       reference: "",
       description: "",
-      prix: "",
-      categorie_id: "",
+      price: "",
+      category_id: "",
       supplier_id: "",
-      quantite: "",
+      quantity: "",
     }
     setSelectedRow(emptyObject)
     setOpenModal(true)
@@ -319,7 +322,7 @@ export default function EnhancedTable({
                   {headCells.map((cell) => (
                     <TableCell key={cell.id}>
                       {typeof row[cell.id] === "object" && row[cell.id] !== null
-                        ? row[cell.id].nom || "N/A"
+                        ? row[cell.id].name || "N/A"
                         : row[cell.id]}
                     </TableCell>
                   ))}

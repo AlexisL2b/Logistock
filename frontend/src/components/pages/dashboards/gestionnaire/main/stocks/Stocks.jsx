@@ -53,13 +53,13 @@ export default function Stocks() {
   // Filtrage des stocks en fonction des sélections
   const filteredStocks = stocks.stocksProducts?.filter(
     (stock) =>
-      stock.produit_id !== null &&
+      stock.product_id !== null &&
       (selectedCategory === "" ||
-        stock.produit_id.categorie_id._id === selectedCategory) &&
+        stock.product_id.category_id._id === selectedCategory) &&
       (selectedSupplier === "" ||
-        stock.produit_id.supplier_id._id === selectedSupplier)
+        stock.product_id.supplier_id._id === selectedSupplier)
   )
-
+  console.log("filteredStocksfilteredStocksfilteredStocks", filteredStocks)
   return (
     <Box>
       {/* Filtres alignés proprement */}

@@ -29,7 +29,7 @@ export default function Transporters() {
       const response = await axiosInstance.get("/users/buyers")
       console.log("Utilisateurs reçus :", response.data)
 
-      const usersData = response.data || []
+      const usersData = response.data.buyers || []
 
       setUsers(usersData)
     } catch (error) {
@@ -41,11 +41,11 @@ export default function Transporters() {
   useEffect(() => {
     let filteredUsers = users.map((user) => ({
       _id: user._id,
-      nom: user.nom,
-      prenom: user.prenom,
-      adresse: user.adresse,
+      nom: user.name,
+      prenom: user.firstname,
+      adresse: user.address,
       email: user.email,
-      point_vente_nom: user.point_vente_id?.nom || "N/A",
+      point_vente_nom: user.sale_point_id?.name || "N/A",
     }))
 
     if (selectedPointVente) {

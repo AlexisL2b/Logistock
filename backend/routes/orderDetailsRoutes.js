@@ -8,7 +8,7 @@ import {
 } from "../controllers/orderDetailsController.js"
 import validate from "../middlewares/validate.js"
 import { orderDetailsSchema } from "../validations/orderDetailsValidation.js"
-import authenticate from "../middlewares/authenticate.js"
+import { protect } from "../middlewares/authMiddleware.js"
 import { checkRole } from "../middlewares/checkRole.js"
 
 const router = express.Router()
@@ -18,20 +18,20 @@ router.get("/:id", getOrderDetailsById) // GET /api/order_details/:id
 router.post(
   "/",
   validate(orderDetailsSchema),
-  authenticate,
+  protect,
   checkRole("Admin", "Gestionnaire", "Acheteur"),
   addOrderDetails
 ) // ✅ Validation ajoutée ici
 router.put(
   "/:id",
   validate(orderDetailsSchema),
-  authenticate,
+  protect,
   checkRole("Admin", "Gestionnaire"),
   updateOrderDetails
 ) // ✅ Validation ajoutée ici
 router.delete(
   "/:id",
-  authenticate,
+  protect,
   checkRole("Admin", "Gestionnaire"),
   deleteOrderDetails
 ) // DELETE /api/order_details/:id
