@@ -67,8 +67,8 @@ function Row({ row, onStatusUpdate }) {
             {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
           </IconButton>
         </TableCell>
-        <TableCell>{row.order_id}</TableCell>
-        <TableCell>{new Date(row.date_commande).toLocaleString()}</TableCell>
+        <TableCell>{row._id}</TableCell>
+        <TableCell>{new Date(row.date_order).toLocaleString()}</TableCell>
         <TableCell
           sx={{ color: color[row.statut] || "black", fontWeight: "700" }}
         >
@@ -98,11 +98,9 @@ function Row({ row, onStatusUpdate }) {
                     <TableRow key={product._id}>
                       <TableCell>{product.name}</TableCell>
                       <TableCell>{product.reference}</TableCell>
-                      <TableCell>{product.quantite}</TableCell>
-                      <TableCell>{product.prix_unitaire}</TableCell>
-                      <TableCell>
-                        {product.quantite * product.prix_unitaire}
-                      </TableCell>
+                      <TableCell>{product.quantity}</TableCell>
+                      <TableCell>{product.price}</TableCell>
+                      <TableCell>{product.quantity * product.price}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -114,7 +112,7 @@ function Row({ row, onStatusUpdate }) {
                     variant="contained"
                     color="primary"
                     onClick={() => setDialogOpen(true)}
-                    disabled={row.statut === "annulée"}
+                    disabled={row.statut !== "expédiée"}
                   >
                     Réceptionné
                   </Button>
@@ -191,11 +189,7 @@ export default function CollapsingTable({ data }) {
         </TableHead>
         <TableBody>
           {orders.map((row) => (
-            <Row
-              key={row.order_id}
-              row={row}
-              onStatusUpdate={updateOrderStatus}
-            />
+            <Row key={row._id} row={row} onStatusUpdate={updateOrderStatus} />
           ))}
         </TableBody>
       </Table>

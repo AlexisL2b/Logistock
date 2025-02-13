@@ -23,7 +23,7 @@ export default function LoginForm() {
       console.log("🔹 Mot de passe envoyé au backend :", password)
 
       console.log("response from login", response)
-
+      saveToLocalStorage("user", response.data.user)
       const { user } = response.data
       if (!user) {
         setError("Erreur d'authentification. Utilisateur introuvable.")
@@ -41,7 +41,7 @@ export default function LoginForm() {
         case "Gestionnaire":
           navigate("/gestionnaire-dashboard")
           break
-        case "logisticien":
+        case "Logisticien":
           navigate("/logisticien-dashboard")
           break
         default:

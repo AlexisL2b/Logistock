@@ -101,7 +101,6 @@ class AuthService {
         message: "Connexion réussie",
         user: {
           id: user._id,
-          email: user.email,
           role: user.role_id.name,
         },
       }

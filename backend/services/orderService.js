@@ -7,8 +7,8 @@ class OrderService {
   async getAllOrdersWithDetails() {
     return await OrderDAO.findAllWithDetails()
   }
-  async getOrdersByUserId(userId) {
-    return await OrderDAO.findByUserId(userId)
+  async getOrdersByBuyerId(buyerId) {
+    return await OrderDAO.findOrdersByBuyerId(buyerId)
   }
   async updateOrder(id, orderData) {
     const updatedOrder = await OrderDAO.update(id, orderData)
@@ -17,7 +17,7 @@ class OrderService {
     }
     return updatedOrder
   }
-  async addOrder(acheteur_id, totalAmount) {
+  async addOrder(buyer_id, totalAmount) {
     try {
       const montantTotal = Math.round(Number(totalAmount) * 100) // Convertir en centimes
       if (isNaN(montantTotal) || montantTotal <= 0) {
@@ -27,20 +27,13 @@ class OrderService {
       console.log("🔍 Montant total transformé :", montantTotal)
 
       // 🔥 Étape 1 : Créer la commande dans la base de données
-      const newOrder = await OrderDAO.createOrder(acheteur_id, totalAmount)
+      const newOrder = await OrderDAO.createOrder(buyer_id, totalAmount)
 
       console.log("✅ Commande créée :", newOrder)
 
-      console.log("✅ Payment Intent créé :", paymentIntent.id)
-
       // 🔥 Étape 3 : Associer le PaymentIntent à la commande
-      await OrderDAO.updateOrderPaymentStatus(
-        newOrder._id,
-        paymentIntent.id,
-        "pending"
-      )
 
-      return { order: newOrder, clientSecret: paymentIntent.client_secret }
+      return { order: newOrder }
     } catch (error) {
       console.error("❌ Erreur addOrder service :", error)
       throw error

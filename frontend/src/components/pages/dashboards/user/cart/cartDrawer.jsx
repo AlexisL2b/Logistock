@@ -12,6 +12,7 @@ import CartCardModal from "./CartCardModal"
 import {
   getFromLocalStorage,
   loadUserFromLocalStorage,
+  removeFromLocalStorage,
 } from "../../../../../utils/localStorage"
 import { useDispatch } from "react-redux"
 import { clearCart } from "../../../../../redux/slices/cartSlice"
@@ -30,21 +31,21 @@ export default function CartDrawer({
   console.log("user", user)
   const userId = user.id
   const dispatch = useDispatch()
-  const [clientSecret, setClientSecret] = useState(null)
+
   const [orderId, setOrderId] = useState(null)
   console.log("cartItems from cartDrawer.jsx", cartItems)
   console.log("userId from cartDrawer.jsx", user._id)
   const handleCheckout = async () => {
-    console.log("🚀 Checkout lancé, userId:", userId, "Total:", total)
+    // console.log("🚀 Checkout lancé, userId:", userId, "Total:", total)
     try {
       if (cartItems.length > 0) {
         // 🔥 Étape 1 : Préparer les produits et calculer le montant total
         const productsData = cartItems.map((item) => ({
           produit_id: item.produit_id,
-          name: item.detailsProduit.nom,
+          name: item.detailsProduit.name,
           reference: item.detailsProduit.reference,
-          prix: Number(item.detailsProduit.prix),
-          quantite: Number(item.quantity),
+          price: Number(item.detailsProduit.price),
+          quantity: Number(item.quantity),
         }))
 
         const total = Number(
@@ -56,21 +57,21 @@ export default function CartDrawer({
             .toFixed(2)
         )
 
-        console.log("📤 Envoi des données au backend :", {
-          acheteur_id: userId,
-          totalAmount: total * 100,
-        })
+        // console.log("📤 Envoi des données au backend :", {
+        //   acheteur_id: userId,
+        //   totalAmount: total * 100,
+        // })
 
-        console.log("📤 Envoi des données au backend :", {
-          acheteur_id: userId,
-          totalAmount: total, // ✅ Vérifie qu'il s'affiche bien ici
-        })
+        // console.log("📤 Envoi des données au backend :", {
+        //   acheteur_id: userId,
+        //   totalAmount: total, // ✅ Vérifie qu'il s'affiche bien ici
+        // })
 
         // 🔥 Étape 2 : Créer la commande avec paiement Stripe
         const responseOrder = await axiosInstance.post(
           "http://localhost:5000/api/orders",
           {
-            acheteur_id: userId,
+            buyer_id: userId,
             totalAmount: total,
           }
         )
@@ -78,20 +79,20 @@ export default function CartDrawer({
         console.log("✅ Commande créée avec ID :", responseOrder)
 
         const orderId = responseOrder.data.order._id
-        const clientSecret = responseOrder.data.clientSecret
+        // const clientSecret = responseOrder.data.clientSecret
 
-        console.log("✅✅✅ Commande ID :", orderId)
-        console.log("✅✅✅ ClientSecret :", clientSecret)
+        // console.log("✅✅✅ Commande ID :", orderId)
+        // console.log("✅✅✅ ClientSecret :", clientSecret)
 
         // 🔥 Étape 3 : Ajouter les produits à la commande
         for (const product of productsData) {
           await axiosInstance.post("http://localhost:5000/api/order_details", {
-            commande_id: orderId,
-            produit_id: product.produit_id,
+            order_id: orderId,
+            product_id: product.produit_id,
             name: product.name,
             reference: product.reference,
-            quantite: product.quantite,
-            prix_unitaire: product.prix,
+            quantity: product.quantity,
+            price: product.price,
           })
         }
 
@@ -99,14 +100,13 @@ export default function CartDrawer({
 
         // 🔥 Étape 4 : Sauvegarder l'ID de commande et ouvrir Stripe
         setOrderId(orderId)
+        dispatch(clearCart())
+        onClose()
+        // removeFromLocalStorage(`cart_${userId}`)
       }
     } catch (error) {
       console.error("❌ Erreur lors du checkout :", error.message)
     }
-  }
-
-  const handleCloseStripeModal = () => {
-    setOpenStripeModal(false)
   }
 
   return (

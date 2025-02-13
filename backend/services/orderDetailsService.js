@@ -5,7 +5,7 @@ class OrderDetailsService {
   // ✅ Ajouter des détails de commande ET mettre à jour le paiement
   async addOrderDetails(orderDetails) {
     try {
-      if (!orderDetails.commande_id) {
+      if (!orderDetails.order_id) {
         throw new Error("Le champ 'commande_id' est requis.")
       }
 

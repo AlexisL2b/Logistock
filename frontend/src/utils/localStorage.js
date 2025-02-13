@@ -44,3 +44,10 @@ export const loadUserFromLocalStorage = () => {
     return null
   }
 }
+export const removeFromLocalStorage = (key) => {
+  try {
+    localStorage.removeItem(key)
+  } catch (error) {
+    console.error("Erreur lors de la suppréssion des données: ", error)
+  }
+}

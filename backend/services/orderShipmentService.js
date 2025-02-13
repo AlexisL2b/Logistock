@@ -18,7 +18,7 @@ class OrderShipmentService {
   }
 
   async addOrderShipment(orderShipmentData) {
-    if (!orderShipmentData.commande_id) {
+    if (!orderShipmentData.order_id) {
       throw new Error("Le champ 'commande_id' est requis")
     }
 

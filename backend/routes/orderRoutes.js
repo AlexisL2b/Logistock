@@ -5,9 +5,9 @@ import {
   addOrder,
   updateOrder,
   deleteOrder,
-  getOrdersByUserId,
   getAllOrdersWithDetails,
-  confirmPayment, // ✅ Nouvelle route pour valider un paiement
+  confirmPayment,
+  getOrdersByBuyer, // ✅ Nouvelle route pour valider un paiement
 } from "../controllers/orderController.js"
 import validate from "../middlewares/validate.js"
 import { orderSchema } from "../validations/orderValidation.js"
@@ -34,6 +34,11 @@ router.delete(
   checkRole("Admin", "Gestionnaire", "Acheteur"),
   deleteOrder
 ) // DELETE /api/orders/:id
-router.get("/user/:userId", getOrdersByUserId) // GET orders by user ID
+router.get(
+  "/user/:buyer_id",
+  // protect,
+  // checkRole("Admin", "Gestionnaire", "Acheteur"),
+  getOrdersByBuyer
+) // GET orders by user ID
 
 export default router

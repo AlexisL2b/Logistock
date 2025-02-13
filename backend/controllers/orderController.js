@@ -28,12 +28,12 @@ export const updateOrder = async (req, res) => {
 // ✅ Ajouter une nouvelle commande (avec paiement)
 export const addOrder = async (req, res) => {
   try {
-    const { acheteur_id, totalAmount } = req.body
+    const { buyer_id, totalAmount } = req.body
 
     console.log("📥 Données reçues pour la commande :", req.body)
     console.log("🔍 Type de totalAmount :", typeof totalAmount)
 
-    if (!acheteur_id) {
+    if (!buyer_id) {
       return res.status(400).json({ message: "L'ID de l'acheteur est requis." })
     }
 
@@ -41,26 +41,28 @@ export const addOrder = async (req, res) => {
       return res.status(400).json({ message: "Le montant total est invalide." })
     }
 
-    console.log("✅ Montant total valide :", totalAmount)
-
-    const newOrder = await OrderService.addOrder(acheteur_id, totalAmount)
+    const newOrder = await OrderService.addOrder(buyer_id, totalAmount)
 
     res.status(201).json({
       message: "Commande créée avec succès",
       order: newOrder.order,
-      clientSecret: newOrder.clientSecret,
+      // clientSecret: newOrder.clientSecret,
     })
   } catch (error) {
     console.error("❌ Erreur addOrder controller :", error)
     res.status(500).json({ message: error.message })
   }
 }
-export const getOrdersByUserId = async (req, res) => {
+export const getOrdersByBuyer = async (req, res) => {
   try {
-    const orders = await OrderService.getOrdersByUserId(req.params.userId)
-    res.json(orders)
+    const { buyer_id } = req.params
+    console.log("buyerId", req.params)
+    const orders = await OrderService.getOrdersByBuyerId(buyer_id)
+    res.status(200).json(orders)
   } catch (error) {
-    res.status(500).json({ message: error.message })
+    res
+      .status(500)
+      .json({ message: "Erreur lors de la récupération des commandes" })
   }
 }
 
