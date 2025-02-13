@@ -6,11 +6,35 @@ class OrderDAO {
     return await Order.find().populate("buyer_id", "lastname firstname email")
   }
 
-  async findAllWithDetails() {
-    const orders = await Order.find().populate(
-      "buyer_id",
-      "firstname lastname email"
-    )
+  async findAllWithDetails(buyerId) {
+    try {
+      const orders = await Order.find().lean()
+
+      if (!orders.length) {
+        return []
+      }
+
+      // Récupérer tous les IDs de commandes
+      const orderIds = orders.map((order) => order._id)
+
+      // Récupérer tous les détails des commandes correspondant aux IDs
+      const orderDetails = await OrderDetails.find({
+        order_id: { $in: orderIds },
+      }).lean()
+
+      // Mapper les détails des commandes dans chaque commande
+      const ordersWithDetails = orders.map((order) => ({
+        ...order,
+        produitDetails: orderDetails.filter(
+          (detail) => detail.order_id.toString() === order._id.toString()
+        ),
+      }))
+
+      return ordersWithDetails
+    } catch (error) {
+      console.error("Erreur lors de la récupération des commandes :", error)
+      throw new Error("Impossible de récupérer les commandes")
+    }
   }
   async findAll() {
     return await Order.find().populate("buyer_id", "name firstname email")

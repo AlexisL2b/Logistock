@@ -8,7 +8,7 @@ import _ from "lodash" // Import de Lodash
 
 export default function Awaiting() {
   const dispatch = useDispatch()
-  const { orders } = useSelector((state) => state)
+  const { orders } = useSelector((state) => state.orders)
   const { stocks } = useSelector((state) => state.stocks)
   const [searchTerm, setSearchTerm] = useState("")
   console.log("stocks", stocks)
@@ -16,7 +16,6 @@ export default function Awaiting() {
   // Références pour stocker les versions précédentes des données
   const prevOrdersRef = useRef(orders)
   const prevStocksRef = useRef(stocks)
-  console.log("prevOrdersRef", prevOrdersRef)
   // Charger les données au démarrage
   useEffect(() => {
     dispatch(fetchOrdersWithDetails())
@@ -50,7 +49,7 @@ export default function Awaiting() {
   const filteredOrders = orders?.filter(
     (order) =>
       order.statut === "en cours" &&
-      order.order_id.toLowerCase().startsWith(searchTerm.toLowerCase())
+      order._id.toLowerCase().startsWith(searchTerm.toLowerCase())
   )
 
   // Conditions pour afficher le statut

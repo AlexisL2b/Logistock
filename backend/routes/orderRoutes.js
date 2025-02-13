@@ -24,8 +24,8 @@ router.post("/", validate(orderSchema), addOrder) // ✅ Création avec Stripe i
 router.put(
   "/:id",
   protect,
-  checkRole("Admin", "Gestionnaire"),
-  validate(orderSchema),
+  checkRole("Admin", "Gestionnaire", "Logisticien"),
+  // validate(orderSchema),
   updateOrder
 ) // ✅ Modification avec validation
 router.delete(

@@ -55,10 +55,10 @@ const io = new Server(server, {
 })
 app.set("io", io)
 io.on("connection", (socket) => {
-  console.log(`🟢 Un client s'est connecté : ${socket.id}`)
+  // console.log(`🟢 Un client s'est connecté : ${socket.id}`)
 
   socket.on("disconnect", () => {
-    console.log(`🔴 Utilisateur déconnecté : ${socket.id}`)
+    // console.log(`🔴 Utilisateur déconnecté : ${socket.id}`)
   })
 
   socket.on("stock:update", (data) => {

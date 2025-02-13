@@ -19,7 +19,11 @@ export const getAllOrdersWithDetails = async (req, res) => {
 }
 export const updateOrder = async (req, res) => {
   try {
+    console.log("req.params", req.params)
+    console.log("req.body", req.body)
+
     const updatedOrder = await OrderService.updateOrder(req.params.id, req.body)
+    console.log(updatedOrder)
     res.json(updatedOrder)
   } catch (error) {
     res.status(404).json({ message: error.message })
