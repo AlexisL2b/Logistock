@@ -10,6 +10,7 @@ import {
 } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
 import EnhancedTableDependancies from "../../../../../reusable-ui/EnhancedTableDependancies"
+import CustomSelect from "../../../../../reusable-ui/CustomSelect"
 
 export default function Products() {
   const [products, setProducts] = useState([])
@@ -18,6 +19,7 @@ export default function Products() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("")
   const [selectedSupplier, setSelectedSupplier] = useState("")
+  const [age, setAge] = useState("")
 
   // Fonction pour charger les produits
   const fetchProducts = () => {
@@ -75,7 +77,6 @@ export default function Products() {
   // 🔍 **Filtrage des produits par recherche, catégorie et fournisseur**
   const filteredProducts = products.filter((product) => {
     const searchLower = searchTerm.toLowerCase()
-
     // Vérification du filtre de recherche
     const matchesSearch =
       product.name.toLowerCase().includes(searchLower) ||
@@ -97,7 +98,9 @@ export default function Products() {
 
     return matchesSearch && matchesCategory && matchesSupplier
   })
-
+  const handleChange = (event) => {
+    setAge(event.target.value)
+  }
   return (
     <Box>
       {/* 🔍 Barre de recherche multi-critères */}
@@ -111,37 +114,26 @@ export default function Products() {
       />
 
       <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-        {/* 🏷️ Filtre par catégorie */}
-        <FormControl fullWidth>
-          <InputLabel>Filtrer par Catégorie</InputLabel>
-          <Select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            <MenuItem value="">Toutes les catégories</MenuItem>
-            {categories.map((category) => (
-              <MenuItem key={category._id} value={category._id}>
-                {category.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* 🚚 Filtre par fournisseur */}
-        <FormControl fullWidth>
-          <InputLabel>Filtrer par Fournisseur</InputLabel>
-          <Select
-            value={selectedSupplier}
-            onChange={(e) => setSelectedSupplier(e.target.value)}
-          >
-            <MenuItem value="">Tous les fournisseurs</MenuItem>
-            {suppliers.map((supplier) => (
-              <MenuItem key={supplier._id} value={supplier._id}>
-                {supplier.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <CustomSelect
+          inputLabelId="filtreCategorieLabel"
+          inputLabel="Filtrer par Catégorie"
+          selectId="filtreCategorie"
+          selectLabel="Filtrer par Catégorie"
+          defaultMenuItemLabel="Toutes les catégories"
+          menuItems={categories}
+          selectedValue={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        />
+        <CustomSelect
+          inputLabelId="filtreCategorieLabel"
+          inputLabel="Filtrer par Fournisseur"
+          selectId="filtreCategorie"
+          selectLabel="Filtrer par Fournisseur"
+          defaultMenuItemLabel="Tous les fournisseurs"
+          menuItems={suppliers}
+          selectedValue={selectedSupplier}
+          onChange={(e) => setSelectedSupplier(e.target.value)}
+        />
 
         {/* 🔄 Bouton de réinitialisation */}
         <Button

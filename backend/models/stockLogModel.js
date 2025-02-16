@@ -2,11 +2,11 @@ import mongoose from "mongoose"
 
 const stockLogSchema = new mongoose.Schema(
   {
-    product_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
-      required: true,
-    },
+    // product_id: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Product",
+    //   required: true,
+    // },
     stock_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Stock",

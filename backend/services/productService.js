@@ -46,7 +46,6 @@ class ProductService {
           })
 
           await stockLogDAO.create({
-            product_id: product._id,
             event: "création",
             quantity: quantity,
             stock_id: stock._id,
@@ -69,7 +68,6 @@ class ProductService {
         statut: "en_stock",
       })
       let stockLog = await stockLogDAO.create({
-        product_id: product._id,
         event: "création",
         quantity: quantity,
         stock_id: stock._id,
@@ -149,7 +147,6 @@ class ProductService {
     const stockToDelete = await stockDAO.findByProductId(productId)
 
     await stockLogDAO.create({
-      product_id: productId,
       stock_id: stockToDelete._id,
       quantity: 0,
       event: "suppression",

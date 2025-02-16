@@ -40,7 +40,7 @@ export default function CartModal({
         console.log("cartItems", cartItems)
         cartItems.forEach(async (item) => {
           const productId = item.product_id
-          const name = item.detailsProduit.nom
+          const name = item.detailsProduit.name
           const quantity = item.quantity
           const priceUnite = item.detailsProduit.prix
           const reference = item.detailsProduit.reference

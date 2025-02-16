@@ -205,7 +205,7 @@ const Profile = () => {
             variant="outlined"
             fullWidth
             value={
-              salesPoints?.find((s) => s._id === user?.point_vente_id)?.nom ||
+              salesPoints?.find((s) => s._id === user?.point_vente_id)?.name ||
               ""
             }
             disabled

@@ -14,7 +14,7 @@ class RoleService {
   }
 
   async addRole(roleData) {
-    if (!roleData.nom) {
+    if (!roleData.name) {
       throw new Error("Le champ 'nom' est requis")
     }
     return await RoleDAO.create(roleData)

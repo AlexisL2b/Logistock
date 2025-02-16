@@ -13,6 +13,7 @@ import axiosInstance from "../../../../../../axiosConfig"
 import BasicTable from "./BasicTable"
 import { useDispatch, useSelector } from "react-redux"
 import { fetchSalesPoints } from "../../../../../../redux/slices/salesPointSlice"
+import CustomSelect from "../../../../../reusable-ui/CustomSelect"
 
 export default function Transporters() {
   const [users, setUsers] = useState([])
@@ -58,7 +59,7 @@ export default function Transporters() {
       const lowerSearchTerm = searchTerm.toLowerCase()
       filteredUsers = filteredUsers.filter(
         (user) =>
-          user.nom.toLowerCase().includes(lowerSearchTerm) ||
+          user.name.toLowerCase().includes(lowerSearchTerm) ||
           user.prenom.toLowerCase().includes(lowerSearchTerm) ||
           user.email.toLowerCase().includes(lowerSearchTerm)
       )
@@ -98,35 +99,16 @@ export default function Transporters() {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
 
-        {/* 📍 Filtre par Point de Vente */}
-        <FormControl variant="outlined" sx={{ minWidth: 200 }}>
-          <InputLabel
-            shrink
-            sx={{
-              position: "absolute",
-              background: "white",
-              px: 1,
-              mt: -0.5,
-              // Ajuste la hauteur pour éviter l'encadrement
-            }}
-          >
-            Point de Vente
-          </InputLabel>
-          <Select
-            value={selectedPointVente}
-            onChange={(e) => setSelectedPointVente(e.target.value)}
-            displayEmpty
-            sx={{ textAlign: "left" }}
-          >
-            <MenuItem value="">Points de vente</MenuItem>
-
-            {salesPoints.map((point) => (
-              <MenuItem key={point._id} value={point.nom}>
-                {point.nom}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <CustomSelect
+          inputLabelId="filtrePointVenteLabel"
+          inputLabel="Filtrer par Points de vente"
+          selectId="filtrePointVente"
+          selectLabel="Filtrer par Points de vente"
+          defaultMenuItemLabel="Tous les Points de vente"
+          menuItems={salesPoints}
+          selectedValue={selectedPointVente}
+          onChange={(e) => setSelectedPointVente(e.target.value)}
+        />
 
         {/* 🔄 Bouton de réinitialisation (hauteur réduite) */}
         <Button

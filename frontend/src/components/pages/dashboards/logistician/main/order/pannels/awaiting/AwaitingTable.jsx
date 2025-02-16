@@ -107,7 +107,6 @@ function Row({ row }) {
 
         // Envoyer la requête avec la quantité trouvée
         await axiosInstance.post(`http://localhost:5000/api/stock_logs`, {
-          product_id: stock.product_id,
           stock_id: stock.stockId,
           event: "sortie",
           quantity: quantity, // Prend la valeur trouvée ou 0 par défaut

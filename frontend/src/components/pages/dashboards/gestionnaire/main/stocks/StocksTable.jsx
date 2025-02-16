@@ -16,11 +16,13 @@ import {
   Button,
   Modal,
   TextField,
+  Snackbar,
+  Alert,
 } from "@mui/material"
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp"
 import axiosInstance from "../../../../../../axiosConfig"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 
 const getEventStyle = (event) => {
   const styles = {
@@ -139,21 +141,21 @@ const modalStyle = {
 }
 
 export default function CollapsibleTable({ stocks }) {
-  const [order, setOrder] = React.useState("asc")
-  const [orderBy, setOrderBy] = React.useState("quantity")
-  const [modalOpen, setModalOpen] = React.useState(false)
-  const [selectedStock, setSelectedStock] = React.useState(null)
-  const [reassortQuantity, setReassortQuantity] = React.useState("")
-  const [error, setError] = React.useState("")
+  const [order, setOrder] = useState("asc")
+  const [orderBy, setOrderBy] = useState("quantity")
+  const [modalOpen, setModalOpen] = useState(false)
+  const [selectedStock, setSelectedStock] = useState(null)
+  const [reassortQuantity, setReassortQuantity] = useState("")
+  const [error, setError] = useState("")
+  const [stocksData, setStocksData] = useState(stocks) // ✅ Stock mis à jour dynamiquement
+  const [snackbarOpen, setSnackbarOpen] = useState(false) // ✅ Ajout Snackbar
 
   const handleSort = (property) => {
     const isAsc = orderBy === property && order === "asc"
     setOrder(isAsc ? "desc" : "asc")
     setOrderBy(property)
   }
-  useEffect(() => {
-    console.log("🔄 Stocks mis à jour", stocks)
-  }, [stocks])
+
   const handleOpenModal = (stock) => {
     setSelectedStock(stock)
     setReassortQuantity("")
@@ -180,11 +182,21 @@ export default function CollapsibleTable({ stocks }) {
       })
 
       await axiosInstance.post(`/stock_logs`, {
-        product_id: selectedStock.product_id._id,
         quantity: quantity,
         event: "entrée",
         stock_id: selectedStock._id,
       })
+
+      // ✅ Mise à jour locale du stock sans recharger la page
+      setStocksData((prevStocks) =>
+        prevStocks.map((stock) =>
+          stock._id === selectedStock._id
+            ? { ...stock, quantity: stock.quantity + quantity }
+            : stock
+        )
+      )
+
+      setSnackbarOpen(true) // ✅ Afficher la Snackbar après succès
     } catch (error) {
       alert("Une erreur s'est produite : " + error.message)
     }
@@ -205,7 +217,7 @@ export default function CollapsibleTable({ stocks }) {
             <TableCell>
               <TableSortLabel
                 active={orderBy === "quantity"}
-                direction={orderBy === "quantity" ? order : "asc"}
+                direction={order}
                 onClick={() => handleSort("quantity")}
               >
                 Quantité
@@ -216,7 +228,7 @@ export default function CollapsibleTable({ stocks }) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {stocks.map((stock) => (
+          {stocksData.map((stock) => (
             <Row key={stock._id} row={stock} onReassort={handleOpenModal} />
           ))}
         </TableBody>
@@ -229,30 +241,27 @@ export default function CollapsibleTable({ stocks }) {
             label="Quantité de réassort"
             type="number"
             value={reassortQuantity}
-            onChange={(e) => {
-              setReassortQuantity(e.target.value)
-              setError("")
-            }}
+            onChange={(e) => setReassortQuantity(e.target.value)}
             error={Boolean(error)}
             helperText={error}
             fullWidth
-            variant="outlined"
-            inputProps={{ min: 1 }}
           />
-          <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
-            <Button onClick={handleCloseModal} color="error">
-              Annuler
-            </Button>
-            <Button
-              onClick={handleConfirmReassort}
-              variant="contained"
-              disabled={Boolean(error)}
-            >
-              Confirmer
-            </Button>
-          </Box>
+          <Button onClick={handleConfirmReassort} variant="contained">
+            Confirmer
+          </Button>
         </Box>
       </Modal>
+
+      {/* ✅ Snackbar de succès */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} severity="success">
+          Réassort effectué avec succès !
+        </Alert>
+      </Snackbar>
     </TableContainer>
   )
 }

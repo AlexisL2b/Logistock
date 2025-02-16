@@ -4,17 +4,13 @@ import {
   TextField,
   Button,
   Grid,
-  Typography,
   Box,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
   Snackbar,
   Alert,
-  Modal,
+  FormHelperText,
 } from "@mui/material"
 import axiosInstance from "../../../axiosConfig"
+import CustomSelect from "../../reusable-ui/CustomSelect"
 
 const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
   const [salesPoints, setSalesPoints] = useState([])
@@ -25,7 +21,6 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
     message: "",
     severity: "info",
   })
-  const [modalOpen, setModalOpen] = useState(false) // État pour afficher la modale
 
   const {
     handleSubmit,
@@ -35,71 +30,43 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
   } = useForm()
 
   const password = watch("password")
-  const selectedSalesPoint = watch("salesPoint") // Récupère la valeur du point de vente
-
-  function cleanObject(obj) {
-    return Object.fromEntries(
-      Object.entries(obj).filter(
-        ([_, value]) => value !== "" && value !== null && value !== undefined
-      )
-    )
-  }
-
-  const fetchSalesPoints = async () => {
-    try {
-      const response = await axiosInstance.get("/sales_points")
-      console.log("Points de ventes reçus :", response.data)
-
-      const salesPoints = response.data || [] // Sécurisation des données
-
-      setSalesPoints(salesPoints) // Mise à jour du state
-    } catch (error) {
-      console.error(
-        "Erreur lors de la récupération des Points de ventes :",
-        error
-      )
-    }
-  }
-  const fetchRoles = async () => {
-    try {
-      const response = await axiosInstance.get("/roles")
-      console.log("Rôles reçus :", response)
-
-      const rolesData = response.data || [] // Sécurisation des données
-
-      setRoles(rolesData) // Mise à jour du state
-    } catch (error) {
-      console.error("Erreur lors de la récupération des Rôles :", error)
-    }
-  }
 
   useEffect(() => {
+    const fetchSalesPoints = async () => {
+      try {
+        const response = await axiosInstance.get("/sales_points")
+        setSalesPoints(response.data || [])
+      } catch (error) {
+        console.error(
+          "Erreur lors de la récupération des Points de ventes :",
+          error
+        )
+      }
+    }
+
+    const fetchRoles = async () => {
+      try {
+        const response = await axiosInstance.get("/roles")
+        setRoles(response.data || [])
+      } catch (error) {
+        console.error("Erreur lors de la récupération des Rôles :", error)
+      }
+    }
+
     fetchSalesPoints()
     fetchRoles()
   }, [])
 
   const onSubmit = async (data) => {
     try {
-      console.log(data)
-
-      // if (selectedRole !== "Acheteur" && admin) {
-      //   delete data.salesPoint
-      // }
       const { confirmPassword, ...userData } = data
-      // 🚨 Supprimer `roles` pour éviter qu'un gestionnaire attribue un rôle
-
-      // const cleanedData = cleanObject(data)
-      console.log("userData", userData)
-
       await axiosInstance.post("http://localhost:5000/api/users", userData)
       setSnackbar({
         open: true,
         message: "Inscription réussie !",
         severity: "success",
       })
-      setModalOpen(false) // Ouvre la modale
       onUserAdded()
-      console.log("ici")
       onClose()
     } catch (error) {
       setSnackbar({
@@ -114,7 +81,7 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
     <Box sx={{ maxWidth: 500, margin: "0 auto", mt: 4 }}>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2}>
-          {/* Champ Prénom */}
+          {/* Prénom */}
           <Grid item xs={12}>
             <Controller
               name="firstname"
@@ -127,14 +94,14 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
                   label="Prénom"
                   variant="outlined"
                   fullWidth
-                  error={!!errors.prenom}
-                  helperText={errors.prenom?.message}
+                  error={!!errors.firstname}
+                  helperText={errors.firstname?.message}
                 />
               )}
             />
           </Grid>
 
-          {/* Champ Nom */}
+          {/* Nom */}
           <Grid item xs={12}>
             <Controller
               name="lastname"
@@ -147,14 +114,14 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
                   label="Nom"
                   variant="outlined"
                   fullWidth
-                  error={!!errors.nom}
-                  helperText={errors.nom?.message}
+                  error={!!errors.lastname}
+                  helperText={errors.lastname?.message}
                 />
               )}
             />
           </Grid>
 
-          {/* Champ Adresse */}
+          {/* Adresse */}
           <Grid item xs={12}>
             <Controller
               name="address"
@@ -167,14 +134,14 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
                   label="Adresse"
                   variant="outlined"
                   fullWidth
-                  error={!!errors.adresse}
-                  helperText={errors.adresse?.message}
+                  error={!!errors.address}
+                  helperText={errors.address?.message}
                 />
               )}
             />
           </Grid>
 
-          {/* Champ Email */}
+          {/* Email */}
           <Grid item xs={12}>
             <Controller
               name="email"
@@ -200,7 +167,8 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
               )}
             />
           </Grid>
-          {/* Champ Mot de passe */}
+
+          {/* Mot de passe */}
           <Grid item xs={12}>
             <Controller
               name="password"
@@ -232,7 +200,7 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
             />
           </Grid>
 
-          {/* Confirmation de mot de passe */}
+          {/* Confirmation du mot de passe */}
           <Grid item xs={12}>
             <Controller
               name="confirmPassword"
@@ -258,8 +226,8 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
             />
           </Grid>
 
-          {/* Sélecteur de rôle */}
-          {admin ? (
+          {/* Sélecteur de rôle (admin uniquement) */}
+          {admin && (
             <Grid item xs={12}>
               <Controller
                 name="role_id"
@@ -267,92 +235,55 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
                 defaultValue=""
                 rules={{ required: "Veuillez sélectionner un rôle" }}
                 render={({ field }) => (
-                  <FormControl fullWidth>
-                    <InputLabel id="roles-label">Rôle</InputLabel>
-                    <Select
-                      {...field}
-                      labelId="roles-label"
-                      label="Rôle"
+                  <>
+                    <CustomSelect
+                      inputLabelId="roles-label"
+                      inputLabel="Rôle"
+                      selectId="roles-select"
+                      selectLabel="Rôle"
+                      defaultMenuItemLabel="Sélectionner un rôle"
+                      menuItems={roles}
+                      selectedValue={field.value}
                       onChange={(e) => {
-                        field.onChange(e) // Met à jour React Hook Form
-                        const selectedRoleObject = roles.find(
-                          (role) => role._id === e.target.value
+                        field.onChange(e)
+                        setSelectedRole(
+                          roles.find((role) => role._id === e.target.value)
                         )
-                        setSelectedRole(selectedRoleObject) // Stocke l'objet entier du rôle
-                        console.log("Rôle sélectionné :", selectedRoleObject)
                       }}
-                    >
-                      {roles?.map((role) => (
-                        <MenuItem key={role._id} value={role._id}>
-                          {role.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                    />
+                    <FormHelperText error={!!errors.role_id}>
+                      {errors.role_id?.message}
+                    </FormHelperText>
+                  </>
                 )}
               />
             </Grid>
-          ) : (
-            ""
           )}
 
-          {/* Sélecteur de point de vente (Seulement si "Acheteur" est sélectionné) */}
-          {selectedRole?.name === "Acheteur" && (
+          {/* Sélecteur de point de vente */}
+          {(selectedRole?.name === "Acheteur" || !admin) && (
             <Grid item xs={12}>
               <Controller
                 name="sale_point_id"
                 control={control}
                 defaultValue=""
-                rules={{
-                  required: "Veuillez sélectionner un point de vente",
-                }}
+                rules={{ required: "Veuillez sélectionner un point de vente" }}
                 render={({ field }) => (
-                  <FormControl fullWidth>
-                    <InputLabel id="sales-point-label">
-                      Point de Vente
-                    </InputLabel>
-                    <Select
-                      {...field}
-                      labelId="sales-point-label"
-                      label="Point de Vente"
-                    >
-                      {salesPoints.map((point) => (
-                        <MenuItem key={point._id} value={point._id}>
-                          {point.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
-              />
-            </Grid>
-          )}
-          {!admin && (
-            <Grid item xs={12}>
-              <Controller
-                name="sale_point_id"
-                control={control}
-                defaultValue=""
-                rules={{
-                  required: "Veuillez sélectionner un point de vente",
-                }}
-                render={({ field }) => (
-                  <FormControl fullWidth>
-                    <InputLabel id="sales-point-label">
-                      Point de Vente
-                    </InputLabel>
-                    <Select
-                      {...field}
-                      labelId="sales-point-label"
-                      label="Point de Vente"
-                    >
-                      {salesPoints.map((point) => (
-                        <MenuItem key={point._id} value={point._id}>
-                          {point.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                  <>
+                    <CustomSelect
+                      inputLabelId="sales-point-label"
+                      inputLabel="Point de Vente"
+                      selectId="sales-point-select"
+                      selectLabel="Point de Vente"
+                      defaultMenuItemLabel="Sélectionner un point de vente"
+                      menuItems={salesPoints}
+                      selectedValue={field.value}
+                      onChange={(e) => field.onChange(e)}
+                    />
+                    <FormHelperText error={!!errors.sale_point_id}>
+                      {errors.sale_point_id?.message}
+                    </FormHelperText>
+                  </>
                 )}
               />
             </Grid>
@@ -366,17 +297,6 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
           </Grid>
         </Grid>
       </form>
-
-      {/* Snackbar pour les messages */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={5000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert severity={snackbar.severity} sx={{ width: "100%" }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   )
 }

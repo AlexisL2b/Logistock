@@ -6,12 +6,9 @@ import {
   Typography,
   Modal,
   TextField,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Select,
   FormHelperText,
 } from "@mui/material"
+import CustomSelect from "./CustomSelect"
 
 const style = {
   position: "absolute",
@@ -36,10 +33,10 @@ export default function BasicModal({
   const [formData, setFormData] = useState({
     name: "",
     reference: "",
-    prix: "",
+    price: "",
     quantity: "",
-    description: "", // ✅ Ajout de la description
-    categorie_id: "",
+    description: "",
+    category_id: "",
     supplier_id: "",
     sales_point_id: "",
   })
@@ -47,18 +44,18 @@ export default function BasicModal({
   const [errors, setErrors] = useState({})
 
   useEffect(() => {
-    if (objectData) {
+    if (open) {
       setFormData({
         name: objectData.name || "",
         reference: objectData.reference || "",
         price: objectData.price || "",
         quantity: objectData.quantity || "",
-        description: objectData.description || "", // ✅ Remplissage si disponible
+        description: objectData.description || "",
         category_id: objectData.category_id?._id || "",
         supplier_id: objectData.supplier_id?._id || "",
       })
     }
-  }, [objectData])
+  }, [objectData, open])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -79,7 +76,7 @@ export default function BasicModal({
     if (!formData.quantity || formData.quantity <= 0)
       newErrors.quantity = "Quantité invalide."
     if (!formData.description.trim())
-      newErrors.description = "La description est obligatoire." // ✅ Ajout validation description
+      newErrors.description = "La description est obligatoire."
     if (!formData.category_id)
       newErrors.category_id = "Veuillez sélectionner une catégorie."
     if (!formData.supplier_id)
@@ -91,7 +88,8 @@ export default function BasicModal({
 
   const handleSubmit = () => {
     if (validateForm()) {
-      onSubmit(formData)
+      console.log("Données envoyées :", { ...formData, _id: objectData._id })
+      onSubmit({ ...formData, _id: objectData._id })
     }
   }
 
@@ -105,7 +103,6 @@ export default function BasicModal({
           component="form"
           sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 2 }}
         >
-          {/* 🔥 Nom */}
           <TextField
             label="Nom"
             name="name"
@@ -115,8 +112,6 @@ export default function BasicModal({
             helperText={errors.name}
             fullWidth
           />
-
-          {/* 🔥 Référence */}
           <TextField
             label="Référence"
             name="reference"
@@ -126,8 +121,6 @@ export default function BasicModal({
             helperText={errors.reference}
             fullWidth
           />
-
-          {/* 🔥 Prix */}
           <TextField
             label="Prix"
             name="price"
@@ -138,8 +131,6 @@ export default function BasicModal({
             helperText={errors.price}
             fullWidth
           />
-
-          {/* 🔥 Quantité Disponible */}
           <TextField
             label="Quantité Disponible"
             name="quantity"
@@ -150,8 +141,6 @@ export default function BasicModal({
             helperText={errors.quantity}
             fullWidth
           />
-
-          {/* 🔥 Description */}
           <TextField
             label="Description"
             name="description"
@@ -160,47 +149,44 @@ export default function BasicModal({
             error={!!errors.description}
             helperText={errors.description}
             fullWidth
-            multiline // ✅ Permet plusieurs lignes
-            rows={3} // ✅ Définit la hauteur initiale
+            multiline
+            rows={3}
           />
 
-          {/* 🔥 Catégorie */}
-          <FormControl fullWidth error={!!errors.category_id}>
-            <InputLabel>Catégorie</InputLabel>
-            <Select
-              name="category_id"
-              value={formData.category_id}
-              onChange={handleInputChange}
-            >
-              {dropdownData["/categories"]?.map((item) => (
-                <MenuItem key={item._id} value={item._id}>
-                  {item.name}
-                </MenuItem>
-              ))}
-            </Select>
-            <FormHelperText>{errors.category_id}</FormHelperText>
-          </FormControl>
+          {/* 🔥 Utilisation de CustomSelect pour Catégories */}
+          <CustomSelect
+            inputLabelId="category-label"
+            inputLabel="Catégorie"
+            selectId="category-select"
+            selectLabel="Catégorie"
+            defaultMenuItemLabel="Toutes les catégories"
+            menuItems={dropdownData["/categories"] || []}
+            selectedValue={formData.category_id}
+            onChange={(e) =>
+              setFormData({ ...formData, category_id: e.target.value })
+            }
+          />
+          <FormHelperText error={!!errors.category_id}>
+            {errors.category_id}
+          </FormHelperText>
 
-          {/* 🔥 Fournisseur */}
-          <FormControl fullWidth error={!!errors.supplier_id}>
-            <InputLabel>Fournisseur</InputLabel>
-            <Select
-              name="supplier_id"
-              value={formData.supplier_id}
-              onChange={handleInputChange}
-            >
-              {dropdownData["/suppliers"]?.map((item) => (
-                <MenuItem key={item._id} value={item._id}>
-                  {item.name}
-                </MenuItem>
-              ))}
-            </Select>
-            <FormHelperText>{errors.supplier_id}</FormHelperText>
-          </FormControl>
+          {/* 🔥 Utilisation de CustomSelect pour Fournisseurs */}
+          <CustomSelect
+            inputLabelId="supplier-label"
+            inputLabel="Fournisseur"
+            selectId="supplier-select"
+            selectLabel="Fournisseur"
+            defaultMenuItemLabel="Tous les fournisseurs"
+            menuItems={dropdownData["/suppliers"] || []}
+            selectedValue={formData.supplier_id}
+            onChange={(e) =>
+              setFormData({ ...formData, supplier_id: e.target.value })
+            }
+          />
+          <FormHelperText error={!!errors.supplier_id}>
+            {errors.supplier_id}
+          </FormHelperText>
 
-          {/* 🔥 Point de Vente */}
-
-          {/* 🔥 Bouton d'enregistrement */}
           <Button
             variant="contained"
             color="primary"

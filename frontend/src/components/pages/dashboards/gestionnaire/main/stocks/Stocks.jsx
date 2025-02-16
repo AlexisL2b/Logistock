@@ -16,6 +16,7 @@ import {
 } from "../../../../../../redux/slices/stockSlice"
 import axiosInstance from "../../../../../../axiosConfig"
 import { io } from "socket.io-client"
+import CustomSelect from "../../../../../reusable-ui/CustomSelect"
 
 export default function Stocks() {
   const dispatch = useDispatch()
@@ -100,40 +101,27 @@ export default function Stocks() {
       {/* Filtres */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
         {/* Filtre par catégorie */}
-        <FormControl variant="outlined" sx={{ minWidth: 200 }}>
-          <InputLabel shrink>Catégorie</InputLabel>
-          <Select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            displayEmpty
-          >
-            <MenuItem value="">Toutes les catégories</MenuItem>
-            {categories.map((cat) => (
-              <MenuItem key={cat._id} value={cat._id}>
-                {cat.nom}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <CustomSelect
+          inputLabelId="filtreCategorieLabel"
+          inputLabel="Filtrer par Catégorie"
+          selectId="filtreCategorie"
+          selectLabel="Filtrer par Catégorie"
+          defaultMenuItemLabel="Toutes les catégories"
+          menuItems={categories}
+          selectedValue={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        />
+        <CustomSelect
+          inputLabelId="filtreCategorieLabel"
+          inputLabel="Filtrer par Fournisseur"
+          selectId="filtreCategorie"
+          selectLabel="Filtrer par Fournisseur"
+          defaultMenuItemLabel="Tous les fournisseurs"
+          menuItems={suppliers}
+          selectedValue={selectedSupplier}
+          onChange={(e) => setSelectedSupplier(e.target.value)}
+        />
 
-        {/* Filtre par fournisseur */}
-        <FormControl variant="outlined" sx={{ minWidth: 200 }}>
-          <InputLabel shrink>Fournisseur</InputLabel>
-          <Select
-            value={selectedSupplier}
-            onChange={(e) => setSelectedSupplier(e.target.value)}
-            displayEmpty
-          >
-            <MenuItem value="">Tous les fournisseurs</MenuItem>
-            {suppliers.map((sup) => (
-              <MenuItem key={sup._id} value={sup._id}>
-                {sup.nom}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        {/* Bouton de réinitialisation */}
         <Button
           variant="contained"
           onClick={() => {

@@ -253,13 +253,11 @@ export default function EnhancedTable({
           `http://localhost:5000/api/${coll}/${updatedData._id}`,
           updatedData
         )
-        //("Données mises à jour :", updatedData)
       } else {
         await axiosInstance.post(
           `http://localhost:5000/api/${coll}`,
           updatedData
         )
-        //("Nouvelle donnée ajoutée :", updatedData)
       }
 
       alert("Opération réussie !")

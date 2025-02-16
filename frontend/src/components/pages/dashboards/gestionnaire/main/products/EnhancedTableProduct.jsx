@@ -328,7 +328,7 @@ export default function EnhancedTable({ data, coll, onDataChange, endpoints }) {
                       >
                         {typeof row[cell.id] === "object" &&
                         row[cell.id] !== null
-                          ? row[cell.id].nom || "N/A" // Si c'est un objet, affichez la propriété "nom"
+                          ? row[cell.id].name || "N/A" // Si c'est un objet, affichez la propriété "nom"
                           : row[cell.id]}{" "}
                         {/* Sinon, affichez directement la valeur */}
                       </TableCell>

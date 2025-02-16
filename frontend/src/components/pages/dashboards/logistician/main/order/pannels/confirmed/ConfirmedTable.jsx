@@ -26,6 +26,7 @@ import { fetchOrdersWithDetails } from "../../../../../../../../redux/slices/ord
 import { fetchTransporters } from "../../../../../../../../redux/slices/transporterSlice"
 import _ from "lodash"
 import axiosInstance from "../../../../../../../../axiosConfig"
+import CustomSelect from "../../../../../../../reusable-ui/CustomSelect"
 
 function ConfirmedRow({ row }) {
   const [open, setOpen] = useState(false)
@@ -181,8 +182,17 @@ function ConfirmedRow({ row }) {
                 <Close />
               </IconButton>
             </Box>
-
-            <FormControl fullWidth sx={{ mt: 2 }} variant="outlined">
+            <CustomSelect
+              inputLabelId="transporteurLabel"
+              inputLabel="Transporteur"
+              selectId="transporteurLabel"
+              selectLabel="Transporteur"
+              defaultMenuItemLabel="Tous les transporteurs"
+              menuItems={transporters}
+              selectedValue={selectedTransporter}
+              onChange={(e) => setSelectedTransporter(e.target.value)}
+            />
+            {/* <FormControl fullWidth sx={{ mt: 2 }} variant="outlined">
               <InputLabel id="transporteur-label">Transporteur</InputLabel>
               <Select
                 labelId="transporteur-label"
@@ -196,7 +206,7 @@ function ConfirmedRow({ row }) {
                   </MenuItem>
                 ))}
               </Select>
-            </FormControl>
+            </FormControl> */}
 
             {errorMessage && (
               <Typography color="error" variant="body2" sx={{ mt: 2 }}>

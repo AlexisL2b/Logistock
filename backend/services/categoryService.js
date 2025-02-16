@@ -22,7 +22,7 @@ class CategoryService {
     const categories = await categoryDAO.findAll()
 
     const existe = categories.some((item) => {
-      console.log(item) // ✅ Vérifie chaque item parcouru
+      console.log("item", item) // ✅ Vérifie chaque item parcouru
       return item.name === categoryData.name // ✅ Ajoute `return` pour que `some()` fonctionne
     })
 
@@ -32,8 +32,7 @@ class CategoryService {
 
       return await CategoryDAO.create(categoryData)
     } else {
-      throw new Error("Cette catégorie existe déjà!")
-      console.log("existe", existe)
+      throw new Error("Cette catégorie existe déjàzzzz!")
     }
   }
 
@@ -44,13 +43,9 @@ class CategoryService {
     const categories = await categoryDAO.findAll()
 
     const existe = categories.some((item) => {
-      console.log(item) // ✅ Vérifie chaque item parcouru
-      return item.nom === categoryData.nom // ✅ Ajoute `return` pour que `some()` fonctionne
+      return item.name === categoryData.name // ✅ Ajoute `return` pour que `some()` fonctionne
     })
     if (!existe) {
-      console.log("existe", existe)
-      console.log("categoryData", categoryData)
-
       const updatedCategory = await CategoryDAO.update(id, categoryData)
 
       return updatedCategory

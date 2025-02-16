@@ -23,14 +23,10 @@ PREVOIR UN DASHBOARD POUR CHAQUE TYPE D'UTILISATEUR
 
 @A FAIRE->  3. Validitée de champs des formulaires:
             dans chaque volet, implémenter une validation des différents champs de formulaire.
-@A FAIRE->  9. Revoir la logique de ma collection order_detail (Un champs quantité existe, imaginer un champ qui accueillera le json de toutes les produits commandés avec prix,quantité,PU HT/TTC, PTOTAL par produit  HT/TTC et PRIX TOTAL HT/TTC)
 
-@A FAIRE->  10.Design et responsive
 
-@A FAIRE->  4. Faire un composant qui accueillera les commande (table collaps mui);
 
-@FAIT->  1. Gerer les conflicts entre produit/categorie ect.
-            ex: Si un produit a une categorie "meuble", et que je supprime la categorie meuble gérer ce cas
+
 
 @FAIT->     2. Ajouter des listes déroulante pour donner acces lors des modification/ajout aux différentes dépendance.
             ex: Pour un produit si je veux le modifier dans la section categorie, un liste déroulante sera présente avec les categories disponibles dans ma collection
@@ -49,9 +45,7 @@ PREVOIR UN DASHBOARD POUR CHAQUE TYPE D'UTILISATEUR
                 b. un dashboard ou il peut modifié son profil, consulté ses commandes en cours ou passée
 
 
-@ A FAIRE-> Lorsque je supprime un role, créer une vue pour rediriger un utilisateur sans rôle 
 
-@ A FAIRE -> lorsque je me déconnecte ( que je retourne dans http://localhost:5173/), et que je complete l'url par -user-dahsboard j'accede au composant et aà un utilisateur pourquoi ?
 
 POINT D'AMELIORATION:
 
@@ -232,3 +226,12 @@ en cours -> stock insufisant-> bouton réassort-> notification gestionnaire-> r�
 
 
 CREATION DUN STOCK LOG LORSQUE JE CREER UN PRODUIT.
+
+
+
+
+
+
+1. Vérifier tous les filtre déroulants.
+2. Modifier les inputs select (probleme d'affichage loors de la selection)
+3. Modifier les inputs number pour ne pas accepter autre chose que des chiffres

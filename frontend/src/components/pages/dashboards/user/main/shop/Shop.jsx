@@ -4,6 +4,7 @@ import { fetchProducts } from "../../../../../../redux/slices/productsSlice"
 import { Box, FormControl, InputLabel, Select, MenuItem } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
 import ProductCard from "./ProductCard"
+import CustomSelect from "../../../../../reusable-ui/CustomSelect"
 
 export default function Shop() {
   const dispatch = useDispatch()
@@ -42,8 +43,18 @@ export default function Shop() {
   console.log(filteredProducts)
   return (
     <Box sx={{ p: 3 }}>
+      <CustomSelect
+        inputLabelId="filtreCategorieLabel"
+        inputLabel="Filtrer par Catégorie"
+        selectId="filtreCategorie"
+        selectLabel="Filtrer par Catégorie"
+        defaultMenuItemLabel="Toutes les catégories"
+        menuItems={categories}
+        selectedValue={selectedCategory}
+        onChange={(e) => setSelectedCategory(e.target.value)}
+      />
       {/* 🏷️ Filtre par catégorie */}
-      <FormControl fullWidth margin="normal">
+      {/* <FormControl fullWidth margin="normal">
         <InputLabel id="category-filter-label">
           Filtrer par Catégorie
         </InputLabel>
@@ -59,7 +70,7 @@ export default function Shop() {
             </MenuItem>
           ))}
         </Select>
-      </FormControl>
+      </FormControl> */}
 
       {/* 🌟 Affichage ultra responsive des produits */}
       <Box
