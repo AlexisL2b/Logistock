@@ -25,7 +25,7 @@ class SalesPointService {
 
   // 🔹 Ajouter un nouveau point de vente
   async addSalesPoint(data) {
-    if (!data.nom || !data.adresse) {
+    if (!data.name || !data.address) {
       throw new Error("Les champs 'nom' et 'adresse' sont obligatoires")
     }
 
@@ -52,7 +52,7 @@ class SalesPointService {
       throw new Error("Point de vente introuvable")
     }
     if (users.length > 0) {
-      const noms = users.map((p) => p.nom).join(", ")
+      const noms = users.map((p) => `${p.firstname} ${p.lastname}`).join(", ")
       throw new Error(
         `Impossible de supprimer le point de vente. Il est associée aux utilisateurs suivants : ${noms}`
       )

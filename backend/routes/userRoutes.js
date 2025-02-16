@@ -1,52 +1,30 @@
 import express from "express"
 import {
-  getAllUsers,
-  getUserById,
-  addUser,
+  getUserProfile,
+  createUser,
   updateUser,
   deleteUser,
-  getUserByUid,
-  getAllBuyers,
+  getAllUsers,
+  getBuyers,
 } from "../controllers/userController.js"
-import authenticate from "../middlewares/authenticate.js"
-import User from "../models/userModel.js"
-import checkRole from "../middlewares/checkRole.js"
+import { protect } from "../middlewares/authMiddleware.js"
+import { checkRole } from "../middlewares/checkRole.js"
+import { userSchema } from "../validations/userValidation.js"
+import validate from "../middlewares/validate.js"
 
 const router = express.Router()
 
-router.get("/me", authenticate, async (req, res) => {
-  try {
-    const user = await User.findOne({ firebaseUid: req.user.uid })
-    if (!user) {
-      return res.status(404).json({ message: "Utilisateur non trouvé" })
-    }
-    res.status(200).json(user)
-  } catch (error) {
-    res.status(500).json({ message: "Erreur serveur", error: error.message })
-  }
-})
-
-router.get("/", getAllUsers)
-router.get("/buyers", getAllBuyers) // 🔥 Route pour récupérer uniquement les acheteur
-router.get("/:id", getUserById)
-router.get("/uid/:uid", getUserByUid)
+router.get("/", protect, getAllUsers)
+router.get("/profile", protect, getUserProfile)
+router.get("/buyers", protect, getBuyers)
 router.post(
   "/",
-  authenticate,
-  checkRole("Admin", "admin", "Gestionnaire"),
-  addUser
+  protect,
+  checkRole("admin", "Gestionnaire"),
+  validate(userSchema),
+  createUser
 )
-router.put(
-  "/:id",
-  authenticate,
-  checkRole("Admin", "admin", "Gestionnaire"),
-  updateUser
-)
-router.delete(
-  "/:id",
-  authenticate,
-  checkRole("Admin", "admin", "Gestionnaire"),
-  deleteUser
-)
+router.put("/:id", protect, checkRole("admin", "Gestionnaire"), updateUser)
+router.delete("/:id", protect, checkRole("admin", "Gestionnaire"), deleteUser)
 
 export default router

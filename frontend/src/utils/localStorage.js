@@ -21,11 +21,19 @@ export const loadFromLocalStorage = (key) => {
   }
 }
 
+export const getFromLocalStorage = (key) => {
+  try {
+    const value = localStorage.getItem(key)
+    return value ? JSON.parse(value) : null
+  } catch (error) {
+    console.error("Erreur lors de la récupération depuis localStorage", error)
+    return null
+  }
+}
+
 export const loadUserFromLocalStorage = () => {
   try {
-    const keys = Object.keys(localStorage).filter((key) =>
-      key.startsWith("user_")
-    )
+    const keys = Object.keys(localStorage).filter((key) => key.startsWith("id"))
     if (keys.length > 0) {
       const userData = localStorage.getItem(keys[0])
       return userData ? JSON.parse(userData) : null
@@ -34,5 +42,12 @@ export const loadUserFromLocalStorage = () => {
   } catch (error) {
     console.error("Erreur lors du chargement des données utilisateur :", error)
     return null
+  }
+}
+export const removeFromLocalStorage = (key) => {
+  try {
+    localStorage.removeItem(key)
+  } catch (error) {
+    console.error("Erreur lors de la suppréssion des données: ", error)
   }
 }

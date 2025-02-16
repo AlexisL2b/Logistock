@@ -25,20 +25,13 @@ export const getOrderDetailsById = async (req, res) => {
 // Ajouter des détails de commande
 export const addOrderDetails = async (req, res) => {
   try {
-    const {
-      commande_id,
-      name,
-      prix_unitaire,
-      produit_id,
-      quantite,
-      reference,
-    } = req.body
+    const { order_id, name, price, product_id, quantity, reference } = req.body
     if (
-      !commande_id ||
+      !order_id ||
       !name ||
-      !prix_unitaire ||
-      !produit_id ||
-      !quantite ||
+      !price ||
+      !product_id ||
+      !quantity ||
       !reference
     ) {
       return res.status(400).json({ message: "Données manquantes." })

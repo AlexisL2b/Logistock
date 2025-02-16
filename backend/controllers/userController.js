@@ -1,73 +1,61 @@
 import UserService from "../services/userService.js"
 
-// ✅ Récupérer tous les utilisateurs
+export const getUserProfile = async (req, res) => {
+  try {
+    const user = await UserService.getUserProfile(req.user.id)
+    // console.log("user from userController", user)
+    res.status(200).json({ user })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
 export const getAllUsers = async (req, res) => {
   try {
     const users = await UserService.getAllUsers()
-    res.json(users)
+    res.status(200).json(users)
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
 }
-
-// ✅ Récupérer uniquement les acheteurs
-export const getAllBuyers = async (req, res) => {
+export const getBuyers = async (req, res) => {
   try {
     const buyers = await UserService.getBuyers()
-    console.log("buyers", buyers)
-    res.json(buyers)
+    res.status(200).json({ buyers })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
 }
 
-// ✅ Récupérer un utilisateur par Firebase UID
-export const getUserByUid = async (req, res) => {
+export const createUser = async (req, res) => {
   try {
-    const user = await UserService.getUserByFirebaseUid(req.params.uid)
-    res.json(user)
+    const newUser = await UserService.createUser(req.body)
+    console.log("newUser depuis controller", newUser.newUser)
+    res.status(201).json({ message: "Utilisateur créé avec succès", newUser })
   } catch (error) {
-    res.status(404).json({ message: error.message })
+    res.status(500).json({ message: error.message })
   }
 }
 
-// ✅ Récupérer un utilisateur par ID
-export const getUserById = async (req, res) => {
-  try {
-    const user = await UserService.getUserById(req.params.id)
-    res.json(user)
-  } catch (error) {
-    res.status(404).json({ message: error.message })
-  }
-}
-
-// ✅ Ajouter un utilisateur (gestionnaire ne peut créer que des acheteurs)
-export const addUser = async (req, res) => {
-  try {
-    const creatorRole = req.user.role // Récupère le rôle du créateur
-    const newUser = await UserService.addUser(req.body, creatorRole)
-    res.status(201).json(newUser)
-  } catch (error) {
-    res.status(400).json({ message: error.message })
-  }
-}
-
-// ✅ Modifier un utilisateur
 export const updateUser = async (req, res) => {
   try {
+    console.log("🔹 Body:", req.body)
+
     const updatedUser = await UserService.updateUser(req.params.id, req.body)
-    res.json(updatedUser)
+    console.log("🔹 Utilisateur mis à jour en base :", updatedUser)
+    res.status(200).json({
+      message: "✅✅✅✅✅✅Utilisateur mis à jour depuis controller user",
+      updatedUser,
+    })
   } catch (error) {
-    res.status(400).json({ message: error.message })
+    res.status(500).json({ message: error.message })
   }
 }
 
-// ✅ Supprimer un utilisateur
 export const deleteUser = async (req, res) => {
   try {
-    const result = await UserService.deleteUser(req.params.id)
-    res.json(result)
+    await UserService.deleteUser(req.params.id)
+    res.status(200).json({ message: "Utilisateur supprimé avec succès" })
   } catch (error) {
-    res.status(400).json({ message: error.message })
+    res.status(500).json({ message: error.message })
   }
 }

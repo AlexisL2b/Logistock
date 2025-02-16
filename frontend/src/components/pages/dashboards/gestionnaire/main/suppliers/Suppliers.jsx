@@ -7,8 +7,8 @@ export default function Suppliers() {
   const [suppliers, setSuppliers] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
   const fields = {
-    nom: { type: "text", label: "Nom", required: true },
-    telephone: { type: "tel", label: "Telephone", required: true },
+    name: { type: "text", label: "Nom", required: true },
+    phone: { type: "tel", label: "Telephone", required: true },
     email: { type: "email", label: "Email", required: true },
     contact: { type: "text", label: "Contact", required: true },
   }
@@ -52,7 +52,7 @@ export default function Suppliers() {
     const searchLower = searchTerm.toLowerCase()
 
     return (
-      supplier.nom.toLowerCase().includes(searchLower) || // Nom du fournisseur
+      supplier.name.toLowerCase().includes(searchLower) || // Nom du fournisseur
       supplier._id.toLowerCase().includes(searchLower) || // ID du fournisseur
       (supplier.email && supplier.email.toLowerCase().includes(searchLower)) || // Email
       (supplier.telephone && supplier.telephone.includes(searchLower)) // Téléphone

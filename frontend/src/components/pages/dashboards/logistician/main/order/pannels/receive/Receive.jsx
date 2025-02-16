@@ -27,8 +27,6 @@ export default function Receive() {
   // 🔄 Rafraîchir les données toutes les 45 secondes avec comparaison
   useEffect(() => {
     const interval = setInterval(() => {
-      console.log("   ")
-
       // Comparer les commandes et les stocks avec leur état précédent
       if (!_.isEqual(orders, prevOrdersRef.current)) {
         console.log("🔄 Mise à jour des commandes détectée")
@@ -48,12 +46,10 @@ export default function Receive() {
     return () => clearInterval(interval) // Nettoyage à la suppression du composant
   }, [dispatch, orders, stocks])
 
-  console.log("orders", orders)
-
   const filteredOrders = orders.filter(
     (order) =>
       order.statut === "réceptionné" &&
-      order.order_id.toLowerCase().startsWith(searchTerm.toLowerCase())
+      order._id.toLowerCase().startsWith(searchTerm.toLowerCase())
   )
 
   return (

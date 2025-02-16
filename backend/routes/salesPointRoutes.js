@@ -8,8 +8,8 @@ import {
 } from "../controllers/salesPointController.js"
 import validate from "../middlewares/validate.js"
 import { salesPointSchema } from "../validations/salesPointValidation.js"
-import authenticate from "../middlewares/authenticate.js"
-import checkRole from "../middlewares/checkRole.js"
+import { protect } from "../middlewares/authMiddleware.js"
+import { checkRole } from "../middlewares/checkRole.js"
 
 const router = express.Router()
 
@@ -18,20 +18,20 @@ router.get("/:id", getSalesPointById) // GET /api/sales_points/:id
 router.post(
   "/",
   validate(salesPointSchema),
-  authenticate,
+  protect,
   checkRole("Admin", "Gestionnaire"),
   addSalesPoint
 ) // ✅ Validation ajoutée ici
 router.put(
   "/:id",
   validate(salesPointSchema),
-  authenticate,
+  protect,
   checkRole("Admin", "Gestionnaire"),
   updateSalesPoint
 ) // ✅ Validation ajoutée ici
 router.delete(
   "/:id",
-  authenticate,
+  protect,
   checkRole("Admin", "Gestionnaire"),
   deleteSalesPoint
 ) // DELETE /api/sales_points/:id

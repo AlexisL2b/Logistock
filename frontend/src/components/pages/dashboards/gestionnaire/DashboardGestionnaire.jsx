@@ -19,7 +19,7 @@ import MenuIcon from "@mui/icons-material/Menu"
 import LogoutIcon from "@mui/icons-material/Logout"
 import CompareArrowsIcon from "@mui/icons-material/CompareArrows"
 import { useDispatch } from "react-redux"
-import { logout } from "../../../../redux/slices/authSlice"
+import { logoutUser } from "../../../../redux/slices/authSlice"
 import Menu from "../../../reusable-ui/Menu"
 import Categories from "./main/catégories/Categories"
 import Suppliers from "./main/suppliers/Suppliers"
@@ -40,7 +40,7 @@ export default function DashboardGestionnaire() {
   const isMobile = useMediaQuery(theme.breakpoints.down("md"))
 
   const handleLogout = () => {
-    dispatch(logout())
+    dispatch(logoutUser())
   }
 
   const links = [

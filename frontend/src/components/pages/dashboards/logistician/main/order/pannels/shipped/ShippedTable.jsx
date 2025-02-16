@@ -25,23 +25,22 @@ import {
 import { io } from "socket.io-client"
 import { fetchOrdersWithDetails } from "../../../../../../../../redux/slices/orderSlice"
 import _ from "lodash"
+import { fetchTransporters } from "../../../../../../../../redux/slices/transporterSlice"
 
 function Row({ row }) {
   const [open, setOpen] = useState(false)
-  const color = {
-    "en cours": "orange",
-    validée: "green",
-    expédiée: "blue",
-    annulée: "red",
-    réceptionné: "purple", // Nouveau statut
-  }
   const dispatch = useDispatch()
 
   // Récupérer les stocks depuis Redux
   const stocks = useSelector((state) => state.stocks.stocks)
+  const transportersState = useSelector((state) => state.transporters)
+  const transporters = transportersState.list.data
 
+  console.log("transporters", transporters)
   // Écouter les mises à jour en temps réel via Socket.IO
   useEffect(() => {
+    dispatch(fetchTransporters())
+
     const socket = io("http://localhost:5000") // Connexion au backend
 
     // Réception des mises à jour des stocks
@@ -50,7 +49,7 @@ function Row({ row }) {
         dispatch(
           updateStock({
             stockId: stock.stockId,
-            stockUpdates: { quantite_totale: stock.quantite_totale },
+            stockUpdates: { quantity: stock.quantity },
           })
         )
       })
@@ -59,7 +58,7 @@ function Row({ row }) {
     })
     return () => socket.disconnect() // Déconnexion propre
   }, [dispatch])
-
+  console.log("row", row)
   return (
     <>
       <TableRow>
@@ -72,8 +71,9 @@ function Row({ row }) {
             {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
           </IconButton>
         </TableCell>
-        <TableCell>{row.order_id}</TableCell>
-        <TableCell>{new Date(row.date_commande).toLocaleString()}</TableCell>
+        <TableCell>{row._id}</TableCell>
+        <TableCell>{new Date(row.date_order).toLocaleString()}</TableCell>
+        <TableCell>{new Date(row.date_shipment).toLocaleString()}</TableCell>
         <TableCell
           sx={{
             color: "purple" || "black",
@@ -81,6 +81,11 @@ function Row({ row }) {
           }}
         >
           {_.capitalize(row.statut)}
+        </TableCell>
+        <TableCell>
+          {transporters?.find(
+            (transporter) => transporter._id === row.transporter_id
+          )?.name || "Non trouvé"}
         </TableCell>
       </TableRow>
 
@@ -103,15 +108,15 @@ function Row({ row }) {
                 <TableBody>
                   {row.produitDetails.map((product) => {
                     const stockInfo = stocks.find(
-                      (stock) => stock.produit_id === product.produit_id
+                      (stock) => stock.product_id === product.product_id
                     )
                     return (
                       <TableRow key={product._id}>
-                        <TableCell>{product.produit_id}</TableCell>
-                        <TableCell>{product.quantite}</TableCell>
-                        <TableCell>{product.prix_unitaire}</TableCell>
+                        <TableCell>{product.product_id}</TableCell>
+                        <TableCell>{product.quantity}</TableCell>
+                        <TableCell>{product.price}</TableCell>
                         <TableCell>
-                          {stockInfo ? stockInfo.quantite_totale : "N/A"}
+                          {stockInfo ? stockInfo.quantity : "N/A"}
                         </TableCell>
                       </TableRow>
                     )
@@ -128,15 +133,15 @@ function Row({ row }) {
 
 Row.propTypes = {
   row: PropTypes.shape({
-    order_id: PropTypes.string.isRequired,
-    date_commande: PropTypes.string.isRequired,
+    _id: PropTypes.string.isRequired,
+    date_order: PropTypes.string.isRequired,
     statut: PropTypes.string.isRequired,
     produitDetails: PropTypes.arrayOf(
       PropTypes.shape({
         _id: PropTypes.string.isRequired,
-        produit_id: PropTypes.string.isRequired,
-        quantite: PropTypes.number.isRequired,
-        prix_unitaire: PropTypes.number.isRequired,
+        product_id: PropTypes.string.isRequired,
+        quantity: PropTypes.number.isRequired,
+        price: PropTypes.number.isRequired,
       })
     ).isRequired,
   }).isRequired,
@@ -145,7 +150,6 @@ Row.propTypes = {
 export default function ShippedTable({ data }) {
   const dispatch = useDispatch()
   const [sortConfig, setSortConfig] = useState({ key: "", direction: "asc" })
-
   // Charger les stocks au démarrage
   useEffect(() => {
     dispatch(fetchStocks())
@@ -165,7 +169,6 @@ export default function ShippedTable({ data }) {
     const order = sortConfig.direction === "asc" ? 1 : -1
     return a[sortConfig.key] > b[sortConfig.key] ? order : -order
   })
-
   return (
     <TableContainer component={Paper}>
       <Table>
@@ -173,11 +176,11 @@ export default function ShippedTable({ data }) {
           <TableRow>
             <TableCell />
             <TableCell
-              onClick={() => handleSort("order_id")}
+              onClick={() => handleSort("_id")}
               style={{ cursor: "pointer", fontWeight: "bold" }}
             >
               Order ID{" "}
-              {sortConfig.key === "order_id" && (
+              {sortConfig.key === "_id" && (
                 <IconButton size="small">
                   {sortConfig.direction === "asc" ? (
                     <KeyboardArrowUp />
@@ -188,11 +191,11 @@ export default function ShippedTable({ data }) {
               )}
             </TableCell>
             <TableCell
-              onClick={() => handleSort("date_commande")}
+              onClick={() => handleSort("date_order")}
               style={{ cursor: "pointer", fontWeight: "bold" }}
             >
               Date de Commande{" "}
-              {sortConfig.key === "date_commande" && (
+              {sortConfig.key === "date_order" && (
                 <IconButton size="small">
                   {sortConfig.direction === "asc" ? (
                     <KeyboardArrowUp />
@@ -202,6 +205,36 @@ export default function ShippedTable({ data }) {
                 </IconButton>
               )}
             </TableCell>
+            <TableCell
+              onClick={() => handleSort("date_shipment")}
+              style={{ cursor: "pointer", fontWeight: "bold" }}
+            >
+              Date d'expédition{" "}
+              {sortConfig.key === "date_shipment" && (
+                <IconButton size="small">
+                  {sortConfig.direction === "asc" ? (
+                    <KeyboardArrowUp />
+                  ) : (
+                    <KeyboardArrowDown />
+                  )}
+                </IconButton>
+              )}
+            </TableCell>
+            {/* <TableCell
+              onClick={() => handleSort("date_order")}
+              style={{ cursor: "pointer", fontWeight: "bold" }}
+            >
+              Date d'expédition{" "}
+              {sortConfig.key === "date_order" && (
+                <IconButton size="small">
+                  {sortConfig.direction === "asc" ? (
+                    <KeyboardArrowUp />
+                  ) : (
+                    <KeyboardArrowDown />
+                  )}
+                </IconButton>
+              )}
+            </TableCell> */}
             <TableCell
               onClick={() => handleSort("statut")}
               style={{ cursor: "pointer", fontWeight: "bold" }}
@@ -217,11 +250,26 @@ export default function ShippedTable({ data }) {
                 </IconButton>
               )}
             </TableCell>
+            <TableCell
+              onClick={() => handleSort("transporter")}
+              style={{ cursor: "pointer", fontWeight: "bold" }}
+            >
+              Transporteur{" "}
+              {sortConfig.key === "transporter" && (
+                <IconButton size="small">
+                  {sortConfig.direction === "asc" ? (
+                    <KeyboardArrowUp />
+                  ) : (
+                    <KeyboardArrowDown />
+                  )}
+                </IconButton>
+              )}
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {sortedData.map((row) => (
-            <Row key={row.order_id} row={row} />
+            <Row key={row._id} row={row} />
           ))}
         </TableBody>
       </Table>
@@ -232,15 +280,15 @@ export default function ShippedTable({ data }) {
 ShippedTable.propTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({
-      order_id: PropTypes.string.isRequired,
-      date_commande: PropTypes.string.isRequired,
+      _id: PropTypes.string.isRequired,
+      date_order: PropTypes.string.isRequired,
       statut: PropTypes.string.isRequired,
       produitDetails: PropTypes.arrayOf(
         PropTypes.shape({
           _id: PropTypes.string.isRequired,
-          produit_id: PropTypes.string.isRequired,
-          quantite: PropTypes.number.isRequired,
-          prix_unitaire: PropTypes.number.isRequired,
+          product_id: PropTypes.string.isRequired,
+          quantity: PropTypes.number.isRequired,
+          price: PropTypes.number.isRequired,
         })
       ).isRequired,
     })

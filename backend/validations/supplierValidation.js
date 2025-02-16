@@ -1,7 +1,7 @@
 import Joi from "joi"
 
 export const supplierSchema = Joi.object({
-  nom: Joi.string().min(2).max(100).required().messages({
+  name: Joi.string().min(2).max(100).required().messages({
     "string.min": "Le nom du fournisseur doit contenir au moins 2 caractères.",
     "string.max": "Le nom du fournisseur ne doit pas dépasser 100 caractères.",
     "any.required": "Le nom du fournisseur est obligatoire.",
@@ -9,7 +9,7 @@ export const supplierSchema = Joi.object({
   contact: Joi.string().optional().messages({
     "string.base": "Le contact doit être une chaîne de caractères.",
   }),
-  telephone: Joi.string()
+  phone: Joi.string()
     .pattern(/^\+?[0-9\s-]{7,20}$/)
     .optional()
     .messages({

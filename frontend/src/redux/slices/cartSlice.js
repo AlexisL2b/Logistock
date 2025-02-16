@@ -36,7 +36,7 @@ const clearLocalStorageForUser = (userId) => {
 
 // État initial (vide au départ, dépendra de l'utilisateur)
 const initialState = {
-  items: [], // Chaque élément { produit_id, quantity, detailsProduit }
+  items: [], // Chaque élément { product_id, quantity, detailsProduit }
 }
 
 // Slice du panier
@@ -54,32 +54,30 @@ const cartSlice = createSlice({
 
     // Ajouter un produit au panier
     addToCart: (state, action) => {
-      const { userId, produit_id, detailsProduit } = action.payload
+      const { userId, product_id, detailsProduit } = action.payload
       const existingProduct = state.items.find(
-        (item) => item.produit_id === produit_id
+        (item) => item.product_id === product_id
       )
 
       if (existingProduct) {
-        if (existingProduct.quantity < detailsProduit.quantite_disponible) {
+        if (existingProduct.quantity < detailsProduit.quantity) {
           existingProduct.quantity += 1
-          //(`[Cart] Quantité augmentée pour ${produit_id}`)
+          //(`[Cart] Quantité augmentée pour ${product_id}`)
         } else {
           console.warn(
-            `[Cart] Impossible d'ajouter ${produit_id} : stock insuffisant`
+            `[Cart] Impossible d'ajouter ${product_id} : stock insuffisant`
           )
         }
       } else {
-        if (detailsProduit.quantite_disponible > 0) {
-          state.items.push({ produit_id, detailsProduit, quantity: 1 })
-          //(`[Cart] Produit ajouté au panier : ${produit_id}`)
+        if (detailsProduit.quantity > 0) {
+          state.items.push({ product_id, detailsProduit, quantity: 1 })
+          //(`[Cart] Produit ajouté au panier : ${product_id}`)
         } else {
           console.warn(
-            `[Cart] Impossible d'ajouter ${produit_id} : stock épuisé`
+            `[Cart] Impossible d'ajouter ${product_id} : stock épuisé`
           )
         }
       }
-      // //("userId from addToCart in slice", userId)
-      //("action.payload", action.payload)
 
       // Sauvegarde après modification
       saveToLocalStorage(userId, state.items)
@@ -87,21 +85,21 @@ const cartSlice = createSlice({
 
     // Retirer un produit ou décrémenter sa quantité
     decrementFromCart: (state, action) => {
-      const { userId, produit_id } = action.payload
+      const { userId, product_id } = action.payload
       //("action.payload", action.payload)
       const existingProduct = state.items.find(
-        (item) => item.produit_id === produit_id
+        (item) => item.product_id === product_id
       )
 
       if (existingProduct) {
         if (existingProduct.quantity > 1) {
           existingProduct.quantity -= 1
-          //(`[Cart] Quantité réduite pour ${produit_id}`)
+          //(`[Cart] Quantité réduite pour ${product_id}`)
         } else {
           state.items = state.items.filter(
-            (item) => item.produit_id !== produit_id
+            (item) => item.product_id !== product_id
           )
-          //(`[Cart] Produit retiré du panier : ${produit_id}`)
+          //(`[Cart] Produit retiré du panier : ${product_id}`)
         }
       }
 
@@ -111,10 +109,10 @@ const cartSlice = createSlice({
 
     // Supprimer complètement un produit
     removeFromCart: (state, action) => {
-      const { userId, produit_id } = action.payload
+      const { userId, product_id } = action.payload
       //(action.payload)
-      state.items = state.items.filter((item) => item.produit_id !== produit_id)
-      //(`[Cart] Produit retiré du panier : ${produit_id}`)
+      state.items = state.items.filter((item) => item.product_id !== product_id)
+      //(`[Cart] Produit retiré du panier : ${product_id}`)
 
       // Sauvegarde après modification
       saveToLocalStorage(userId, state.items)

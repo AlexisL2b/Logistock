@@ -1,7 +1,7 @@
 import Joi from "joi"
 
 export const productSchema = Joi.object({
-  nom: Joi.string().min(2).max(100).required().messages({
+  name: Joi.string().min(2).max(100).required().messages({
     "string.min": "Le nom du produit doit contenir au moins 2 caractères.",
     "string.max": "Le nom du produit ne doit pas dépasser 100 caractères.",
     "any.required": "Le nom du produit est obligatoire.",
@@ -16,11 +16,11 @@ export const productSchema = Joi.object({
     "string.max": "La description ne doit pas dépasser 500 caractères.",
     "any.required": "La description est obligatoire.",
   }),
-  prix: Joi.number().min(0).required().messages({
+  price: Joi.number().min(0).required().messages({
     "number.min": "Le prix ne peut pas être négatif.",
     "any.required": "Le prix est obligatoire.",
   }),
-  categorie_id: Joi.string()
+  category_id: Joi.string()
     .regex(/^[0-9a-fA-F]{24}$/)
     .required()
     .messages({

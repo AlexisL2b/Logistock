@@ -1,129 +1,82 @@
+import bcrypt from "bcryptjs"
 import UserDAO from "../dao/userDAO.js"
-import bcrypt from "bcrypt"
-import { getAuth } from "firebase-admin/auth"
-import userDAO from "../dao/userDAO.js"
-import admin from "../config/firebase.js"
+import User from "../models/userModel.js"
+import Role from "../models/roleModel.js"
 
-class UserService {
-  async getAllUsers() {
-    return await UserDAO.findAll()
-  }
+const UserService = {
+  async getUserProfile(userId) {
+    const user = await UserDAO.findById(userId)
+    if (!user) {
+      throw new Error("Utilisateur introuvable.")
+    }
+    return user
+  },
 
   async getBuyers() {
-    const allUsers = await userDAO.findAll()
-    const userIds = allUsers.map((user) => user.firebaseUid)
-
-    const usersWithClaims = await Promise.all(
-      userIds.map(async (uid) => {
-        try {
-          const userRecord = await admin.auth().getUser(uid)
-          const userFromDB = allUsers.find((user) => user.firebaseUid === uid)
-
-          if (!userFromDB) {
-            console.warn(`Utilisateur avec UID ${uid} non trouvé en BDD`)
-            return null
-          }
-
-          // Transformer en objet JS pur
-          const cleanUser = userFromDB.toObject()
-          cleanUser.customClaims = userRecord.customClaims
-
-          return cleanUser
-        } catch (error) {
-          console.error(
-            `Erreur lors de la récupération des claims pour ${uid}:`,
-            error
-          )
-          return null
-        }
-      })
-    )
-
-    // console.log("usersWithClaims", usersWithClaims)
-
-    // Filtrer les acheteurs et enlever les utilisateurs null
-    return usersWithClaims.filter(
-      (user) => user && user.customClaims?.role === "Acheteur"
-    )
-  }
-
-  async getUserById(id) {
-    const user = await UserDAO.findById(id)
-    if (!user) {
-      throw new Error("Utilisateur introuvable")
+    const buyers = await UserDAO.findBuyers()
+    if (!buyers) {
+      throw new Error("Utilisateur introuvable.")
     }
-    return user
-  }
+    return buyers
+  },
 
-  async getUserByFirebaseUid(firebaseUid) {
-    const user = await UserDAO.findByFirebaseUid(firebaseUid)
-    if (!user) {
-      throw new Error("Utilisateur introuvable avec cet UID")
-    }
-    return user
-  }
-
-  async getUserByEmail(email) {
-    const user = await UserDAO.findByEmail(email)
-    if (!user) {
-      throw new Error(`Utilisateur avec l'email ${email} introuvable`)
-    }
-    return user
-  }
-
-  async addUser(userData, creatorRole) {
-    if (!userData.nom || !userData.email || !userData.mot_de_passe) {
-      throw new Error("Les champs 'nom', 'email' et 'mot_de_passe' sont requis")
-    }
-
-    userData.mot_de_passe = await bcrypt.hash(userData.mot_de_passe, 10)
-
-    // 🔥 Si un gestionnaire crée un utilisateur, il ne peut créer que des acheteurs
-    if (creatorRole === "Gestionnaire") {
-      userData.role = "Acheteur"
-    }
-
-    return await UserDAO.create(userData)
-  }
-
-  async updateUser(id, userData) {
-    const existingUser = await UserDAO.findById(id)
-    if (!existingUser) {
-      throw new Error("Utilisateur introuvable")
-    }
-
-    if (userData.mot_de_passe) {
-      userData.mot_de_passe = await bcrypt.hash(userData.mot_de_passe, 10)
-    }
-
-    if (userData.email && userData.email !== existingUser.email) {
-      try {
-        const auth = getAuth()
-        await auth.updateUser(existingUser.firebaseUid.toString(), {
-          email: userData.email,
-        })
-      } catch (firebaseError) {
-        throw new Error("Impossible de modifier l'email sur Firebase")
-      }
-    }
-
-    return await UserDAO.update(id, userData)
-  }
-
-  async deleteUser(id) {
-    const user = await UserDAO.findById(id)
-    if (!user) {
-      throw new Error("Utilisateur introuvable")
-    }
-
+  async createUser(userData, currentUserRole) {
     try {
-      await getAuth().deleteUser(user.firebaseUid)
-    } catch (firebaseError) {
-      throw new Error("Erreur lors de la suppression dans Firebase")
+      const { email, password, prenom, nom, adresse, sale_point_id, role_id } =
+        userData
+
+      const userExists = await User.findOne({ email })
+      if (userExists) {
+        throw new Error("L'utilisateur existe déjà !")
+      }
+
+      const assignedRole = role_id
+        ? await Role.findById(role_id)
+        : { _id: "677cf977b39853e4a17727e3" }
+      if (!assignedRole) {
+        throw new Error("Le rôle spécifié n'existe pas !")
+      }
+
+      const newUser = new User({
+        email,
+        password: userData.password,
+        role_id: assignedRole._id,
+        firstname: userData.firstname,
+        lastname: userData.lastname,
+        address: userData.address,
+        ...(sale_point_id && { sale_point_id: userData.sale_point_id }),
+      })
+
+      await newUser.save()
+      console.log("✅ Utilisateur créé avec succès :", newUser)
+      return { message: "Utilisateur créé avec succès !" }
+    } catch (error) {
+      console.error(
+        "❌ Erreur lors de la création de l'utilisateur :",
+        error.message
+      )
+      throw new Error(error.message)
+    }
+  },
+
+  async getAllUsers() {
+    return await UserDAO.findAll()
+  },
+
+  async updateUser(userId, updateData) {
+    // ✅ Si l'utilisateur met à jour son mot de passe, on le hash avant de l'enregistrer
+    if (updateData.password) {
+      const salt = await bcrypt.genSalt(10)
+      updateData.password = await bcrypt.hash(updateData.password, salt)
+      console.log("🔹 Mot de passe hashé mis à jour :", updateData.password)
     }
 
-    return await UserDAO.delete(id)
-  }
+    return await UserDAO.updateUser(userId, updateData)
+  },
+
+  async deleteUser(userId) {
+    return await UserDAO.deleteUser(userId)
+  },
 }
 
-export default new UserService()
+export default UserService

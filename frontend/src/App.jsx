@@ -14,67 +14,79 @@ import ErrorPage from "./components/pages/error/ErrorPage"
 // import Home from "./components/pages/dashboard/home/Home"
 import SignUpPage from "./components/pages/signupPage/SignUpPage"
 import DashboardUser from "./components/pages/dashboards/user/DashboardUser"
-import { listenToAuthState } from "./redux/slices/authSlice"
 import ProtectedRoute from "./components/reusable-ui/ProtectedRoute"
 import DashboardLogistician from "./components/pages/dashboards/logistician/DashboardLogistician"
 
 import DashboardGestionnaire from "./components/pages/dashboards/gestionnaire/DashboardGestionnaire"
+import { getFromLocalStorage } from "./utils/localStorage"
+import { fetchUserProfile, setUser } from "./redux/slices/authSlice"
+import { io } from "socket.io-client"
+import StockUpdater from "./components/sockets/StockUpdater"
 
 function App() {
   const dispatch = useDispatch()
-
+  const socket = io("http://localhost:5000")
   useEffect(() => {
-    let isMounted = true
-    console.log("🚀 useEffect de l'auth s'exécute")
+    console.log("🔹 Récupération du profil utilisateur...")
+    dispatch(fetchUserProfile()) // 🔹 Charger le profil utilisateur au montage
+  }, [dispatch])
+  useEffect(() => {
+    socket.on("connection", () => {
+      console.log(`🟢 Connecté au serveur WebSocket avec l'ID : ${socket.id}`)
+    })
 
-    if (isMounted) {
-      dispatch(listenToAuthState()) // Vérifie l'utilisateur connecté
-    }
+    socket.on("disconnect", () => {
+      console.log("🔴 Déconnecté du serveur WebSocket")
+    })
 
     return () => {
-      isMounted = false // Empêche le second appel
+      socket.off("connection")
+      socket.off("disconnect")
     }
-  }, [dispatch])
+  }, [])
 
   return (
-    <Routes>
-      <Route path="/" element={<LoginPage />} />
-      <Route path="/passwordforgot" element={<PasswordForgot />} />
-      <Route path="*" element={<ErrorPage />} />
-      <Route path="/signup" element={<SignUpPage />} />
-      <Route
-        path="/user-dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardUser />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/logisticien-dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardLogistician />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin-dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardAdmin />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/gestionnaire-dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardGestionnaire />
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+    <>
+      <StockUpdater />
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        {/* <Route path="/passwordforgot" element={<PasswordForgot />} /> */}
+        <Route path="*" element={<ErrorPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+        <Route
+          path="/user-dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardUser />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/logisticien-dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardLogistician />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin-dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardAdmin />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/gestionnaire-dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardGestionnaire />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </>
   )
 }
 

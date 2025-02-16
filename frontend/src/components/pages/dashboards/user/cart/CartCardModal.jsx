@@ -11,10 +11,11 @@ import AddIcon from "@mui/icons-material/Add"
 import RemoveIcon from "@mui/icons-material/Remove"
 
 export default function CartCardModal({ product }) {
-  const { nom, prix, quantite_disponible, quantity = 0 } = product
+  const { name, quantity } = product
+  console.log(product)
   const dispatch = useDispatch()
   const cartItem = useSelector((state) =>
-    state.cart.items.find((item) => item.produit_id === product.produit_id)
+    state.cart.items.find((item) => item.product_id === product.product_id)
   )
   const userId = useSelector((state) => state.auth.user._id)
 
@@ -22,7 +23,7 @@ export default function CartCardModal({ product }) {
     dispatch(
       addToCart({
         userId,
-        produit_id: cartItem.produit_id,
+        product_id: cartItem.product_id,
         detailsProduit: cartItem.detailsProduit,
       })
     )
@@ -30,14 +31,14 @@ export default function CartCardModal({ product }) {
 
   const handleDecrement = () => {
     if (cartItem?.quantity > 0) {
-      dispatch(decrementFromCart({ userId, produit_id: cartItem.produit_id }))
+      dispatch(decrementFromCart({ userId, product_id: cartItem.product_id }))
     }
   }
 
   const handleRemove = () => {
-    dispatch(removeFromCart({ userId, produit_id: cartItem.produit_id }))
+    dispatch(removeFromCart({ userId, product_id: cartItem.product_id }))
   }
-
+  console.log(product)
   return (
     <Box
       sx={{
@@ -60,14 +61,19 @@ export default function CartCardModal({ product }) {
       {/* Informations sur le produit */}
       <Box sx={{ flex: 1, textAlign: { xs: "center", sm: "left" } }}>
         <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-          {nom}
+          {product.detailsProduit.name}
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Prix : <strong>{prix ? `${prix} €` : "Non défini"}</strong>
+          Prix :{" "}
+          <strong>
+            {product.detailsProduit.price
+              ? `${product.detailsProduit.price} €`
+              : "Non défini"}
+          </strong>
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Quantité disponible :{" "}
-          <strong>{quantite_disponible ?? "Non défini"}</strong>
+          <strong>{product.detailsProduit.quantity ?? "Non défini"}</strong>
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Dans le panier : <strong>{quantity}</strong>
@@ -104,7 +110,7 @@ export default function CartCardModal({ product }) {
           size="small"
           color="primary"
           onClick={handleAddToCart}
-          disabled={quantity >= quantite_disponible}
+          disabled={quantity >= product.detailsProduit.quantity}
           sx={{ border: "1px solid", borderRadius: "8px", p: 1 }}
         >
           <AddIcon />

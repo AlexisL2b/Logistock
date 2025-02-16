@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { loadUserFromLocalStorage } from "../../../../../../utils/localStorage"
+import { getFromLocalStorage } from "../../../../../../utils/localStorage"
 import CollapsingTable from "./CollapsingTable"
 import {
   Box,
@@ -14,14 +14,14 @@ import {
 import axiosInstance from "../../../../../../axiosConfig"
 
 export default function Orders() {
-  const user = loadUserFromLocalStorage()
-  const userId = user?._id
+  const user = getFromLocalStorage("user")
+  const userId = user?.id
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [openDialog, setOpenDialog] = useState(false)
-
+  console.log(userId)
   useEffect(() => {
     const fetchOrdersWithDetails = async () => {
       try {
@@ -29,8 +29,9 @@ export default function Orders() {
 
         // Récupérer les commandes depuis le backend
         const response = await axiosInstance.get(
-          `http://localhost:5000/api/orders/user/${userId}/orders-details`
+          `http://localhost:5000/api/orders/user/${userId}`
         )
+        console.log(response)
         setOrders(response.data) // Stocker les commandes
       } catch (err) {
         console.error("Erreur lors de la récupération des commandes :", err)
@@ -41,10 +42,10 @@ export default function Orders() {
 
     fetchOrdersWithDetails()
   }, [userId])
-
+  console.log(orders)
   // 🔍 Filtrer les commandes en fonction de la recherche
-  const filteredOrders = orders.filter((order) =>
-    order.order_id.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredOrders = orders?.filter((order) =>
+    order._id.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   // 📌 Ouvrir la boîte de dialogue de confirmation
@@ -65,15 +66,13 @@ export default function Orders() {
 
     try {
       await axiosInstance.put(
-        `http://localhost:5000/api/orders/${selectedOrder.order_id}/receive`
+        `http://localhost:5000/api/orders/${selectedOrder._id}/receive`
       )
 
       // Mettre à jour le statut de la commande
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order.order_id === selectedOrder.order_id
-            ? { ...order, status: "Reçu" }
-            : order
+          order._id === selectedOrder._id ? { ...order, status: "Reçu" } : order
         )
       )
 
@@ -114,6 +113,7 @@ export default function Orders() {
           </Button>
           <Button
             onClick={handleConfirmReception}
+            // onClick={handleConfirmReception}
             color="primary"
             variant="contained"
           >

@@ -2,11 +2,11 @@ import mongoose from "mongoose"
 
 const productSchema = new mongoose.Schema(
   {
-    nom: { type: String, required: true },
+    name: { type: String, required: true },
     reference: { type: String, required: true },
     description: { type: String, required: true },
-    prix: { type: Number, required: true },
-    categorie_id: {
+    price: { type: Number, required: true },
+    category_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       required: true,

@@ -18,13 +18,13 @@ class OrderShipmentService {
   }
 
   async addOrderShipment(orderShipmentData) {
-    if (!orderShipmentData.commande_id) {
+    if (!orderShipmentData.order_id) {
       throw new Error("Le champ 'commande_id' est requis")
     }
 
     // Vérifier si une expédition existe déjà pour cette commande
     const existingShipment = await OrderShipmentDAO.findByCommandeId(
-      orderShipmentData.commande_id
+      orderShipmentData.order_id
     )
     if (existingShipment.length > 0) {
       throw new Error("Une expédition existe déjà pour cette commande")

@@ -2,18 +2,14 @@ import mongoose from "mongoose"
 
 const stockSchema = new mongoose.Schema(
   {
-    produit_id: {
+    product_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
       required: true,
-      unique: true, // Un stock par produit
+      unique: true,
     },
-    sales_point_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "SalesPoint",
-      required: true,
-    },
-    quantite_disponible: { type: Number, required: true, default: 0 },
+
+    quantity: { type: Number, required: true, default: 0 },
   },
   { versionKey: false }
 )

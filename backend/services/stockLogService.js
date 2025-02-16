@@ -2,11 +2,11 @@ import StockLog from "../models/stockLogModel.js"
 
 class StockLogDAO {
   async findAll() {
-    return await StockLog.find().populate("produit_id", "nom description")
+    return await StockLog.find().populate("product_id", "nom description")
   }
 
   async findById(id) {
-    return await StockLog.findById(id).populate("produit_id", "nom description")
+    return await StockLog.findById(id).populate("product_id", "nom description")
   }
 
   async create(stockLogData) {

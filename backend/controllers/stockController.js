@@ -69,7 +69,7 @@ export const updateStock = async (req, res) => {
 export const updateStockByProductId = async (req, res) => {
   try {
     const updatedStock = await stockService.updateStockByProductId(
-      req.params.produit_id,
+      req.params.product_id,
       req.body
     )
     res.json({
@@ -88,7 +88,7 @@ export const decrementStockForOrder = async (req, res) => {
 
     //Je récupère @io dans ma requete.
     const io = req.io
-
+    // console.log("❌❌❌❌❌❌❌❌❌", io, "❌❌❌❌❌❌❌❌❌")
     if (!io) {
       console.warn(
         "⚠️ io n'est pas défini dans req, l'événement ne sera pas émis."
@@ -103,7 +103,6 @@ export const decrementStockForOrder = async (req, res) => {
     const { orderDetails } = req.body
 
     if (!orderDetails || !Array.isArray(orderDetails)) {
-      console.error("❌ ERREUR : orderDetails est invalide !")
       return res.status(400).json({
         message: "Les détails de la commande sont invalides.",
         req,
@@ -112,6 +111,7 @@ export const decrementStockForOrder = async (req, res) => {
     }
 
     const result = await stockService.decrementStockForOrder(orderDetails, io)
+    console.log(result)
     res.json(result)
   } catch (error) {
     console.error("❌ Erreur dans decrementStockForOrder :", error.message)
@@ -132,16 +132,16 @@ export const deleteStock = async (req, res) => {
 export const incrementStock = async (req, res) => {
   try {
     const { id } = req.params
-    const { quantite_disponible } = req.body
+    const { quantity } = req.body
 
-    // ✅ Vérifier si `stock_id` et `quantite_disponible` sont valides
-    if (!quantite_disponible || quantite_disponible <= 0) {
+    // ✅ Vérifier si `stock_id` et `quantity` sont valides
+    if (!quantity || quantity <= 0) {
       return res
         .status(400)
         .json({ message: "Données invalides pour l'incrémentation du stock" })
     }
 
-    const result = await stockService.incrementStock(id, quantite_disponible)
+    const result = await stockService.incrementStock(id, quantity)
     res.status(200).json(result)
   } catch (error) {
     res.status(500).json({ message: error.message })

@@ -54,18 +54,15 @@ function ConfirmedRow({ row }) {
       setIsLoading(true)
       setErrorMessage("")
 
-      await axiosInstance.put(
-        `http://localhost:5000/api/orders/${row.order_id}`,
-        {
-          statut: "expédiée",
-          transporteur_id: selectedTransporter,
-        }
-      )
+      await axiosInstance.put(`http://localhost:5000/api/orders/${row._id}`, {
+        statut: "expédiée",
+        transporteur_id: selectedTransporter,
+      })
+      console.log(row._id)
 
       await axiosInstance.post(`http://localhost:5000/api/order_shipments`, {
-        commande_id: row.order_id,
-        transporteur_id: selectedTransporter,
-        date_depart: new Date(),
+        order_id: row._id,
+        transporter_id: selectedTransporter,
       })
 
       dispatch(fetchOrdersWithDetails())
@@ -78,7 +75,7 @@ function ConfirmedRow({ row }) {
       setIsLoading(false)
     }
   }
-
+  console.log(transporters)
   return (
     <>
       {/* Ligne principale */}
@@ -92,8 +89,8 @@ function ConfirmedRow({ row }) {
             {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
           </IconButton>
         </TableCell>
-        <TableCell>{row.order_id}</TableCell>
-        <TableCell>{new Date(row.date_commande).toLocaleString()}</TableCell>
+        <TableCell>{row._id}</TableCell>
+        <TableCell>{new Date(row.date_order).toLocaleString()}</TableCell>
         <TableCell
           sx={{
             color: color[row.statut] || "black",
@@ -127,11 +124,9 @@ function ConfirmedRow({ row }) {
                     <TableRow key={product._id}>
                       <TableCell>{product.name}</TableCell>
                       <TableCell>{product.reference}</TableCell>
-                      <TableCell>{product.quantite}</TableCell>
-                      <TableCell>{product.prix_unitaire}</TableCell>
-                      <TableCell>
-                        {product.quantite * product.prix_unitaire}
-                      </TableCell>
+                      <TableCell>{product.quantity}</TableCell>
+                      <TableCell>{product.price}</TableCell>
+                      <TableCell>{product.quantity * product.price}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -197,7 +192,7 @@ function ConfirmedRow({ row }) {
               >
                 {transporters.data?.map((transporter) => (
                   <MenuItem key={transporter._id} value={transporter._id}>
-                    {transporter.nom}
+                    {transporter.name}
                   </MenuItem>
                 ))}
               </Select>
@@ -257,11 +252,11 @@ export default function ConfirmedTable({ data }) {
           <TableRow>
             <TableCell />
             <TableCell
-              onClick={() => handleSort("order_id")}
+              onClick={() => handleSort("_id")}
               style={{ cursor: "pointer", fontWeight: "bold" }}
             >
               Order ID{" "}
-              {sortConfig.key === "order_id" && (
+              {sortConfig.key === "_id" && (
                 <IconButton size="small">
                   {sortConfig.direction === "asc" ? (
                     <KeyboardArrowUp />
@@ -272,11 +267,11 @@ export default function ConfirmedTable({ data }) {
               )}
             </TableCell>
             <TableCell
-              onClick={() => handleSort("date_commande")}
+              onClick={() => handleSort("date_order")}
               style={{ cursor: "pointer", fontWeight: "bold" }}
             >
               Date de Commande{" "}
-              {sortConfig.key === "date_commande" && (
+              {sortConfig.key === "date_order" && (
                 <IconButton size="small">
                   {sortConfig.direction === "asc" ? (
                     <KeyboardArrowUp />
@@ -305,7 +300,7 @@ export default function ConfirmedTable({ data }) {
         </TableHead>
         <TableBody>
           {sortedData.map((row) => (
-            <ConfirmedRow key={row.order_id} row={row} />
+            <ConfirmedRow key={row._id} row={row} />
           ))}
         </TableBody>
       </Table>

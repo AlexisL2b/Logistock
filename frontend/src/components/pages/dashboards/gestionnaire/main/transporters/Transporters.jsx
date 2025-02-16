@@ -35,13 +35,13 @@ export default function Transporters() {
   const headerMapping = {
     _id: "ID",
     nom: "Nom",
-    telephone: "Téléphone",
+    phone: "Téléphone",
     email: "Email",
   }
 
   const fields = {
-    nom: { type: "text", label: "Nom", required: true },
-    telephone: { type: "tel", label: "Telephone", required: true },
+    name: { type: "text", label: "Nom", required: true },
+    phone: { type: "tel", label: "phone", required: true },
     email: { type: "email", label: "Email", required: true },
   }
   console.log("data: ", transporters)
@@ -51,9 +51,9 @@ export default function Transporters() {
     const searchLower = searchTerm.toLowerCase()
 
     return (
-      transporter.nom.toLowerCase().includes(searchLower) || // Nom du transporteur
+      transporter.name.toLowerCase().includes(searchLower) || // Nom du transporteur
       transporter._id.toLowerCase().includes(searchLower) || // ID du transporteur
-      (transporter.telephone && transporter.telephone.includes(searchLower)) || // Téléphone
+      (transporter.phone && transporter.phone.includes(searchLower)) || // Téléphone
       (transporter.email &&
         transporter.email.toLowerCase().includes(searchLower)) // Email
     )

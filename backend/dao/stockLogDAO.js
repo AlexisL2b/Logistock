@@ -5,14 +5,14 @@ class StockLogDAO {
     return await StockLog.find()
   }
   async findAllWithProduct() {
-    return await StockLog.find().populate("produit_id", "nom description")
+    return await StockLog.find().populate("product_id", "nom description")
   }
 
   async findById(id) {
-    return await StockLog.findById(id).populate("produit_id", "nom description")
+    return await StockLog.findById(id).populate("product_id", "nom description")
   }
   async deleteByProductId(produitId) {
-    return await StockLog.findOneAndDelete({ produit_id: produitId })
+    return await StockLog.findOneAndDelete({ product_id: produitId })
   }
   async create(stockLogData) {
     const newStockLog = new StockLog(stockLogData)

@@ -2,7 +2,7 @@ import mongoose from "mongoose"
 
 const stockLogSchema = new mongoose.Schema(
   {
-    produit_id: {
+    product_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
       required: true,
@@ -12,16 +12,16 @@ const stockLogSchema = new mongoose.Schema(
       ref: "Stock",
       required: true,
     },
-    evenement: {
+    event: {
       type: String,
       enum: ["entrée", "sortie", "création", "suppression"],
       required: true,
     },
-    quantite: {
+    quantity: {
       type: Number,
       required: true,
     },
-    date_evenement: {
+    date_event: {
       type: Date,
       default: Date.now,
     },

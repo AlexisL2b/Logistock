@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
 import { Box, TextField } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
-import BasicTable from "./BasicTable"
+import BasicTable from "./BasicTableAdmin"
+import BasicTableAdmin from "./BasicTableAdmin"
 
 export default function Users() {
   const [users, setUsers] = useState([])
@@ -26,11 +27,12 @@ export default function Users() {
   useEffect(() => {
     const userTab = users.map((user) => ({
       _id: user._id,
-      nom: user.nom,
-      prenom: user.prenom,
-      adresse: user.adresse,
+      nom: user.lastname,
+      prenom: user.firstname,
+      adresse: user.address,
       email: user.email,
-      point_vente_nom: user.point_vente_id?.nom || "N/A",
+      "point de vente": user.sale_point_id?.name || "N/A",
+      rôle: user.role_id?.name || "N/A",
     }))
     setUsersFiltered(userTab) // Mise à jour propre du state
   }, [users]) // 🔥 users est dans les dépendances, donc mise à jour automatique
@@ -68,7 +70,7 @@ export default function Users() {
       />
 
       {/* Table avec les données filtrées */}
-      <BasicTable
+      <BasicTableAdmin
         admin={true}
         data={usersFiltered}
         coll={"users"}

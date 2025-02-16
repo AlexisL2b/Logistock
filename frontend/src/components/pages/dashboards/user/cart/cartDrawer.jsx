@@ -9,13 +9,14 @@ import {
 } from "@mui/material"
 import CloseIcon from "@mui/icons-material/Close"
 import CartCardModal from "./CartCardModal"
-import { loadUserFromLocalStorage } from "../../../../../utils/localStorage"
+import {
+  getFromLocalStorage,
+  loadUserFromLocalStorage,
+  removeFromLocalStorage,
+} from "../../../../../utils/localStorage"
 import { useDispatch } from "react-redux"
 import { clearCart } from "../../../../../redux/slices/cartSlice"
 import axiosInstance from "../../../../../axiosConfig"
-import { Elements } from "@stripe/react-stripe-js"
-import stripePromise from "../../../../../config/stripeConfig" // Import de Stripe
-import StripeModal from "../stripeModal/stripeModal"
 
 export default function CartDrawer({
   open,
@@ -26,52 +27,51 @@ export default function CartDrawer({
   onDecrement,
   onRemove,
 }) {
-  const user = loadUserFromLocalStorage()
-  const userId = user._id
+  const user = getFromLocalStorage("user")
+  console.log("user", user)
+  const userId = user.id
   const dispatch = useDispatch()
-  // 🔥 Ajout d’un state pour gérer la modale Stripe
-  const [openStripeModal, setOpenStripeModal] = useState(false)
-  const [clientSecret, setClientSecret] = useState(null)
+
   const [orderId, setOrderId] = useState(null)
   console.log("cartItems from cartDrawer.jsx", cartItems)
   console.log("userId from cartDrawer.jsx", user._id)
   const handleCheckout = async () => {
-    console.log("🚀 Checkout lancé, userId:", userId, "Total:", total)
+    // console.log("🚀 Checkout lancé, userId:", userId, "Total:", total)
     try {
       if (cartItems.length > 0) {
         // 🔥 Étape 1 : Préparer les produits et calculer le montant total
         const productsData = cartItems.map((item) => ({
-          produit_id: item.produit_id,
-          name: item.detailsProduit.nom,
+          product_id: item.product_id,
+          name: item.detailsProduit.name,
           reference: item.detailsProduit.reference,
-          prix: Number(item.detailsProduit.prix),
-          quantite: Number(item.quantity),
+          price: Number(item.detailsProduit.price),
+          quantity: Number(item.quantity),
         }))
 
         const total = Number(
           cartItems
             .reduce(
-              (sum, item) => sum + item.detailsProduit.prix * item.quantity,
+              (sum, item) => sum + item.detailsProduit.price * item.quantity,
               0
             )
             .toFixed(2)
         )
 
-        console.log("📤 Envoi des données au backend :", {
-          acheteur_id: userId,
-          totalAmount: total * 100,
-        })
+        // console.log("📤 Envoi des données au backend :", {
+        //   acheteur_id: userId,
+        //   totalAmount: total * 100,
+        // })
 
-        console.log("📤 Envoi des données au backend :", {
-          acheteur_id: userId,
-          totalAmount: total, // ✅ Vérifie qu'il s'affiche bien ici
-        })
+        // console.log("📤 Envoi des données au backend :", {
+        //   acheteur_id: userId,
+        //   totalAmount: total, // ✅ Vérifie qu'il s'affiche bien ici
+        // })
 
         // 🔥 Étape 2 : Créer la commande avec paiement Stripe
         const responseOrder = await axiosInstance.post(
           "http://localhost:5000/api/orders",
           {
-            acheteur_id: userId,
+            buyer_id: userId,
             totalAmount: total,
           }
         )
@@ -79,20 +79,21 @@ export default function CartDrawer({
         console.log("✅ Commande créée avec ID :", responseOrder)
 
         const orderId = responseOrder.data.order._id
-        const clientSecret = responseOrder.data.clientSecret
+        console.log("orderId /////////", orderId)
+        // const clientSecret = responseOrder.data.clientSecret
 
-        console.log("✅✅✅ Commande ID :", orderId)
-        console.log("✅✅✅ ClientSecret :", clientSecret)
+        // console.log("✅✅✅ Commande ID :", orderId)
+        // console.log("✅✅✅ ClientSecret :", clientSecret)
 
         // 🔥 Étape 3 : Ajouter les produits à la commande
         for (const product of productsData) {
           await axiosInstance.post("http://localhost:5000/api/order_details", {
-            commande_id: orderId,
-            produit_id: product.produit_id,
+            order_id: orderId,
+            product_id: product.product_id,
             name: product.name,
             reference: product.reference,
-            quantite: product.quantite,
-            prix_unitaire: product.prix,
+            quantity: product.quantity,
+            price: product.price,
           })
         }
 
@@ -100,16 +101,13 @@ export default function CartDrawer({
 
         // 🔥 Étape 4 : Sauvegarder l'ID de commande et ouvrir Stripe
         setOrderId(orderId)
-        setClientSecret(clientSecret)
-        setOpenStripeModal(true)
+        dispatch(clearCart())
+        onClose()
+        // removeFromLocalStorage(`cart_${userId}`)
       }
     } catch (error) {
       console.error("❌ Erreur lors du checkout :", error.message)
     }
-  }
-
-  const handleCloseStripeModal = () => {
-    setOpenStripeModal(false)
   }
 
   return (
@@ -144,7 +142,7 @@ export default function CartDrawer({
           {cartItems.length > 0 ? (
             cartItems.map((item) => (
               <CartCardModal
-                key={item.produit_id}
+                key={item.product_id}
                 product={item}
                 onIncrement={() => onIncrement(item)}
                 onDecrement={() => onDecrement(item)}
@@ -187,20 +185,6 @@ export default function CartDrawer({
       </Box>
 
       {/* 🔥 Modale Stripe pour paiement */}
-      {clientSecret && orderId && (
-        <Elements stripe={stripePromise}>
-          <StripeModal
-            open={openStripeModal}
-            handleClose={handleCloseStripeModal}
-            clientSecret={clientSecret}
-            orderId={orderId}
-            onSuccess={() => {
-              dispatch(clearCart())
-              onClose()
-            }}
-          />
-        </Elements>
-      )}
     </Drawer>
   )
 }

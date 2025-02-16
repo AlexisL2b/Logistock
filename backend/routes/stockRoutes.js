@@ -16,22 +16,22 @@ import {
   incrementStockSchema,
   stockSchema,
 } from "../validations/stockValidation.js"
-import authenticate from "../middlewares/authenticate.js"
-import checkRole from "../middlewares/checkRole.js"
+import { protect } from "../middlewares/authMiddleware.js"
+import { checkRole } from "../middlewares/checkRole.js"
 
 const router = express.Router()
 
 router.post(
   "/decrement",
-  validate(stockSchema),
-  authenticate,
+  // validate(stockSchema),
+  protect,
   checkRole("Admin", "Gestionnaire", "Logisticien"),
   decrementStockForOrder
 ) // ✅ Validation ajoutée ici
 router.put(
   "/increment/:id",
   validate(incrementStockSchema),
-  authenticate,
+  protect,
   checkRole("Admin", "Gestionnaire", "Logisticien"),
   incrementStock
 ) // ✅ Validation ajoutée ici
@@ -42,22 +42,22 @@ router.get("/:id", getStockById) // Récupérer un stock par ID
 router.post(
   "/",
   validate(stockSchema),
-  authenticate,
+  protect,
   checkRole("Admin", "Gestionnaire", "Logisticien"),
   addStock
 ) // ✅ Validation ajoutée ici
 router.put(
   "/:id",
-  validate(stockSchema),
-  authenticate,
+  // validate(stockSchema),
+  protect,
   checkRole("Admin", "Gestionnaire", "Logisticien"),
   updateStock
 ) // ✅ Validation ajoutée ici
 // ✅ Validation ajoutée ici
 router.put(
-  "/update-by-product/:produit_id",
+  "/update-by-product/:product_id",
   validate(stockSchema),
-  authenticate,
+  protect,
   checkRole("Admin", "Gestionnaire", "Logisticien"),
   updateStockByProductId
 ) // ✅ Validation ajoutée ici

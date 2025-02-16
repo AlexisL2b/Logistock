@@ -3,14 +3,14 @@ import OrderDetails from "../models/orderDetailsModel.js"
 class OrderDetailsDAO {
   async findAll() {
     return await OrderDetails.find()
-      .populate("commande_id", "date_commande statut")
-      .populate("produit_id", "nom prix")
+      .populate("commande_id", "date_order statut")
+      .populate("product_id", "nom prix")
   }
 
   async findById(id) {
     return await OrderDetails.findById(id)
-      .populate("commande_id", "date_commande statut")
-      .populate("produit_id", "nom prix")
+      .populate("commande_id", "date_order statut")
+      .populate("product_id", "nom prix")
   }
 
   async create(orderDetailsData) {

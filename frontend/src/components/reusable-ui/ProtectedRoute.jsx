@@ -1,23 +1,34 @@
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { Navigate } from "react-router"
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
+import { fetchUserProfile } from "../../redux/slices/authSlice"
 
 const ProtectedRoute = ({ children }) => {
-  // Récupérer l'utilisateur dans localStorage avec une clé dynamique
-  const getUserFromLocalStorage = () => {
-    const keys = Object.keys(localStorage) // Récupère toutes les clés du localStorage
-    const userKey = keys.find((key) => key.startsWith("user_")) // Trouve la clé qui commence par "user_"
-    if (userKey) {
-      const userData = localStorage.getItem(userKey)
-      return userData ? JSON.parse(userData) : null
+  const dispatch = useDispatch()
+  const { user, loading } = useSelector((state) => state.auth)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        await dispatch(fetchUserProfile()).unwrap()
+      } catch (error) {
+        console.error(
+          "Erreur lors de la récupération de l'utilisateur :",
+          error
+        )
+      } finally {
+        setIsLoading(false)
+      }
     }
-    return null
+
+    fetchUser()
+  }, [dispatch])
+
+  if (isLoading || loading) {
+    return <p>Chargement...</p> // Affiche un loader pendant la récupération des infos utilisateur
   }
 
-  const reduxUser = useSelector((state) => state.auth.user)
-
-  const user = reduxUser
-  // console.log("user from redux", user)
   if (!user) {
     return <Navigate to="/" />
   }

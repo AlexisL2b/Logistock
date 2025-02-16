@@ -72,8 +72,8 @@ function Row({ row }) {
             {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
           </IconButton>
         </TableCell>
-        <TableCell>{row.order_id}</TableCell>
-        <TableCell>{new Date(row.date_commande).toLocaleString()}</TableCell>
+        <TableCell>{row._id}</TableCell>
+        <TableCell>{new Date(row.date_order).toLocaleString()}</TableCell>
         <TableCell
           sx={{
             color: color[row.statut] || "black",
@@ -104,17 +104,17 @@ function Row({ row }) {
                 <TableBody>
                   {row.produitDetails.map((product) => {
                     const stockInfo = stocks.find(
-                      (stock) => stock.produit_id === product.produit_id
+                      (stock) => stock.product_id === product.product_id
                     )
                     return (
                       <TableRow key={product._id}>
-                        <TableCell>{product.produit_id}</TableCell>
+                        <TableCell>{product.product_id}</TableCell>
                         <TableCell>{product.name}</TableCell>
 
-                        <TableCell>{product.quantite}</TableCell>
-                        <TableCell>{product.prix_unitaire}</TableCell>
+                        <TableCell>{product.quantity}</TableCell>
+                        <TableCell>{product.price}</TableCell>
                         <TableCell>
-                          {stockInfo ? stockInfo.quantite_disponible : "N/A"}
+                          {stockInfo ? stockInfo.quantity : "N/A"}
                         </TableCell>
                       </TableRow>
                     )
@@ -131,15 +131,15 @@ function Row({ row }) {
 
 Row.propTypes = {
   row: PropTypes.shape({
-    order_id: PropTypes.string.isRequired,
-    date_commande: PropTypes.string.isRequired,
+    _id: PropTypes.string.isRequired,
+    date_order: PropTypes.string.isRequired,
     statut: PropTypes.string.isRequired,
     produitDetails: PropTypes.arrayOf(
       PropTypes.shape({
         _id: PropTypes.string.isRequired,
-        produit_id: PropTypes.string.isRequired,
-        quantite: PropTypes.number.isRequired,
-        prix_unitaire: PropTypes.number.isRequired,
+        product_id: PropTypes.string.isRequired,
+        quantity: PropTypes.number.isRequired,
+        price: PropTypes.number.isRequired,
       })
     ).isRequired,
   }).isRequired,
@@ -176,11 +176,11 @@ export default function CancelledTable({ data }) {
           <TableRow>
             <TableCell />
             <TableCell
-              onClick={() => handleSort("order_id")}
+              onClick={() => handleSort("_id")}
               style={{ cursor: "pointer", fontWeight: "bold" }}
             >
               Order ID{" "}
-              {sortConfig.key === "order_id" && (
+              {sortConfig.key === "_id" && (
                 <IconButton size="small">
                   {sortConfig.direction === "asc" ? (
                     <KeyboardArrowUp />
@@ -191,11 +191,11 @@ export default function CancelledTable({ data }) {
               )}
             </TableCell>
             <TableCell
-              onClick={() => handleSort("date_commande")}
+              onClick={() => handleSort("date_order")}
               style={{ cursor: "pointer", fontWeight: "bold" }}
             >
               Date de Commande{" "}
-              {sortConfig.key === "date_commande" && (
+              {sortConfig.key === "date_order" && (
                 <IconButton size="small">
                   {sortConfig.direction === "asc" ? (
                     <KeyboardArrowUp />
@@ -224,7 +224,7 @@ export default function CancelledTable({ data }) {
         </TableHead>
         <TableBody>
           {sortedData.map((row) => (
-            <Row key={row.order_id} row={row} />
+            <Row key={row._id} row={row} />
           ))}
         </TableBody>
       </Table>
@@ -235,15 +235,15 @@ export default function CancelledTable({ data }) {
 CancelledTable.propTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({
-      order_id: PropTypes.string.isRequired,
-      date_commande: PropTypes.string.isRequired,
+      _id: PropTypes.string.isRequired,
+      date_order: PropTypes.string.isRequired,
       statut: PropTypes.string.isRequired,
       produitDetails: PropTypes.arrayOf(
         PropTypes.shape({
           _id: PropTypes.string.isRequired,
-          produit_id: PropTypes.string.isRequired,
-          quantite: PropTypes.number.isRequired,
-          prix_unitaire: PropTypes.number.isRequired,
+          product_id: PropTypes.string.isRequired,
+          quantity: PropTypes.number.isRequired,
+          price: PropTypes.number.isRequired,
         })
       ).isRequired,
     })

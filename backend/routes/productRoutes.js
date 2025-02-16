@@ -6,8 +6,8 @@ import {
   updateProduct,
   deleteProduct,
 } from "../controllers/productController.js"
-import authenticate from "../middlewares/authenticate.js"
-import checkRole from "../middlewares/checkRole.js"
+import { protect } from "../middlewares/authMiddleware.js"
+import { checkRole } from "../middlewares/checkRole.js"
 
 const router = express.Router()
 
@@ -16,21 +16,11 @@ router.get("/", getAllProducts)
 
 // Récupérer un produit par son ID
 router.get("/:id", getProductById)
-router.post(
-  "/",
-  authenticate,
-  checkRole("Admin", "Gestionnaire"),
-  createProduct
-)
-router.put(
-  "/:id",
-  authenticate,
-  checkRole("Admin", "Gestionnaire"),
-  updateProduct
-)
+router.post("/", protect, checkRole("Admin", "Gestionnaire"), createProduct)
+router.put("/:id", protect, checkRole("Admin", "Gestionnaire"), updateProduct)
 router.delete(
   "/:id",
-  authenticate,
+  protect,
   checkRole("Admin", "Gestionnaire"),
   deleteProduct
 )

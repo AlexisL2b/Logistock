@@ -9,19 +9,18 @@ class StockDAO {
     // 🔍 Étape 1 : Récupérer les stocks avec leurs produits (et supplier/categorie)
     const stocks = await Stock.find()
       .populate({
-        path: "produit_id",
+        path: "product_id",
         populate: [
-          { path: "supplier_id", model: "Supplier", select: "nom" },
-          { path: "categorie_id", model: "Category", select: "nom" },
+          { path: "supplier_id", model: "Supplier", select: "name" },
+          { path: "category_id", model: "Category", select: "name" },
         ],
         model: "Product",
-        select: "nom reference prix supplier_id categorie_id",
+        select: "name reference price supplier_id categorie_id",
       })
       .lean() // ✅ Assure que Mongoose retourne des objets purs
 
     // 🔍 Étape 2 : Récupérer tous les stockLogs
     const stockLogs = await StockLog.find().lean()
-    console.log("stockLogs récupérés :", stockLogs)
 
     // 🔍 Étape 3 : Associer chaque stockLog à son stock correspondant
     const stocksWithLogs = stocks.map((stock) => {
@@ -35,11 +34,11 @@ class StockDAO {
   }
 
   async findById(id) {
-    return await Stock.findById(id).populate("produit_id")
+    return await Stock.findById(id).populate("product_id")
   }
 
-  async findByProductId(produit_id) {
-    return await Stock.findOne({ produit_id })
+  async findByProductId(product_id) {
+    return await Stock.findOne({ product_id })
   }
 
   async createStock(stockData) {
@@ -54,8 +53,8 @@ class StockDAO {
     })
   }
 
-  async updateByProductId(produit_id, stockData) {
-    return await Stock.findOneAndUpdate({ produit_id }, stockData, {
+  async updateByProductId(product_id, stockData) {
+    return await Stock.findOneAndUpdate({ product_id }, stockData, {
       new: true,
       runValidators: true,
     })
@@ -65,13 +64,13 @@ class StockDAO {
     return await Stock.findByIdAndDelete(id)
   }
   async deleteByProductId(produitId) {
-    return await Stock.findOneAndDelete({ produit_id: produitId })
+    return await Stock.findOneAndDelete({ product_id: produitId })
   }
 
-  async incrementStock(stock_id, quantite_disponible) {
+  async incrementStock(stock_id, quantity) {
     return await Stock.findByIdAndUpdate(
       stock_id,
-      { $inc: { quantite_disponible: Number(quantite_disponible) || 0 } },
+      { $inc: { quantity: Number(quantity) || 0 } },
       { new: true }
     )
   }

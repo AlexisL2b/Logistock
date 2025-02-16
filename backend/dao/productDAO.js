@@ -8,12 +8,12 @@ class ProductDAO {
   async findByReference(reference) {
     return await Product.findOne({ reference })
   }
-  async findByCategoryId(categorie_id) {
-    if (!mongoose.Types.ObjectId.isValid(categorie_id)) {
+  async findByCategoryId(category_id) {
+    if (!mongoose.Types.ObjectId.isValid(category_id)) {
       throw new Error("ID de catégorie invalide.") // ✅ Vérification de l'ID
     }
 
-    const products = await Product.find({ categorie_id }) // 🔥 Optionnel : récupérer les infos de la catégorie
+    const products = await Product.find({ category_id }) // 🔥 Optionnel : récupérer les infos de la catégorie
     console.log("products dans productsDAO findbycategorieId", products)
     return products
   }
@@ -32,18 +32,18 @@ class ProductDAO {
     // Récupérer tous les produits
     const products = await Product.find()
       .populate([
-        { path: "categorie_id", model: "Category", select: "nom" },
-        { path: "supplier_id", model: "Supplier", select: "nom" },
+        { path: "category_id", model: "Category", select: "name" },
+        { path: "supplier_id", model: "Supplier", select: "name" },
       ])
       .lean() // Utiliser `lean()` pour des objets JS purs
 
     // Pour chaque produit, chercher la quantité disponible dans `Stock`
     const productsWithStock = await Promise.all(
       products.map(async (product) => {
-        const stock = await Stock.findOne({ produit_id: product._id }) // 🔥 Recherche du stock lié
+        const stock = await Stock.findOne({ product_id: product._id }) // 🔥 Recherche du stock lié
         return {
           ...product,
-          quantite_disponible: stock ? stock.quantite_disponible : 0, // 🔥 Ajoute `quantite_disponible`
+          quantity: stock ? stock.quantity : 0, // 🔥 Ajoute `quantity`
         }
       })
     )
@@ -52,9 +52,7 @@ class ProductDAO {
   }
 
   async findById(id) {
-    return await Product.findById(id)
-      .populate("stock_id", "quantite_disponible")
-      .lean()
+    return await Product.findById(id).populate("stock_id", "quantity").lean()
   }
 
   // ✅ Mettre à jour un produit

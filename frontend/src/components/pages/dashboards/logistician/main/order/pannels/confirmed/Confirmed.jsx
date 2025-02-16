@@ -50,9 +50,9 @@ export default function Confirmed() {
   const filteredOrders = orders.filter(
     (order) =>
       order.statut === "validée" &&
-      order.order_id.toLowerCase().startsWith(searchTerm.toLowerCase())
+      order._id.toLowerCase().startsWith(searchTerm.toLowerCase())
   )
-
+  console.log("filteredOrdersfilteredOrdersfilteredOrders", filteredOrders)
   return (
     <Box>
       {/* 🔍 Champ de recherche */}

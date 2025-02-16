@@ -64,7 +64,7 @@ function EnhancedTableHead(props) {
         {headCells.map((headCell) => (
           <TableCell
             key={headCell.id}
-            align={headCell.numeric ? "right" : "left"}
+            // align={headCell.numeric ? "right" : "left"}
             padding={headCell.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === headCell.id ? order : false}
           >
@@ -131,28 +131,22 @@ export default function EnhancedTable({
     }
   }, [])
   const headCells = data.length
-    ? Object.keys(data[0]).map((key) => ({
-        id: key,
-        numeric: typeof data[0][key] === "number",
-        disablePadding: false,
-        label: headerMapping[key] || key.charAt(0).toUpperCase() + key.slice(1), // Utilise headerMapping pour les labels
-      }))
+    ? Object.keys(data[0])
+        .filter((key) => !key.startsWith("_") && key !== "quantity") // Exclure les clés commençant par "_"
+        .map((key) => ({
+          id: key,
+          numeric: typeof data[0][key] === "number",
+          disablePadding: false,
+          label:
+            headerMapping[key] || key.charAt(0).toUpperCase() + key.slice(1), // Utilise headerMapping pour les labels
+        }))
     : []
+
+  console.log("headCells", headCells)
 
   // État pour gérer la modal
   const [openModal, setOpenModal] = useState(false)
   const [selectedRow, setSelectedRow] = useState(null)
-
-  // Générer un objet vide basé sur la structure
-  // const generateEmptyObject = () => {
-  //   if (data.length === 0) return {}
-  //   const firstItem = data[0]
-  //   const emptyObject = {}
-  //   Object.keys(firstItem).forEach((key) => {
-  //     emptyObject[key] = key === "_id" ? undefined : "" // `_id` reste vide
-  //   })
-  //   return emptyObject
-  // }
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc"
@@ -236,13 +230,13 @@ export default function EnhancedTable({
 
   const handleOpenModalForAdd = () => {
     const emptyObject = {
-      nom: "",
+      name: "",
       reference: "",
       description: "",
-      prix: "",
-      categorie_id: "",
+      price: "",
+      category_id: "",
       supplier_id: "",
-      quantite: "",
+      quantity: "",
     }
     setSelectedRow(emptyObject)
     setOpenModal(true)
@@ -319,7 +313,7 @@ export default function EnhancedTable({
                   {headCells.map((cell) => (
                     <TableCell key={cell.id}>
                       {typeof row[cell.id] === "object" && row[cell.id] !== null
-                        ? row[cell.id].nom || "N/A"
+                        ? row[cell.id].name || "N/A"
                         : row[cell.id]}
                     </TableCell>
                   ))}

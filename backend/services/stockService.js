@@ -25,14 +25,14 @@ class StockService {
     const insufficientStock = []
 
     for (const detail of orderDetails) {
-      const { produit_id, quantite } = detail
-      const stock = await StockDAO.findByProductId(produit_id)
+      const { product_id, quantity } = detail
+      const stock = await StockDAO.findByProductId(product_id)
 
-      if (!stock || quantite > stock.quantite_disponible) {
+      if (!stock || quantity > stock.quantity) {
         insufficientStock.push({
-          produit_id,
-          quantite,
-          stockDisponible: stock ? stock.quantite_disponible : 0,
+          product_id,
+          quantity,
+          stockDisponible: stock ? stock.quantity : 0,
         })
       }
     }
@@ -41,8 +41,8 @@ class StockService {
   }
 
   async addStock(stockData) {
-    if (!stockData.produit_id) {
-      throw new Error("Le champ 'produit_id' est requis")
+    if (!stockData.product_id) {
+      throw new Error("Le champ 'product_id' est requis")
     }
     return await StockDAO.create(stockData)
   }
@@ -55,8 +55,8 @@ class StockService {
     return updatedStock
   }
 
-  async updateStockByProductId(produit_id, stockData) {
-    const updatedStock = await StockDAO.updateByProductId(produit_id, stockData)
+  async updateStockByProductId(product_id, stockData) {
+    const updatedStock = await StockDAO.updateByProductId(product_id, stockData)
     if (!updatedStock) {
       throw new Error("Stock introuvable pour ce produit")
     }
@@ -70,78 +70,51 @@ class StockService {
     }
     return deletedStock
   }
-  async incrementStock(id, quantite_disponible) {
-    const incrementStock = await StockDAO.incrementStock(
-      id,
-      quantite_disponible
-    )
+  async incrementStock(id, quantity) {
+    const incrementStock = await StockDAO.incrementStock(id, quantity)
     if (!incrementStock) {
       throw new Error("Stock introuvable")
     }
     return incrementStock
   }
 
-  /**
-   * Décrémente le stock en fonction des détails de commande
-   * @param {Array} orderDetails - Liste des articles commandés
-   * @param {Object} io - Socket.IO pour la mise à jour en temps réel
-   */
   async decrementStockForOrder(orderDetails, io) {
-    const session = await mongoose.startSession()
-    session.startTransaction()
-
     try {
       if (!Array.isArray(orderDetails)) {
         throw new Error("Les détails de la commande doivent être un tableau.")
       }
 
+      console.log("✅ Décrémentation des stocks :", orderDetails)
+
       const updatedStocks = []
 
       for (const detail of orderDetails) {
-        const { produit_id, quantite } = detail
-        console.log("quantite from stockService", quantite)
+        const { product_id, quantity } = detail
+        const stock = await StockDAO.findByProductId(product_id)
 
-        const stock = await StockDAO.findByProductId(produit_id)
-        console.log("Stock actuel :", stock)
-
-        if (!stock) {
-          throw new Error(`Stock introuvable pour le produit ID: ${produit_id}`)
-        }
-
-        if (quantite > stock.quantite_disponible) {
+        if (!stock)
           throw new Error(
-            `Stock insuffisant pour le produit ID: ${produit_id}. Quantité demandée: ${quantite}, disponible: ${stock.quantite_disponible}`
+            `❌ Stock introuvable pour le produit ID: ${product_id}`
           )
-        }
+        if (quantity > stock.quantity)
+          throw new Error(`⚠️ Stock insuffisant : ${product_id}`)
 
-        stock.quantite_disponible -= quantite
-        await stock.save({ session })
+        stock.quantity -= quantity
+        await stock.save()
 
         updatedStocks.push({
-          produit_id: stock.produit_id,
-          quantite_disponible: stock.quantite_disponible,
+          product_id: stock.product_id,
+          quantity: stock.quantity,
           stockId: stock._id,
         })
       }
 
-      await session.commitTransaction()
-      session.endSession()
+      io.emit("stocksUpdated", updatedStocks)
+      console.log("📢 Envoi de la mise à jour des stocks via Socket.IO")
 
-      if (io) {
-        io.emit("stocksUpdated", updatedStocks)
-      }
-
-      return {
-        success: true,
-        message: "Stocks mis à jour avec succès",
-        updatedStocks,
-      }
+      return { success: true, message: "Stocks mis à jour", updatedStocks }
     } catch (error) {
-      console.error("Erreur lors de la mise à jour des stocks :", error.message)
-
-      await session.abortTransaction()
-      session.endSession()
-
+      console.error("❌ Erreur mise à jour stock :", error.message)
       throw error
     }
   }

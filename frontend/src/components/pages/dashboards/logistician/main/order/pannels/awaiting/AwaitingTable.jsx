@@ -24,7 +24,6 @@ import {
   updateStock,
 } from "../../../../../../../../redux/slices/stockSlice"
 import { fetchOrdersWithDetails } from "../../../../../../../../redux/slices/orderSlice"
-import { io } from "socket.io-client"
 import _ from "lodash"
 import axiosInstance from "../../../../../../../../axiosConfig"
 
@@ -40,22 +39,8 @@ function Row({ row }) {
   const stocks = useSelector((state) => state.stocks.stocks)
 
   useEffect(() => {
-    const socket = io("http://localhost:5000")
-
-    socket.on("stocksUpdated", (updatedStocks) => {
-      updatedStocks.forEach((stock) => {
-        dispatch(
-          updateStock({
-            stockId: stock.stockId,
-            stockUpdates: { quantite_totale: stock.quantite_totale },
-          })
-        )
-      })
-      dispatch(fetchStocks())
-      dispatch(fetchOrdersWithDetails())
-    })
-
-    return () => socket.disconnect()
+    dispatch(fetchStocks())
+    dispatch(fetchOrdersWithDetails())
   }, [dispatch])
 
   useEffect(() => {
@@ -66,10 +51,9 @@ function Row({ row }) {
     if (!window.confirm("Confirmez-vous l'annulation de cette commande ?"))
       return
     try {
-      await axiosInstance.put(
-        `http://localhost:5000/api/orders/${row.order_id}`,
-        { statut: "annulée" }
-      )
+      await axiosInstance.put(`http://localhost:5000/api/orders/${row._id}`, {
+        statut: "annulée",
+      })
 
       dispatch(fetchOrdersWithDetails())
       setModalOpen(false)
@@ -81,12 +65,11 @@ function Row({ row }) {
       setIsLoading(false)
     }
   }
-
   const hasStockIssue = row.produitDetails.some((product) => {
     const stockInfo = stocks?.find(
-      (stock) => stock.produit_id === product.produit_id
+      (stock) => stock.product_id === product.product_id
     )
-    return product.quantite > (stockInfo ? stockInfo.quantite_totale : 0)
+    return product.quantity > (stockInfo ? stockInfo.quantity : 0)
   })
 
   const handleValidate = async () => {
@@ -96,31 +79,52 @@ function Row({ row }) {
       setErrorMessage("")
 
       const orderDetails = row.produitDetails.map((product) => ({
-        produit_id: product.produit_id,
-        quantite: product.quantite,
+        product_id: product.product_id,
+        quantity: product.quantity,
       }))
-      console.log("orderDetails from AwaitingTable", orderDetails)
 
-      await axiosInstance.post("http://localhost:5000/api/stocks/decrement", {
-        orderDetails,
-      })
-      await axiosInstance.put(
-        `http://localhost:5000/api/orders/${row.order_id}`,
-        { statut: "validée" }
+      console.log("orderDetails", orderDetails)
+      const responseStock = await axiosInstance.post(
+        "http://localhost:5000/api/stocks/decrement",
+        {
+          orderDetails,
+        }
       )
+      console.log(responseStock.data.updatedStocks)
+
+      await axiosInstance.put(`http://localhost:5000/api/orders/${row._id}`, {
+        statut: "validée",
+      })
+
+      responseStock.data.updatedStocks.map(async (stock) => {
+        // Trouver le produit correspondant dans le tableau d'origine
+        const product = orderDetails.find(
+          (p) => p.product_id === stock.product_id
+        )
+
+        // Vérifier si le produit existe pour éviter une erreur
+        const quantity = product ? product.quantity : 0
+
+        // Envoyer la requête avec la quantité trouvée
+        await axiosInstance.post(`http://localhost:5000/api/stock_logs`, {
+          product_id: stock.product_id,
+          stock_id: stock.stockId,
+          event: "sortie",
+          quantity: quantity, // Prend la valeur trouvée ou 0 par défaut
+        })
+      })
 
       dispatch(fetchStocks())
       dispatch(fetchOrdersWithDetails())
       setModalOpen(false)
     } catch (error) {
       setErrorMessage(
-        error.response?.data?.message || "Erreur lors de la validation"
+        error.response?.data?.message || "❌ Erreur lors de la validation"
       )
     } finally {
       setIsLoading(false)
     }
   }
-  console.log("row", row)
 
   return (
     <>
@@ -130,8 +134,8 @@ function Row({ row }) {
             {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
           </IconButton>
         </TableCell>
-        <TableCell>{row.order_id}</TableCell>
-        <TableCell>{new Date(row.date_commande).toLocaleString()}</TableCell>
+        <TableCell>{row._id}</TableCell>
+        <TableCell>{new Date(row.date_order).toLocaleString()}</TableCell>
         <TableCell
           sx={{
             fontWeight: "bold",
@@ -162,16 +166,16 @@ function Row({ row }) {
                 <TableBody>
                   {row.produitDetails.map((product) => {
                     const stockInfo = stocks.find(
-                      (stock) => stock.produit_id === product.produit_id
+                      (stock) => stock.product_id === product.product_id
                     )
                     return (
                       <TableRow key={product._id}>
-                        <TableCell>{product.produit_id}</TableCell>
+                        <TableCell>{product.product_id}</TableCell>
                         <TableCell>{product.name}</TableCell>
-                        <TableCell>{product.quantite}</TableCell>
-                        <TableCell>{product.prix_unitaire}</TableCell>
+                        <TableCell>{product.quantity}</TableCell>
+                        <TableCell>{product.price}</TableCell>
                         <TableCell>
-                          {stockInfo ? stockInfo.quantite_disponible : "N/A"}
+                          {stockInfo ? stockInfo.quantity : "N/A"}
                         </TableCell>
                       </TableRow>
                     )
@@ -222,12 +226,10 @@ function Row({ row }) {
               <TableBody>
                 {row.produitDetails.map((product) => (
                   <TableRow key={product._id}>
-                    <TableCell>{product.produit_id}</TableCell>
-                    <TableCell>{product.quantite}</TableCell>
-                    <TableCell>{product.prix_unitaire}</TableCell>
-                    <TableCell>
-                      {product.quantite * product.prix_unitaire}
-                    </TableCell>
+                    <TableCell>{product.product_id}</TableCell>
+                    <TableCell>{product.quantity}</TableCell>
+                    <TableCell>{product.price}</TableCell>
+                    <TableCell>{product.quantity * product.price}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -259,15 +261,15 @@ function Row({ row }) {
 
 Row.propTypes = {
   row: PropTypes.shape({
-    order_id: PropTypes.string.isRequired,
-    date_commande: PropTypes.string.isRequired,
+    _id: PropTypes.string.isRequired,
+    date_order: PropTypes.string.isRequired,
     statut: PropTypes.string.isRequired,
     produitDetails: PropTypes.arrayOf(
       PropTypes.shape({
         _id: PropTypes.string.isRequired,
-        produit_id: PropTypes.string.isRequired,
-        quantite: PropTypes.number.isRequired,
-        prix_unitaire: PropTypes.number.isRequired,
+        product_id: PropTypes.string.isRequired,
+        quantity: PropTypes.number.isRequired,
+        price: PropTypes.number.isRequired,
       })
     ).isRequired,
   }).isRequired,
@@ -304,12 +306,12 @@ export default function CollapsingTable({ data }) {
           <TableRow>
             <TableCell />
             <TableCell
-              onClick={() => handleSort("order_id")}
+              onClick={() => handleSort("_id")}
               style={{ cursor: "pointer" }}
             >
               Order ID{" "}
               <IconButton aria-label="expand row" size="small">
-                {sortConfig.key === "order_id" &&
+                {sortConfig.key === "_id" &&
                   (sortConfig.direction === "asc" ? (
                     <KeyboardArrowUp />
                   ) : (
@@ -318,12 +320,12 @@ export default function CollapsingTable({ data }) {
               </IconButton>
             </TableCell>
             <TableCell
-              onClick={() => handleSort("date_commande")}
+              onClick={() => handleSort("date_order")}
               style={{ cursor: "pointer" }}
             >
               Date de Commande{" "}
               <IconButton aria-label="expand row" size="small">
-                {sortConfig.key === "date_commande" &&
+                {sortConfig.key === "date_order" &&
                   (sortConfig.direction === "asc" ? (
                     <KeyboardArrowUp />
                   ) : (
@@ -349,7 +351,7 @@ export default function CollapsingTable({ data }) {
         </TableHead>
         <TableBody>
           {sortedData.map((row) => (
-            <Row key={row.order_id} row={row} />
+            <Row key={row._id} row={row} />
           ))}
         </TableBody>
       </Table>
@@ -360,15 +362,15 @@ export default function CollapsingTable({ data }) {
 CollapsingTable.propTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({
-      order_id: PropTypes.string.isRequired,
-      date_commande: PropTypes.string.isRequired,
+      _id: PropTypes.string.isRequired,
+      date_order: PropTypes.string.isRequired,
       statut: PropTypes.string.isRequired,
       produitDetails: PropTypes.arrayOf(
         PropTypes.shape({
           _id: PropTypes.string.isRequired,
-          produit_id: PropTypes.string.isRequired,
-          quantite: PropTypes.number.isRequired,
-          prix_unitaire: PropTypes.number.isRequired,
+          product_id: PropTypes.string.isRequired,
+          quantity: PropTypes.number.isRequired,
+          price: PropTypes.number.isRequired,
         })
       ).isRequired,
     })

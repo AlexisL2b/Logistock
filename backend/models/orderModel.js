@@ -2,7 +2,7 @@ import mongoose from "mongoose"
 
 const orderSchema = new mongoose.Schema(
   {
-    date_commande: {
+    date_order: {
       type: Date,
       default: Date.now,
     },
@@ -11,19 +11,19 @@ const orderSchema = new mongoose.Schema(
       enum: ["en cours", "validée", "expédiée", "annulée", "réceptionné"],
       default: "en cours",
     },
-    acheteur_id: {
+    buyer_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    stripePayment: {
-      paymentIntentId: { type: String, default: null }, // 🔥 Stocker l’ID Stripe
-      status: {
-        type: String,
-        enum: ["pending", "succeeded", "failed"],
-        default: "pending",
-      }, // 🔥 Suivi du paiement
-    },
+    // stripePayment: {
+    //   paymentIntentId: { type: String, default: null }, // 🔥 Stocker l’ID Stripe
+    //   status: {
+    //     type: String,
+    //     enum: ["pending", "succeeded", "failed"],
+    //     default: "pending",
+    //   }, // 🔥 Suivi du paiement
+    // },
     totalAmount: {
       // 🔥 Ajoute ce champ
       type: Number,

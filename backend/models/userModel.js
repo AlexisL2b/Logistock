@@ -1,5 +1,5 @@
 import mongoose from "mongoose"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 
 const userSchema = new mongoose.Schema(
   {
@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema(
     //   trim: true,
     // },
 
-    nom: {
+    lastname: {
       type: String,
       required: true,
       trim: true,
@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema(
       maxlength: 100,
     },
 
-    prenom: {
+    firstname: {
       type: String,
       required: true,
       trim: true,
@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema(
       maxlength: 100,
     },
 
-    adresse: {
+    address: {
       type: String,
       required: true,
       trim: true,
@@ -50,11 +50,11 @@ const userSchema = new mongoose.Schema(
 
     role_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Role", // Référence à la collection Role
+      ref: "Role", // ✅ Doit correspondre au nom du modèle "Role"
       required: true,
     },
 
-    point_vente_id: {
+    sale_point_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "SalesPoint",
     },

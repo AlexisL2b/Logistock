@@ -10,20 +10,25 @@ import {
 import React, { useEffect, useState } from "react"
 import StocksTable from "./StocksTable"
 import { useDispatch, useSelector } from "react-redux"
-import { fetchStocksWithProduct } from "../../../../../../redux/slices/stockSlice"
+import {
+  fetchStocksWithProduct,
+  updateStock,
+} from "../../../../../../redux/slices/stockSlice"
 import axiosInstance from "../../../../../../axiosConfig"
+import { io } from "socket.io-client"
 
 export default function Stocks() {
-  const stocks = useSelector((state) => state.stocks)
+  const dispatch = useDispatch()
+  const stocks = useSelector((state) => state.stocks.stocksProducts || [])
+
   const [categories, setCategories] = useState([])
   const [selectedCategory, setSelectedCategory] = useState("")
   const [suppliers, setSuppliers] = useState([])
   const [selectedSupplier, setSelectedSupplier] = useState("")
-  const dispatch = useDispatch()
 
   useEffect(() => {
-    dispatch(fetchStocksWithProduct())
-  }, [])
+    dispatch(fetchStocksWithProduct()) // Charger les stocks une seule fois
+  }, [dispatch])
 
   useEffect(() => {
     axiosInstance
@@ -46,45 +51,63 @@ export default function Stocks() {
       )
   }, [])
 
-  const refreshStocks = () => {
-    dispatch(fetchStocksWithProduct())
-  }
+  // Fonction pour écouter WebSocket et mettre à jour Redux
+  useEffect(() => {
+    const socket = io("http://localhost:5000")
+
+    socket.on("stocksUpdated", (updatedStocks) => {
+      console.log(
+        "🟢 Mise à jour des stocks reçue via WebSocket :",
+        updatedStocks
+      )
+
+      // Vérifie si updatedStocks est bien un tableau
+      if (!Array.isArray(updatedStocks)) {
+        console.error("❌ Format incorrect de stocksUpdated :", updatedStocks)
+        return
+      }
+
+      updatedStocks.forEach((stock) => {
+        if (!stock.stockId || !stock.quantity) {
+          console.error("❌ Données manquantes dans le stock reçu :", stock)
+          return
+        }
+        console.log(stock.stockId)
+        dispatch(
+          updateStock({
+            stockId: stock.stockId,
+            stockUpdates: { quantity: stock.quantity },
+          })
+        )
+      })
+    })
+
+    return () => socket.disconnect()
+  }, [dispatch])
 
   // Filtrage des stocks en fonction des sélections
-  const filteredStocks = stocks.stocksProducts?.filter(
+  const filteredStocks = stocks.filter(
     (stock) =>
-      stock.produit_id !== null &&
+      stock.product_id !== null &&
       (selectedCategory === "" ||
-        stock.produit_id.categorie_id._id === selectedCategory) &&
+        stock.product_id.category_id._id === selectedCategory) &&
       (selectedSupplier === "" ||
-        stock.produit_id.supplier_id._id === selectedSupplier)
+        stock.product_id.supplier_id._id === selectedSupplier)
   )
 
   return (
     <Box>
-      {/* Filtres alignés proprement */}
+      {/* Filtres */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
         {/* Filtre par catégorie */}
         <FormControl variant="outlined" sx={{ minWidth: 200 }}>
-          <InputLabel
-            shrink
-            sx={{
-              position: "absolute",
-              background: "white",
-              px: 1,
-              mt: -0.5, // Ajuste la hauteur pour éviter l'encadrement
-            }}
-          >
-            Catégorie
-          </InputLabel>
+          <InputLabel shrink>Catégorie</InputLabel>
           <Select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
             displayEmpty
           >
-            <MenuItem value="" sx={{ fontSize: "0.85rem" }}>
-              Toutes les catégories
-            </MenuItem>
+            <MenuItem value="">Toutes les catégories</MenuItem>
             {categories.map((cat) => (
               <MenuItem key={cat._id} value={cat._id}>
                 {cat.nom}
@@ -95,25 +118,13 @@ export default function Stocks() {
 
         {/* Filtre par fournisseur */}
         <FormControl variant="outlined" sx={{ minWidth: 200 }}>
-          <InputLabel
-            shrink
-            sx={{
-              position: "absolute",
-              background: "white",
-              px: 1,
-              mt: -0.5,
-            }}
-          >
-            Fournisseur
-          </InputLabel>
+          <InputLabel shrink>Fournisseur</InputLabel>
           <Select
             value={selectedSupplier}
             onChange={(e) => setSelectedSupplier(e.target.value)}
             displayEmpty
           >
-            <MenuItem value="" sx={{ fontSize: "0.85rem" }}>
-              Tous les fournisseurs
-            </MenuItem>
+            <MenuItem value="">Tous les fournisseurs</MenuItem>
             {suppliers.map((sup) => (
               <MenuItem key={sup._id} value={sup._id}>
                 {sup.nom}
@@ -122,11 +133,9 @@ export default function Stocks() {
           </Select>
         </FormControl>
 
-        {/* Bouton de réinitialisation (ajusté en hauteur) */}
+        {/* Bouton de réinitialisation */}
         <Button
           variant="contained"
-          size="small"
-          sx={{ height: 40 }} // Ajustement précis de la hauteur
           onClick={() => {
             setSelectedCategory("")
             setSelectedSupplier("")
@@ -136,11 +145,11 @@ export default function Stocks() {
         </Button>
       </Box>
 
-      {/* Tableau des stocks filtrés */}
-      {filteredStocks ? (
-        <StocksTable stocks={filteredStocks} onStockUpdated={refreshStocks} />
+      {/* Affichage des stocks */}
+      {filteredStocks.length > 0 ? (
+        <StocksTable stocks={filteredStocks} />
       ) : (
-        <Typography>Aucun stocks !</Typography>
+        <Typography>Aucun stock disponible.</Typography>
       )}
     </Box>
   )

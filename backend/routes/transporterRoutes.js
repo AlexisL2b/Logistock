@@ -8,8 +8,9 @@ import {
 } from "../controllers/transporterController.js"
 import validate from "../middlewares/validate.js"
 import { transporterSchema } from "../validations/transporterValidation.js"
-import checkRole from "../middlewares/checkRole.js"
-import authenticate from "../middlewares/authenticate.js"
+import { checkRole } from "../middlewares/checkRole.js"
+
+import { protect } from "../middlewares/authMiddleware.js"
 
 const router = express.Router()
 
@@ -17,7 +18,7 @@ router.get("/", getAllTransporters) // GET /api/transporters
 router.get("/:id", getTransporterById) // GET /api/transporters/:id
 router.post(
   "/",
-  authenticate,
+  protect,
   checkRole("Admin", "Gestionnaire"),
   validate(transporterSchema),
   addTransporter
@@ -25,13 +26,13 @@ router.post(
 router.put(
   "/:id",
   validate(transporterSchema),
-  authenticate,
+  protect,
   checkRole("Admin", "Gestionnaire"),
   updateTransporter
 ) // ✅ Validation ajoutée ici
 router.delete(
   "/:id",
-  authenticate,
+  protect,
   checkRole("Admin", "Gestionnaire"),
   deleteTransporter
 ) // DELETE /api/transporters/:id

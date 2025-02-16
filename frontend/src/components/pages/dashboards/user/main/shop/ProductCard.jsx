@@ -19,24 +19,21 @@ import RemoveIcon from "@mui/icons-material/Remove"
 export default function ProductCard({ product }) {
   const dispatch = useDispatch()
   const cartItem = useSelector((state) =>
-    state.cart.items.find((item) => item.produit_id === product._id)
+    state.cart.items.find((item) => item.product_id === product._id)
   )
   const userId = useSelector((state) => state.auth.user._id)
 
   const quantity = cartItem?.quantity || 0
 
   const handleAddToCart = () => {
-    console.log("userId", userId)
-    console.log("product._id", product._id)
-    console.log("product", product)
     dispatch(
-      addToCart({ userId, produit_id: product._id, detailsProduit: product })
+      addToCart({ userId, product_id: product._id, detailsProduit: product })
     )
   }
 
   const handleDecrement = () => {
     if (quantity > 0) {
-      dispatch(decrementFromCart({ userId, produit_id: product._id }))
+      dispatch(decrementFromCart({ userId, product_id: product._id }))
     }
   }
 
@@ -65,13 +62,13 @@ export default function ProductCard({ product }) {
             component="div"
             sx={{ fontWeight: "bold", mb: 1 }}
           >
-            {product.nom}
+            {product.name}
           </Typography>
 
           {/* Catégorie et Fournisseur */}
           <Typography variant="body2" color="text.secondary">
-            {product.categorie_id?.nom || "Catégorie inconnue"} -{" "}
-            {product.supplier_id?.nom || "Fournisseur inconnu"}
+            {product.category_id?.name || "Catégorie inconnue"} -{" "}
+            {product.supplier_id?.name || "Fournisseur inconnu"}
           </Typography>
 
           {/* Description */}
@@ -84,7 +81,7 @@ export default function ProductCard({ product }) {
             variant="h6"
             sx={{ fontWeight: "bold", color: "primary.main" }}
           >
-            {`Prix : ${product.prix} €`}
+            {`Prix : ${product.price} €`}
           </Typography>
 
           {/* Gestion de la quantité */}
