@@ -28,7 +28,6 @@ export const getBuyers = async (req, res) => {
 
 export const createUser = async (req, res) => {
   try {
-    console.log(req.body)
     const newUser = await UserService.createUser(req.body)
     console.log("newUser depuis controller", newUser.newUser)
     res.status(201).json({ message: "Utilisateur créé avec succès", newUser })

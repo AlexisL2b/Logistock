@@ -20,7 +20,7 @@ router.get("/by_order_id/:id", getOrderShipmentByCommandeId) // GET /api/order_s
 router.post(
   "/",
   protect,
-  checkRole("Admin", "Gestionnaire"),
+  checkRole("Admin", "Gestionnaire", "Logisticien"),
   validate(orderShipmentSchema),
   addOrderShipment
 ) // ✅ Validation ajoutée ici

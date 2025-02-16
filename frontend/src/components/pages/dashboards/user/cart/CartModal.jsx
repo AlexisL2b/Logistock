@@ -39,7 +39,7 @@ export default function CartModal({
         //(orderId)
         console.log("cartItems", cartItems)
         cartItems.forEach(async (item) => {
-          const productId = item.produit_id
+          const productId = item.product_id
           const name = item.detailsProduit.nom
           const quantity = item.quantity
           const priceUnite = item.detailsProduit.prix
@@ -47,9 +47,9 @@ export default function CartModal({
           const orderDetailToAdd = {
             commande_id: orderId,
             name: name,
-            produit_id: productId,
-            quantite: quantity,
-            prix_unitaire: priceUnite,
+            product_id: productId,
+            quantity: quantity,
+            price: priceUnite,
             reference: reference,
           }
           const responseOrder = await axiosInstance.post(
@@ -110,7 +110,7 @@ export default function CartModal({
         >
           {cartItems.map((item) => (
             <CartCardModal
-              key={item.produit_id}
+              key={item.product_id}
               product={item}
               onIncrement={() => onIncrement(item)}
               onDecrement={() => onDecrement(item)}

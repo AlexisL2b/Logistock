@@ -19,7 +19,7 @@ import RemoveIcon from "@mui/icons-material/Remove"
 export default function ProductCard({ product }) {
   const dispatch = useDispatch()
   const cartItem = useSelector((state) =>
-    state.cart.items.find((item) => item.produit_id === product._id)
+    state.cart.items.find((item) => item.product_id === product._id)
   )
   const userId = useSelector((state) => state.auth.user._id)
 
@@ -27,13 +27,13 @@ export default function ProductCard({ product }) {
 
   const handleAddToCart = () => {
     dispatch(
-      addToCart({ userId, produit_id: product._id, detailsProduit: product })
+      addToCart({ userId, product_id: product._id, detailsProduit: product })
     )
   }
 
   const handleDecrement = () => {
     if (quantity > 0) {
-      dispatch(decrementFromCart({ userId, produit_id: product._id }))
+      dispatch(decrementFromCart({ userId, product_id: product._id }))
     }
   }
 

@@ -37,7 +37,7 @@ export default function BasicModal({
     name: "",
     reference: "",
     prix: "",
-    quantite_disponible: "",
+    quantity: "",
     description: "", // ✅ Ajout de la description
     categorie_id: "",
     supplier_id: "",

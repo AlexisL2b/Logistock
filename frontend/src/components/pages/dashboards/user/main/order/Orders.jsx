@@ -66,15 +66,13 @@ export default function Orders() {
 
     try {
       await axiosInstance.put(
-        `http://localhost:5000/api/orders/${selectedOrder.order_id}/receive`
+        `http://localhost:5000/api/orders/${selectedOrder._id}/receive`
       )
 
       // Mettre à jour le statut de la commande
       setOrders((prevOrders) =>
         prevOrders.map((order) =>
-          order.order_id === selectedOrder.order_id
-            ? { ...order, status: "Reçu" }
-            : order
+          order._id === selectedOrder._id ? { ...order, status: "Reçu" } : order
         )
       )
 
@@ -115,6 +113,7 @@ export default function Orders() {
           </Button>
           <Button
             onClick={handleConfirmReception}
+            // onClick={handleConfirmReception}
             color="primary"
             variant="contained"
           >

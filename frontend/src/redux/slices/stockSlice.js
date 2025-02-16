@@ -51,28 +51,6 @@ export const fetchStocksWithProduct = createAsyncThunk(
   }
 )
 
-// Thunk pour mettre à jour un stock individuel
-export const updateStock = createAsyncThunk(
-  "stocks/updateStock",
-  async ({ stockId, stockUpdates }, { rejectWithValue }) => {
-    try {
-      //("stockId from stockSlice", stockId)
-      //("stockUpdates from stockSlice", stockUpdates)
-      const response = await updateStockById(stockId, stockUpdates)
-      console.log("stockUpdates", stockUpdates)
-      console.log(stockId, stockId)
-      //("response from slice", response)
-      return response
-    } catch (error) {
-      console.error(
-        "Erreur lors de la mise à jour du stock depuis le slice :",
-        error
-      )
-      return rejectWithValue(error.response?.data || error.message)
-    }
-  }
-)
-
 const stockSlice = createSlice({
   name: "stocks",
   initialState: {
@@ -82,18 +60,19 @@ const stockSlice = createSlice({
   },
   reducers: {
     // Action pour mettre à jour plusieurs stocks en temps réel (par exemple via Socket.IO)
-    updateStocks(state, action) {
-      const updatedStocks = action.payload
-      updatedStocks.forEach((updatedStock) => {
-        const index = state.items.findIndex(
-          (item) => item.produit_id === updatedStock.produit_id
-        )
-        if (index !== -1) {
-          state.items[index] = updatedStock // Mettre à jour le stock existant
-        } else {
-          state.items.push(updatedStock) // Ajouter un nouveau stock si inexistant
+    updateStock: (state, action) => {
+      const stockId = action.payload.stockId
+      const stockUpdates = action.payload.stockUpdates
+      console.log("state from slice", state)
+      const stockIndex = state.stocksProducts.findIndex(
+        (stock) => stock._id === stockId
+      )
+      if (stockIndex !== -1) {
+        state.stocksProducts[stockIndex] = {
+          ...state.stocksProducts[stockIndex],
+          ...stockUpdates,
         }
-      })
+      }
     },
   },
   extraReducers: (builder) => {
@@ -105,7 +84,7 @@ const stockSlice = createSlice({
       .addCase(fetchStockByProductId.fulfilled, (state, action) => {
         state.status = "succeeded"
         const stockIndex = state.items.findIndex(
-          (item) => item.produit_id === action.payload.produit_id
+          (item) => item.product_id === action.payload.product_id
         )
         if (stockIndex === -1) {
           state.items.push(action.payload)
@@ -144,19 +123,19 @@ const stockSlice = createSlice({
         state.error = action.payload
       })
 
-      // Gestion de updateStock
-      .addCase(updateStock.fulfilled, (state, action) => {
-        const updatedStock = action.payload
-        const stockIndex = state.items.findIndex(
-          (item) => item._id === updatedStock._id
-        )
-        if (stockIndex !== -1) {
-          state.items[stockIndex] = updatedStock
-        }
-      })
+    // Gestion de updateStock
+    // .addCase(updateStock.fulfilled, (state, action) => {
+    //   const updatedStock = action.payload
+    //   const stockIndex = state.items.findIndex(
+    //     (item) => item._id === updatedStock._id
+    //   )
+    //   if (stockIndex !== -1) {
+    //     state.items[stockIndex] = updatedStock
+    //   }
+    // })
   },
 })
 
 // Export des actions et du reducer
-export const { updateStocks } = stockSlice.actions
+export const { updateStock } = stockSlice.actions
 export default stockSlice.reducer

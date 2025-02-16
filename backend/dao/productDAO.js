@@ -43,7 +43,7 @@ class ProductDAO {
         const stock = await Stock.findOne({ product_id: product._id }) // 🔥 Recherche du stock lié
         return {
           ...product,
-          quantity: stock ? stock.quantity : 0, // 🔥 Ajoute `quantite_disponible`
+          quantity: stock ? stock.quantity : 0, // 🔥 Ajoute `quantity`
         }
       })
     )
@@ -52,9 +52,7 @@ class ProductDAO {
   }
 
   async findById(id) {
-    return await Product.findById(id)
-      .populate("stock_id", "quantite_disponible")
-      .lean()
+    return await Product.findById(id).populate("stock_id", "quantity").lean()
   }
 
   // ✅ Mettre à jour un produit

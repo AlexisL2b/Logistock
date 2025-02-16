@@ -42,12 +42,13 @@ function Row({ row, onStatusUpdate }) {
   const handleReception = async () => {
     try {
       const response = await axiosInstance.put(
-        `http://localhost:5000/api/orders/${row.order_id}`,
+        `http://localhost:5000/api/orders/${row._id}`,
         { statut: "réceptionné" }
       )
 
       if (response.status === 200) {
-        onStatusUpdate(row.order_id, "réceptionné")
+        // 🔥 Mettre à jour le statut de la commande dans l'interface
+        onStatusUpdate(row._id, "réceptionné")
         setDialogOpen(false)
       }
     } catch (error) {
@@ -149,16 +150,16 @@ function Row({ row, onStatusUpdate }) {
 
 Row.propTypes = {
   row: PropTypes.shape({
-    order_id: PropTypes.string.isRequired,
-    date_commande: PropTypes.string.isRequired,
+    _id: PropTypes.string.isRequired,
+    date_order: PropTypes.string.isRequired,
     statut: PropTypes.string.isRequired,
     produitDetails: PropTypes.arrayOf(
       PropTypes.shape({
         _id: PropTypes.string.isRequired,
-        commande_id: PropTypes.string.isRequired,
-        produit_id: PropTypes.string.isRequired,
-        quantite: PropTypes.number.isRequired,
-        prix_unitaire: PropTypes.number.isRequired,
+        name: PropTypes.string.isRequired,
+        reference: PropTypes.string.isRequired,
+        quantity: PropTypes.number.isRequired,
+        price: PropTypes.number.isRequired,
       })
     ).isRequired,
   }).isRequired,
@@ -171,7 +172,7 @@ export default function CollapsingTable({ data }) {
   const updateOrderStatus = (orderId, newStatus) => {
     setOrders((prevOrders) =>
       prevOrders.map((order) =>
-        order.order_id === orderId ? { ...order, statut: newStatus } : order
+        order._id === orderId ? { ...order, statut: newStatus } : order
       )
     )
   }

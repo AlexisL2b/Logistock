@@ -3,13 +3,13 @@ import OrderShipment from "../models/orderShipmentModel.js"
 class OrderShipmentDAO {
   async findAll() {
     return await OrderShipment.find()
-      .populate("commande_id", "statut date_commande")
+      .populate("commande_id", "statut date_order")
       .populate("transporteur_id", "nom telephone")
   }
 
   async findById(id) {
     return await OrderShipment.findById(id)
-      .populate("commande_id", "statut date_commande")
+      .populate("commande_id", "statut date_order")
       .populate("transporteur_id", "nom telephone")
   }
 

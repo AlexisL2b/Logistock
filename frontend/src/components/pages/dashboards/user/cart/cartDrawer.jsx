@@ -41,7 +41,7 @@ export default function CartDrawer({
       if (cartItems.length > 0) {
         // 🔥 Étape 1 : Préparer les produits et calculer le montant total
         const productsData = cartItems.map((item) => ({
-          produit_id: item.produit_id,
+          product_id: item.product_id,
           name: item.detailsProduit.name,
           reference: item.detailsProduit.reference,
           price: Number(item.detailsProduit.price),
@@ -79,6 +79,7 @@ export default function CartDrawer({
         console.log("✅ Commande créée avec ID :", responseOrder)
 
         const orderId = responseOrder.data.order._id
+        console.log("orderId /////////", orderId)
         // const clientSecret = responseOrder.data.clientSecret
 
         // console.log("✅✅✅ Commande ID :", orderId)
@@ -88,7 +89,7 @@ export default function CartDrawer({
         for (const product of productsData) {
           await axiosInstance.post("http://localhost:5000/api/order_details", {
             order_id: orderId,
-            product_id: product.produit_id,
+            product_id: product.product_id,
             name: product.name,
             reference: product.reference,
             quantity: product.quantity,
@@ -141,7 +142,7 @@ export default function CartDrawer({
           {cartItems.length > 0 ? (
             cartItems.map((item) => (
               <CartCardModal
-                key={item.produit_id}
+                key={item.product_id}
                 product={item}
                 onIncrement={() => onIncrement(item)}
                 onDecrement={() => onDecrement(item)}

@@ -35,24 +35,6 @@ function Row({ row }) {
   const stocks = useSelector((state) => state.stocks.stocks)
 
   // Écouter les mises à jour en temps réel via Socket.IO
-  useEffect(() => {
-    const socket = io("http://localhost:5000") // Connexion au backend
-
-    // Réception des mises à jour des stocks
-    socket.on("stocksUpdated", (updatedStocks) => {
-      updatedStocks.forEach((stock) => {
-        dispatch(
-          updateStock({
-            stockId: stock.stockId,
-            stockUpdates: { quantite_totale: stock.quantite_totale },
-          })
-        )
-      })
-      dispatch(fetchStocks())
-      dispatch(fetchOrdersWithDetails())
-    })
-    return () => socket.disconnect() // Déconnexion propre
-  }, [dispatch])
 
   return (
     <>
@@ -66,8 +48,8 @@ function Row({ row }) {
             {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
           </IconButton>
         </TableCell>
-        <TableCell>{row.order_id}</TableCell>
-        <TableCell>{new Date(row.date_commande).toLocaleString()}</TableCell>
+        <TableCell>{row._id}</TableCell>
+        <TableCell>{new Date(row.date_order).toLocaleString()}</TableCell>
         <TableCell
           sx={{
             color: "blue" || "black",
@@ -97,15 +79,15 @@ function Row({ row }) {
                 <TableBody>
                   {row.produitDetails.map((product) => {
                     const stockInfo = stocks.find(
-                      (stock) => stock.produit_id === product.produit_id
+                      (stock) => stock.product_id === product.product_id
                     )
                     return (
                       <TableRow key={product._id}>
-                        <TableCell>{product.produit_id}</TableCell>
-                        <TableCell>{product.quantite}</TableCell>
-                        <TableCell>{product.prix_unitaire}</TableCell>
+                        <TableCell>{product.product_id}</TableCell>
+                        <TableCell>{product.quantity}</TableCell>
+                        <TableCell>{product.price}</TableCell>
                         <TableCell>
-                          {stockInfo ? stockInfo.quantite_totale : "N/A"}
+                          {stockInfo ? stockInfo.quantity : "N/A"}
                         </TableCell>
                       </TableRow>
                     )
@@ -122,15 +104,15 @@ function Row({ row }) {
 
 Row.propTypes = {
   row: PropTypes.shape({
-    order_id: PropTypes.string.isRequired,
-    date_commande: PropTypes.string.isRequired,
+    _id: PropTypes.string.isRequired,
+    date_order: PropTypes.string.isRequired,
     statut: PropTypes.string.isRequired,
     produitDetails: PropTypes.arrayOf(
       PropTypes.shape({
         _id: PropTypes.string.isRequired,
-        produit_id: PropTypes.string.isRequired,
-        quantite: PropTypes.number.isRequired,
-        prix_unitaire: PropTypes.number.isRequired,
+        product_id: PropTypes.string.isRequired,
+        quantity: PropTypes.number.isRequired,
+        price: PropTypes.number.isRequired,
       })
     ).isRequired,
   }).isRequired,
@@ -167,11 +149,11 @@ export default function ReceivedTable({ data }) {
           <TableRow>
             <TableCell />
             <TableCell
-              onClick={() => handleSort("order_id")}
+              onClick={() => handleSort("_id")}
               style={{ cursor: "pointer", fontWeight: "bold" }}
             >
               Order ID{" "}
-              {sortConfig.key === "order_id" && (
+              {sortConfig.key === "_id" && (
                 <IconButton size="small">
                   {sortConfig.direction === "asc" ? (
                     <KeyboardArrowUp />
@@ -182,11 +164,11 @@ export default function ReceivedTable({ data }) {
               )}
             </TableCell>
             <TableCell
-              onClick={() => handleSort("date_commande")}
+              onClick={() => handleSort("date_order")}
               style={{ cursor: "pointer", fontWeight: "bold" }}
             >
               Date de Commande{" "}
-              {sortConfig.key === "date_commande" && (
+              {sortConfig.key === "date_order" && (
                 <IconButton size="small">
                   {sortConfig.direction === "asc" ? (
                     <KeyboardArrowUp />
@@ -215,7 +197,7 @@ export default function ReceivedTable({ data }) {
         </TableHead>
         <TableBody>
           {sortedData.map((row) => (
-            <Row key={row.order_id} row={row} />
+            <Row key={row._id} row={row} />
           ))}
         </TableBody>
       </Table>
@@ -226,15 +208,15 @@ export default function ReceivedTable({ data }) {
 ReceivedTable.propTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({
-      order_id: PropTypes.string.isRequired,
-      date_commande: PropTypes.string.isRequired,
+      _id: PropTypes.string.isRequired,
+      date_order: PropTypes.string.isRequired,
       statut: PropTypes.string.isRequired,
       produitDetails: PropTypes.arrayOf(
         PropTypes.shape({
           _id: PropTypes.string.isRequired,
-          produit_id: PropTypes.string.isRequired,
-          quantite: PropTypes.number.isRequired,
-          prix_unitaire: PropTypes.number.isRequired,
+          product_id: PropTypes.string.isRequired,
+          quantity: PropTypes.number.isRequired,
+          price: PropTypes.number.isRequired,
         })
       ).isRequired,
     })

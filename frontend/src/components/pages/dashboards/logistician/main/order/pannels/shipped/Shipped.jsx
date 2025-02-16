@@ -46,12 +46,10 @@ export default function Shipped() {
     return () => clearInterval(interval) // Nettoyage à la suppression du composant
   }, [dispatch, orders, stocks])
 
-  console.log("orders", orders)
-
   const filteredOrders = orders.filter(
     (order) =>
       order.statut === "expédiée" &&
-      order.order_id.toLowerCase().startsWith(searchTerm.toLowerCase())
+      order._id.toLowerCase().startsWith(searchTerm.toLowerCase())
   )
 
   return (

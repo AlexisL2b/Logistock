@@ -20,6 +20,7 @@ import {
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp"
 import axiosInstance from "../../../../../../axiosConfig"
+import { useEffect } from "react"
 
 const getEventStyle = (event) => {
   const styles = {
@@ -32,13 +33,12 @@ const getEventStyle = (event) => {
 
 function Row({ row, onReassort }) {
   const [open, setOpen] = React.useState(false)
-  console.log("rowrowrowrowrowrow", row)
   return (
     <>
       <TableRow
         sx={{
           "& > *": { borderBottom: "unset" },
-          backgroundColor: row.quantite_disponible < 50 ? "#ffcccc" : "inherit",
+          backgroundColor: row.quantity < 50 ? "#ffcccc" : "inherit",
         }}
       >
         <TableCell>
@@ -138,9 +138,9 @@ const modalStyle = {
   gap: 2,
 }
 
-export default function CollapsibleTable({ stocks, onStockUpdated }) {
+export default function CollapsibleTable({ stocks }) {
   const [order, setOrder] = React.useState("asc")
-  const [orderBy, setOrderBy] = React.useState("quantite_disponible")
+  const [orderBy, setOrderBy] = React.useState("quantity")
   const [modalOpen, setModalOpen] = React.useState(false)
   const [selectedStock, setSelectedStock] = React.useState(null)
   const [reassortQuantity, setReassortQuantity] = React.useState("")
@@ -151,7 +151,9 @@ export default function CollapsibleTable({ stocks, onStockUpdated }) {
     setOrder(isAsc ? "desc" : "asc")
     setOrderBy(property)
   }
-
+  useEffect(() => {
+    console.log("🔄 Stocks mis à jour", stocks)
+  }, [stocks])
   const handleOpenModal = (stock) => {
     setSelectedStock(stock)
     setReassortQuantity("")
@@ -183,8 +185,6 @@ export default function CollapsibleTable({ stocks, onStockUpdated }) {
         event: "entrée",
         stock_id: selectedStock._id,
       })
-
-      onStockUpdated()
     } catch (error) {
       alert("Une erreur s'est produite : " + error.message)
     }

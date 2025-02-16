@@ -23,7 +23,7 @@ const router = express.Router()
 
 router.post(
   "/decrement",
-  validate(stockSchema),
+  // validate(stockSchema),
   protect,
   checkRole("Admin", "Gestionnaire", "Logisticien"),
   decrementStockForOrder
@@ -48,14 +48,14 @@ router.post(
 ) // ✅ Validation ajoutée ici
 router.put(
   "/:id",
-  validate(stockSchema),
+  // validate(stockSchema),
   protect,
   checkRole("Admin", "Gestionnaire", "Logisticien"),
   updateStock
 ) // ✅ Validation ajoutée ici
 // ✅ Validation ajoutée ici
 router.put(
-  "/update-by-product/:produit_id",
+  "/update-by-product/:product_id",
   validate(stockSchema),
   protect,
   checkRole("Admin", "Gestionnaire", "Logisticien"),

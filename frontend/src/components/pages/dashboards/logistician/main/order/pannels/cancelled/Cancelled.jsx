@@ -49,7 +49,7 @@ export default function Cancelled() {
   const filteredOrders = orders.filter(
     (order) =>
       order.statut === "annulée" &&
-      order.order_id.toLowerCase().startsWith(searchTerm.toLowerCase())
+      order._id.toLowerCase().startsWith(searchTerm.toLowerCase())
   )
 
   return (

@@ -1,12 +1,13 @@
 import Order from "../models/orderModel.js"
 import OrderDetails from "../models/orderDetailsModel.js"
+import OrderShipment from "../models/orderShipmentModel.js"
 
 class OrderDAO {
   async findAllOrders() {
     return await Order.find().populate("buyer_id", "lastname firstname email")
   }
 
-  async findAllWithDetails(buyerId) {
+  async findAllWithDetails() {
     try {
       const orders = await Order.find().lean()
 
@@ -21,14 +22,32 @@ class OrderDAO {
       const orderDetails = await OrderDetails.find({
         order_id: { $in: orderIds },
       }).lean()
+      const orderShipments = await OrderShipment.find({
+        order_id: { $in: orderIds },
+      }).lean()
 
-      // Mapper les détails des commandes dans chaque commande
-      const ordersWithDetails = orders.map((order) => ({
-        ...order,
-        produitDetails: orderDetails.filter(
+      const ordersWithDetails = orders.map((order) => {
+        // Filtrer les produits liés à cette commande
+        const produitDetails = orderDetails.filter(
           (detail) => detail.order_id.toString() === order._id.toString()
-        ),
-      }))
+        )
+
+        // Trouver la première expédition liée à cette commande
+        const shipment = orderShipments.find(
+          (shipment) => shipment.order_id.toString() === order._id.toString()
+        )
+
+        return {
+          ...order,
+          produitDetails,
+          ...(order.statut === "expédiée" && shipment
+            ? {
+                transporter_id: shipment.transporter_id,
+                date_shipment: shipment.date_shipment,
+              }
+            : {}),
+        }
+      })
 
       return ordersWithDetails
     } catch (error) {

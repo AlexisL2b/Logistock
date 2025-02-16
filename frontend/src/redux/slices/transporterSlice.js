@@ -7,6 +7,7 @@ export const fetchTransporters = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await getTransporters()
+      console.log("response", response)
       return response.data // Assure-toi que ton API retourne `response.data`
     } catch (error) {
       console.error("Erreur lors de la récupération des transporteurs :", error)

@@ -24,10 +24,11 @@ router.post("/", validate(orderSchema), addOrder) // ✅ Création avec Stripe i
 router.put(
   "/:id",
   protect,
-  checkRole("Admin", "Gestionnaire", "Logisticien"),
+  checkRole("Admin", "Gestionnaire", "Logisticien", "Acheteur"),
   // validate(orderSchema),
   updateOrder
 ) // ✅ Modification avec validation
+// ✅ Modification avec validation
 router.delete(
   "/:id",
   protect,

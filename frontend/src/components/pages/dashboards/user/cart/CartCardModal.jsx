@@ -15,7 +15,7 @@ export default function CartCardModal({ product }) {
   console.log(product)
   const dispatch = useDispatch()
   const cartItem = useSelector((state) =>
-    state.cart.items.find((item) => item.produit_id === product.produit_id)
+    state.cart.items.find((item) => item.product_id === product.product_id)
   )
   const userId = useSelector((state) => state.auth.user._id)
 
@@ -23,7 +23,7 @@ export default function CartCardModal({ product }) {
     dispatch(
       addToCart({
         userId,
-        produit_id: cartItem.produit_id,
+        product_id: cartItem.product_id,
         detailsProduit: cartItem.detailsProduit,
       })
     )
@@ -31,14 +31,14 @@ export default function CartCardModal({ product }) {
 
   const handleDecrement = () => {
     if (cartItem?.quantity > 0) {
-      dispatch(decrementFromCart({ userId, produit_id: cartItem.produit_id }))
+      dispatch(decrementFromCart({ userId, product_id: cartItem.product_id }))
     }
   }
 
   const handleRemove = () => {
-    dispatch(removeFromCart({ userId, produit_id: cartItem.produit_id }))
+    dispatch(removeFromCart({ userId, product_id: cartItem.product_id }))
   }
-
+  console.log(product)
   return (
     <Box
       sx={{
@@ -61,7 +61,7 @@ export default function CartCardModal({ product }) {
       {/* Informations sur le produit */}
       <Box sx={{ flex: 1, textAlign: { xs: "center", sm: "left" } }}>
         <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-          {name}
+          {product.detailsProduit.name}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Prix :{" "}

@@ -21,7 +21,6 @@ class StockDAO {
 
     // 🔍 Étape 2 : Récupérer tous les stockLogs
     const stockLogs = await StockLog.find().lean()
-    console.log("stockLogs récupérés :", stockLogs)
 
     // 🔍 Étape 3 : Associer chaque stockLog à son stock correspondant
     const stocksWithLogs = stocks.map((stock) => {

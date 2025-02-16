@@ -10,6 +10,7 @@ export const getStockByProductId = async (productId) => {
 
 // Mettre à jour un stock par son ID
 export const updateStockById = async (stockId, stockUpdates) => {
+  console.log("'stockIdstockIdstockIdstockIdstockId'", stockId)
   const response = await axiosInstance.put(
     `http://localhost:5000/api/stocks/${stockId}`,
     stockUpdates

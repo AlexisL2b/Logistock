@@ -40,6 +40,7 @@ app.use(
     credentials: true,
   })
 )
+console.log("✅ WebSocket Server initialisé !")
 const server = createServer(app)
 
 // ✅ Correction des requêtes OPTIONS (preflight)
@@ -55,17 +56,18 @@ const io = new Server(server, {
 })
 app.set("io", io)
 io.on("connection", (socket) => {
-  // console.log(`🟢 Un client s'est connecté : ${socket.id}`)
+  console.log(`🟢 Un client connecté : ${socket.id}`)
 
   socket.on("disconnect", () => {
-    // console.log(`🔴 Utilisateur déconnecté : ${socket.id}`)
+    console.log(`🔴 Client déconnecté : ${socket.id}`)
   })
 
-  socket.on("stock:update", (data) => {
-    console.log("🔄 Mise à jour du stock :", data)
-    io.emit("stock:update", data) // Envoie à tous les clients connectés
+  socket.on("stocksUpdated", (data) => {
+    console.log("🔄 📢 [SOCKET] Émission stocksUpdated avec :", data)
+    io.emit("stocksUpdated", data)
   })
 })
+
 app.use((req, res, next) => {
   req.io = io
   next()
