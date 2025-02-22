@@ -10,6 +10,7 @@ import {
   DialogContentText,
   DialogTitle,
   Button,
+  Typography,
 } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
 
@@ -87,6 +88,10 @@ export default function Orders() {
   return (
     <Box sx={{ maxWidth: "1200px", margin: "auto", p: 3 }}>
       {/* 🔍 Champ de recherche */}
+      {/* 🏷️ Titre principal */}
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
+        Commandes
+      </Typography>
       <TextField
         label="Rechercher une commande par ID"
         variant="outlined"

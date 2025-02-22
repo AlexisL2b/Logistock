@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Box, TextField } from "@mui/material"
+import { Box, TextField, Typography } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
 import EnhancedTable from "../../../../../reusable-ui/EnhancedTable"
 
@@ -60,7 +60,11 @@ export default function Suppliers() {
   })
 
   return (
-    <Box>
+    <Box sx={{ padding: 3 }}>
+      {/* 🏷️ Titre principal */}
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
+        Fournisseurs
+      </Typography>
       {/* 🔍 Champ de recherche multi-critères */}
       <TextField
         label="Rechercher par Nom, ID, Email, Téléphone"

@@ -1,4 +1,4 @@
-import { Box, TextField } from "@mui/material"
+import { Box, TextField, Typography } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
 import EnhancedTable from "../../../../../reusable-ui/EnhancedTable"
 import { useEffect, useState } from "react"
@@ -22,6 +22,7 @@ export default function SalesPoints() {
         )
       })
   }
+
   const fields = {
     name: { type: "text", label: "Nom", required: true },
     address: { type: "text", label: "Adresse", required: true },
@@ -39,8 +40,8 @@ export default function SalesPoints() {
 
   const headerMapping = {
     _id: "ID",
-    nom: "Nom",
-    adresse: "Adresse",
+    name: "Nom",
+    address: "Adresse",
     telephone: "Téléphone",
   }
 
@@ -53,14 +54,21 @@ export default function SalesPoints() {
     return (
       salesPoint.name.toLowerCase().includes(searchLower) || // Nom du point de vente
       salesPoint._id.toLowerCase().includes(searchLower) || // ID du point de vente
-      (salesPoint.adresse &&
-        salesPoint.adresse.toLowerCase().includes(searchLower)) || // Adresse
+      (salesPoint.address &&
+        salesPoint.address.toLowerCase().includes(searchLower)) || // Adresse
       (salesPoint.telephone && salesPoint.telephone.includes(searchLower)) // Téléphone
     )
   })
+
   console.log(filteredSalesPoints)
+
   return (
-    <Box>
+    <Box sx={{ padding: 3 }}>
+      {/* 🏷️ Titre principal */}
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
+        Points de Vente
+      </Typography>
+
       {/* 🔍 Champ de recherche multi-critères */}
       <TextField
         label="Rechercher par Nom, ID, Adresse, Téléphone"

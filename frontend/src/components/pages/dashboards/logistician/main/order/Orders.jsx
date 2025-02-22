@@ -1,4 +1,4 @@
-import { Box } from "@mui/material"
+import { Box, Typography } from "@mui/material"
 import React from "react"
 import TabsWithPanels from "../../../../../reusable-ui/TabsWithPanels"
 import Awaiting from "./pannels/awaiting/Awaiting"
@@ -16,7 +16,11 @@ export default function Order() {
     { label: "Annulée", component: <Cancelled /> },
   ]
   return (
-    <Box>
+    <Box sx={{ padding: 3 }}>
+      {/* 🏷️ Titre principal */}
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
+        Commandes
+      </Typography>
       <TabsWithPanels tabs={tabs} />
     </Box>
   )

@@ -1,13 +1,5 @@
 import { useEffect, useState } from "react"
-import {
-  Box,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Button,
-} from "@mui/material"
+import { Box, TextField, Typography, Button } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
 import EnhancedTableDependancies from "../../../../../reusable-ui/EnhancedTableDependancies"
 import CustomSelect from "../../../../../reusable-ui/CustomSelect"
@@ -19,9 +11,8 @@ export default function Products() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("")
   const [selectedSupplier, setSelectedSupplier] = useState("")
-  const [age, setAge] = useState("")
 
-  // Fonction pour charger les produits
+  // Chargement des données
   const fetchProducts = () => {
     axiosInstance
       .get("/products")
@@ -31,7 +22,6 @@ export default function Products() {
       )
   }
 
-  // Fonction pour charger les catégories
   const fetchCategories = () => {
     axiosInstance
       .get("/categories")
@@ -41,7 +31,6 @@ export default function Products() {
       )
   }
 
-  // Fonction pour charger les fournisseurs
   const fetchSuppliers = () => {
     axiosInstance
       .get("/suppliers")
@@ -69,7 +58,6 @@ export default function Products() {
   const headerMapping = {
     supplier_id: "Fournisseur",
     category_id: "Categorie",
-    // quantity: "Quantité",
     price: "Prix",
     reference: "Référence",
   }
@@ -77,7 +65,6 @@ export default function Products() {
   // 🔍 **Filtrage des produits par recherche, catégorie et fournisseur**
   const filteredProducts = products.filter((product) => {
     const searchLower = searchTerm.toLowerCase()
-    // Vérification du filtre de recherche
     const matchesSearch =
       product.name.toLowerCase().includes(searchLower) ||
       product._id.toLowerCase().includes(searchLower) ||
@@ -88,22 +75,23 @@ export default function Products() {
       (product.reference &&
         product.reference.toLowerCase().includes(searchLower))
 
-    // Vérification du filtre par catégorie
     const matchesCategory =
       selectedCategory === "" || product.category_id?._id === selectedCategory
 
-    // Vérification du filtre par fournisseur
     const matchesSupplier =
       selectedSupplier === "" || product.supplier_id?._id === selectedSupplier
 
     return matchesSearch && matchesCategory && matchesSupplier
   })
-  const handleChange = (event) => {
-    setAge(event.target.value)
-  }
+
   return (
-    <Box>
-      {/* 🔍 Barre de recherche multi-critères */}
+    <Box sx={{ padding: 3 }}>
+      {/* 🏷️ Titre principal */}
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
+        Produits
+      </Typography>
+
+      {/* 🔍 Barre de recherche */}
       <TextField
         label="Rechercher par name, ID, Catégorie, Fournisseur, Référence"
         variant="outlined"
@@ -113,6 +101,7 @@ export default function Products() {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
+      {/* 🏷️ Filtres */}
       <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
         <CustomSelect
           inputLabelId="filtreCategorieLabel"
@@ -149,7 +138,7 @@ export default function Products() {
         </Button>
       </Box>
 
-      {/* 📊 Affichage des produits filtrés */}
+      {/* 📊 Tableau des produits */}
       <EnhancedTableDependancies
         data={filteredProducts}
         coll={"products"}

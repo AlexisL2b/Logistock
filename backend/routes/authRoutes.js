@@ -11,19 +11,6 @@ import { loginSchema, registerSchema } from "../validations/authValidation.js"
 
 const router = express.Router()
 
-/**
- * 🔹 Route d'inscription (seulement admin et gestionnaire)
- */
-// router.post(
-//   "/register",
-//   protect,
-//   checkRole("admin", "gestionnaire"), // 🚀 Seuls les admins & gestionnaires peuvent créer des utilisateurs
-//   validate(registerSchema),
-//   createUser
-// )
-/**
- * 🔹 Route de connexion
- */
 router.post("/login", validate(loginSchema), loginUser)
 
 /**

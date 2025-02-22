@@ -86,7 +86,11 @@ export default function Transporters() {
   }
 
   return (
-    <Box>
+    <Box sx={{ padding: 3 }}>
+      {/* 🏷️ Titre principal */}
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
+        Utilisateurs
+      </Typography>
       {/* Filtres alignés proprement */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
         {/* 🔍 Champ de recherche */}
