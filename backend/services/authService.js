@@ -61,12 +61,12 @@ class AuthService {
   async loginUser(email, password, res) {
     // 🔥 Ajouter `res` comme paramètre
     try {
-      const user = await User.findOne({ email }).populate("role_id", "name")
+      const user = await User.findOne({ email })
       if (!user) {
         throw new Error("Utilisateur introuvable.")
       }
 
-      const assignedRole = await Role.findById(user.role_id._id)
+      const assignedRole = await Role.findById(user.role._id)
       if (!assignedRole) {
         throw new Error("Le rôle spécifié n'existe pas !")
       }
@@ -75,6 +75,7 @@ class AuthService {
       console.log("🔹 Mot de passe en clair reçu :", password)
       console.log("🔹 Mot de passe hashé stocké :", user.password)
 
+      console.log("user", user)
       // Vérification du mot de passe
       const isMatch = await bcrypt.compare(password, user.password)
       console.log("🔹 bcrypt.compare() résultat :", isMatch)
@@ -84,7 +85,7 @@ class AuthService {
 
       // 🔹 Générer le token JWT
       const token = jwt.sign(
-        { id: user._id, email: user.email, role: user.role_id.name },
+        { id: user._id, email: user.email, role: user.role.name },
         process.env.JWT_SECRET,
         { expiresIn: "1h" }
       )
@@ -101,7 +102,7 @@ class AuthService {
         message: "Connexion réussie",
         user: {
           id: user._id,
-          role: user.role_id.name,
+          role: user.role.name,
         },
       }
     } catch (error) {

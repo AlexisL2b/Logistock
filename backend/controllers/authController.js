@@ -29,7 +29,7 @@ export const loginUser = async (req, res) => {
 
     res.status(200).json(response)
   } catch (error) {
-    res.status(401).json({ message: error.message })
+    res.status(401).json({ message: error.message, file: "authController" })
   }
 }
 

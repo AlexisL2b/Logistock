@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material"
 import React from "react"
-import TabsWithPanels from "../../../../../reusable-ui/TabsWithPanels"
+import TabsWithPanels from "../../../../../reusable-ui/tables/TabsWithPanels"
 import Awaiting from "./pannels/awaiting/Awaiting"
 import Shipped from "./pannels/shipped/Shipped"
 import Confirmed from "./pannels/confirmed/Confirmed"

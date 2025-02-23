@@ -16,7 +16,7 @@ import {
 } from "../../../../../../redux/slices/stockSlice"
 import axiosInstance from "../../../../../../axiosConfig"
 import { io } from "socket.io-client"
-import CustomSelect from "../../../../../reusable-ui/CustomSelect"
+import CustomSelect from "../../../../../reusable-ui/selects/CustomSelect"
 
 export default function Stocks() {
   const dispatch = useDispatch()

@@ -1,37 +1,60 @@
 import User from "../models/userModel.js"
+import Role from "../models/roleModel.js"
 
 const UserDAO = {
   async findById(userId) {
-    return await User.findById(userId).populate("role_id", "name")
+    return await User.findById(userId)
   },
 
   async findAll() {
-    return await User.find().populate([
-      { path: "role_id", select: "name" },
-      { path: "sale_point_id", select: "name" },
-    ])
+    return await User.find()
   },
+
   async findBuyers() {
-    return await User.find({ role_id: "677cf977b39853e4a17727e3" }).populate([
-      { path: "role_id", select: "name" },
-      { path: "sale_point_id", select: "name" },
-    ])
+    return await User.find({ role: "Gestionnaire" })
   },
-  async findBySalesPointId(sale_point_id) {
-    return await User.find({ sale_point_id })
+
+  async findBySalesPointId(sales_point_id) {
+    return await User.find({ "sales_point.id": sales_point_id })
   },
 
   async findByEmail(email) {
-    return await User.findOne({ email }).populate("role_id", "name")
+    return await User.findOne({ email })
   },
 
   async createUser(userData) {
     console.log("🔹 Création d'utilisateur avec les données :", userData)
-    const user = new User(userData)
-    return await user.save()
+
+    // Vérifier que le rôle existe
+    // const role = await Role.findById(userData.role_id)
+    // if (!role) throw new Error("Le rôle spécifié n'existe pas.")
+
+    // Validation de `sales_point`
+    if (
+      !userData.sales_point ||
+      !userData.sales_point._id ||
+      !userData.sales_point.name
+    ) {
+      throw new Error("Le `sales_point` doit contenir un `id` et un `name`.")
+    }
+    console.log("userData", userData)
+    // Création de l'utilisateur avec `role` en texte et `role_id` en référence
+    const newUser = new User({
+      userData,
+      // Stocke directement le rôle en texte
+    })
+
+    return await newUser.save()
   },
 
   async updateUser(userId, updateData) {
+    // Si `role_id` est mis à jour, récupérer le nouveau rôle
+    if (updateData.role_id) {
+      const role = await Role.findById(updateData.role_id)
+      if (!role) throw new Error("Le rôle spécifié n'existe pas.")
+      updateData.role = role.name // Mettre à jour le rôle en texte
+    }
+
     return await User.findByIdAndUpdate(userId, updateData, { new: true })
   },
 

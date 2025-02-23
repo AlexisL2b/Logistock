@@ -12,7 +12,6 @@ import DashboardAdmin from "./components/pages/dashboards/admin/DashboardAdmin"
 import PasswordForgot from "./components/pages/passwordForgot/PasswordForgot"
 import ErrorPage from "./components/pages/error/ErrorPage"
 // import Home from "./components/pages/dashboard/home/Home"
-import SignUpPage from "./components/pages/signupPage/SignUpPage"
 import DashboardUser from "./components/pages/dashboards/user/DashboardUser"
 import ProtectedRoute from "./components/reusable-ui/ProtectedRoute"
 import DashboardLogistician from "./components/pages/dashboards/logistician/DashboardLogistician"
@@ -52,7 +51,6 @@ function App() {
         <Route path="/" element={<LoginPage />} />
         {/* <Route path="/passwordforgot" element={<PasswordForgot />} /> */}
         <Route path="*" element={<ErrorPage />} />
-        <Route path="/signup" element={<SignUpPage />} />
         <Route
           path="/user-dashboard"
           element={

@@ -13,7 +13,7 @@ import axiosInstance from "../../../../../../axiosConfig"
 import BasicTable from "./BasicTable"
 import { useDispatch, useSelector } from "react-redux"
 import { fetchSalesPoints } from "../../../../../../redux/slices/salesPointSlice"
-import CustomSelect from "../../../../../reusable-ui/CustomSelect"
+import CustomSelect from "../../../../../reusable-ui/selects/CustomSelect"
 
 export default function Transporters() {
   const [users, setUsers] = useState([])
@@ -21,7 +21,7 @@ export default function Transporters() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedPointVente, setSelectedPointVente] = useState("")
 
-  const salesPoints = useSelector((state) => state.salesPoints.salesPoints)
+  const salesPoints = useSelector((state) => state.salesPoints.list)
   const dispatch = useDispatch()
 
   // Fonction pour récupérer les utilisateurs depuis l'API

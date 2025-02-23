@@ -1,10 +1,6 @@
 import Joi from "joi"
 
 export const userSchema = Joi.object({
-  // firebaseUid: Joi.string().required().messages({
-  //   "any.required": "L'UID Firebase est obligatoire.",
-  // }),
-
   lastname: Joi.string().min(2).max(100).trim().required().messages({
     "string.min": "Le nom doit contenir au moins 2 caractères.",
     "string.max": "Le nom ne doit pas dépasser 100 caractères.",
@@ -33,20 +29,44 @@ export const userSchema = Joi.object({
     "any.required": "Le mot de passe est obligatoire.",
   }),
 
-  role_id: Joi.string()
-    .regex(/^[0-9a-fA-F]{24}$/)
-    .optional()
+  role: Joi.object({
+    _id: Joi.string()
+      .regex(/^[0-9a-fA-F]{24}$/) // 🔹 Valide un ObjectId MongoDB
+      .required()
+      .messages({
+        "string.pattern.base":
+          "L'ID du rôle doit être un ObjectId MongoDB valide.",
+        "any.required": "L'ID du rôle est obligatoire.",
+      }),
+    name: Joi.string()
+      .valid("Gestionnaire", "admin", "Logisticien", "Acheteur")
+      .required()
+      .messages({
+        "any.only":
+          "Le rôle doit être 'Gestionnaire', 'Acheteur', 'Logisticien' ou 'Admin'.",
+        "any.required": "Le rôle est obligatoire.",
+      }),
+  })
+    .required()
     .messages({
-      "string.pattern.base":
-        "L'ID du rôle doit être un ObjectId MongoDB valide.",
-      "any.required": "Le rôle est obligatoire.",
+      "any.required": "Le rôle est obligatoire et doit être un objet valide.",
     }),
 
-  sale_point_id: Joi.string()
-    .regex(/^[0-9a-fA-F]{24}$/)
-    .optional()
-    .messages({
-      "string.pattern.base":
-        "L'ID du point de vente doit être un ObjectId MongoDB valide.",
+  sales_point: Joi.object({
+    _id: Joi.string()
+      .regex(/^[0-9a-fA-F]{24}$/)
+      .required()
+      .messages({
+        "string.pattern.base":
+          "L'ID du point de vente doit être un ObjectId MongoDB valide.",
+        "any.required": "L'ID du point de vente est obligatoire.",
+      }),
+    name: Joi.string().min(2).max(255).trim().messages({
+      "string.min":
+        "Le nom du point de vente doit contenir au moins 2 caractères.",
+      "string.max":
+        "Le nom du point de vente ne doit pas dépasser 255 caractères.",
+      "any.required": "Le nom du point de vente est obligatoire.",
     }),
+  }),
 })

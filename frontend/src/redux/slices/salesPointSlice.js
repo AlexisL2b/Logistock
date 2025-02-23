@@ -21,7 +21,7 @@ export const fetchSalesPoints = createAsyncThunk(
 const salesPointSlice = createSlice({
   name: "salesPoints",
   initialState: {
-    salesPoints: [],
+    list: [],
     status: "idle",
     error: null,
   },
@@ -33,7 +33,7 @@ const salesPointSlice = createSlice({
       })
       .addCase(fetchSalesPoints.fulfilled, (state, action) => {
         state.status = "succeeded"
-        state.salesPoints = action.payload
+        state.list = action.payload
       })
       .addCase(fetchSalesPoints.rejected, (state, action) => {
         state.status = "failed"

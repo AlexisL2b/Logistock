@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react"
+import React, { useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import {
   TextField,
@@ -8,14 +8,19 @@ import {
   Snackbar,
   Alert,
   FormHelperText,
+  Typography,
 } from "@mui/material"
-import axiosInstance from "../../../axiosConfig"
-import CustomSelect from "../../reusable-ui/CustomSelect"
+import { useDispatch, useSelector } from "react-redux"
+import { addUser } from "../../../redux/slices/userSlice" // 🔥 Redux
+import CustomSelect from "../selects/CustomSelect"
 
 const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
-  const [salesPoints, setSalesPoints] = useState([])
-  const [roles, setRoles] = useState([])
-  const [selectedRole, setSelectedRole] = useState("") // Stocke le rôle sélectionné
+  const dispatch = useDispatch()
+
+  const salesPoints = useSelector((state) => state.salesPoints.list)
+  const roles = useSelector((state) => state.roles.list)
+
+  const [selectedRole, setSelectedRole] = useState(admin ? "" : "Acheteur")
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -30,48 +35,45 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
   } = useForm()
 
   const password = watch("password")
+  const confirmPassword = watch("confirmPassword")
 
-  useEffect(() => {
-    const fetchSalesPoints = async () => {
-      try {
-        const response = await axiosInstance.get("/sales_points")
-        setSalesPoints(response.data || [])
-      } catch (error) {
-        console.error(
-          "Erreur lors de la récupération des Points de ventes :",
-          error
-        )
-      }
-    }
-
-    const fetchRoles = async () => {
-      try {
-        const response = await axiosInstance.get("/roles")
-        setRoles(response.data || [])
-      } catch (error) {
-        console.error("Erreur lors de la récupération des Rôles :", error)
-      }
-    }
-
-    fetchSalesPoints()
-    fetchRoles()
-  }, [])
-
+  // ✅ Soumission du formulaire via Redux
   const onSubmit = async (data) => {
     try {
       const { confirmPassword, ...userData } = data
-      await axiosInstance.post("http://localhost:5000/api/users", userData)
+      console.log(userData)
+      const roleToAdd = roles.find((role) => role._id === userData.role)
+      console.log("roleToAdd", roleToAdd)
+      const salePointToAdd = userData.sale_point_id
+        ? salesPoints.find(
+            (salesPoint) => salesPoint._id === userData.sale_point_id
+          )
+        : {}
+      // 🔹 Extraction sécurisée des propriétés `_id` et `name`
+      const salePointData = salePointToAdd
+        ? { _id: salePointToAdd._id, name: salePointToAdd.name }
+        : null
+      const { sale_point_id, ...cleanUserData } = userData
+      const updatedUserData = {
+        ...cleanUserData,
+        role: roleToAdd,
+        sales_point: salePointData,
+      }
+
+      await dispatch(addUser(updatedUserData))
       setSnackbar({
         open: true,
-        message: "Inscription réussie !",
+        message: "Utilisateur créé avec succès !",
         severity: "success",
       })
+
       onUserAdded()
-      onClose()
+      // onClose()
     } catch (error) {
+      console.log(error)
       setSnackbar({
         open: true,
-        message: error.response?.data?.message || "Une erreur est survenue.",
+        message: error.message || "Une erreur est survenue.",
         severity: "error",
       })
     }
@@ -194,10 +196,13 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
                   variant="outlined"
                   fullWidth
                   error={!!errors.password}
-                  helperText={errors.password?.message}
                 />
               )}
             />
+            <FormHelperText>
+              ✅ Min. 12 caractères | ✅ 1 majuscule | ✅ 1 minuscule | ✅ 1
+              chiffre | ✅ 1 caractère spécial (!@#$%^&*)
+            </FormHelperText>
           </Grid>
 
           {/* Confirmation du mot de passe */}
@@ -226,22 +231,19 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
             />
           </Grid>
 
-          {/* Sélecteur de rôle (admin uniquement) */}
+          {/* Sélecteur de rôle (uniquement pour l'admin) */}
           {admin && (
             <Grid item xs={12}>
               <Controller
-                name="role_id"
+                name="role"
                 control={control}
                 defaultValue=""
                 rules={{ required: "Veuillez sélectionner un rôle" }}
                 render={({ field }) => (
                   <>
                     <CustomSelect
-                      inputLabelId="roles-label"
                       inputLabel="Rôle"
-                      selectId="roles-select"
                       selectLabel="Rôle"
-                      defaultMenuItemLabel="Sélectionner un rôle"
                       menuItems={roles}
                       selectedValue={field.value}
                       onChange={(e) => {
@@ -251,8 +253,8 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
                         )
                       }}
                     />
-                    <FormHelperText error={!!errors.role_id}>
-                      {errors.role_id?.message}
+                    <FormHelperText error={!!errors.role}>
+                      {errors.role?.message}
                     </FormHelperText>
                   </>
                 )}
@@ -271,14 +273,11 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
                 render={({ field }) => (
                   <>
                     <CustomSelect
-                      inputLabelId="sales-point-label"
                       inputLabel="Point de Vente"
-                      selectId="sales-point-select"
                       selectLabel="Point de Vente"
-                      defaultMenuItemLabel="Sélectionner un point de vente"
                       menuItems={salesPoints}
                       selectedValue={field.value}
-                      onChange={(e) => field.onChange(e)}
+                      onChange={field.onChange}
                     />
                     <FormHelperText error={!!errors.sale_point_id}>
                       {errors.sale_point_id?.message}

@@ -8,7 +8,7 @@ import {
   TextField,
   FormHelperText,
 } from "@mui/material"
-import CustomSelect from "./CustomSelect"
+import CustomSelect from "../selects/CustomSelect"
 
 const style = {
   position: "absolute",

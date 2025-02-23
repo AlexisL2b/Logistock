@@ -10,6 +10,7 @@ const CustomSelect = ({
   menuItems,
   selectedValue,
   onChange,
+  valueKey = "_id", // ✅ Ajout d'une nouvelle prop avec "_id" comme valeur par défaut
 }) => {
   return (
     <FormControl fullWidth>
@@ -23,7 +24,7 @@ const CustomSelect = ({
       >
         <MenuItem value="">{defaultMenuItemLabel}</MenuItem>
         {menuItems.map((item) => (
-          <MenuItem key={item._id} value={item._id}>
+          <MenuItem key={item._id} value={item[valueKey]}>
             {item.name}
           </MenuItem>
         ))}
@@ -46,6 +47,7 @@ CustomSelect.propTypes = {
   ).isRequired,
   selectedValue: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  valueKey: PropTypes.string, // ✅ Permet de spécifier une autre clé pour la value
 }
 
 export default CustomSelect

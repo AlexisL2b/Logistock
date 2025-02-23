@@ -26,8 +26,8 @@ import {
   Snackbar,
 } from "@mui/material"
 
-import BasicModal from "./BasicModal" // Import du composant modal
-import axiosInstance from "../../axiosConfig"
+import BasicModal from "../modals/BasicModal" // Import du composant modal
+import axiosInstance from "../../../axiosConfig"
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1

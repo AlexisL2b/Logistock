@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Box, TextField, Typography } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
-import EnhancedTable from "../../../../../reusable-ui/EnhancedTable"
+import EnhancedTable from "../../../../../reusable-ui/tables/EnhancedTable"
 
 export default function Transporters() {
   const [transporters, setTransporters] = useState([])

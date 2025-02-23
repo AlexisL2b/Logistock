@@ -1,6 +1,6 @@
 import { Box, TextField, Typography } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
-import EnhancedTable from "../../../../../reusable-ui/EnhancedTable"
+import EnhancedTable from "../../../../../reusable-ui/tables/EnhancedTable"
 import { useEffect, useState } from "react"
 
 export default function SalesPoints() {

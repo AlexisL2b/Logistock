@@ -16,9 +16,9 @@ import Switch from "@mui/material/Switch"
 import EditIcon from "@mui/icons-material/Edit"
 import { Alert, Button, IconButton, Snackbar } from "@mui/material"
 
-import ModalDependancies from "./ModalDependancies" // Import du composant modal
+import ModalDependancies from "../modals/ModalDependancies" // Import du composant modal
 import { useEffect } from "react"
-import axiosInstance from "../../axiosConfig"
+import axiosInstance from "../../../axiosConfig"
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1

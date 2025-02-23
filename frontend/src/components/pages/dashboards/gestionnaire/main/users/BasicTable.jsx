@@ -22,7 +22,7 @@ import {
   Typography,
 } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
-import SignUpForm from "../../../../signupPage/SignUpForm"
+import SignUpForm from "../../../../../reusable-ui/usersforms/SignUpForm"
 
 export default function BasicTable({
   data,

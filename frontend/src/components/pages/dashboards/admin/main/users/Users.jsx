@@ -3,48 +3,46 @@ import { Box, TextField } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
 import BasicTable from "./BasicTableAdmin"
 import BasicTableAdmin from "./BasicTableAdmin"
+import { useDispatch, useSelector } from "react-redux"
+import { fetchUsers } from "../../../../../../redux/slices/userSlice"
 
 export default function Users() {
-  const [users, setUsers] = useState([])
+  // const [users, setUsers] = useState([])
   const [usersFiltered, setUsersFiltered] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
+  const users = useSelector((state) => state.users.list)
+  const dispatch = useDispatch()
+  useEffect(() => {
+    dispatch(fetchUsers()) // Charger les stocks une seule fois
+  }, [dispatch])
+  console.log("users", users)
 
   // Fonction pour récupérer les utilisateurs depuis l'API
-  const fetchUsers = async () => {
-    try {
-      const response = await axiosInstance.get("/users")
-      console.log("Utilisateurs reçus :", response.data)
-
-      const usersData = response.data || [] // Sécurisation des données
-
-      setUsers(usersData) // Mise à jour du state
-    } catch (error) {
-      console.error("Erreur lors de la récupération des utilisateurs :", error)
-    }
-  }
 
   // Mettre à jour `usersFiltered` à chaque changement de `users`
   useEffect(() => {
-    const userTab = users.map((user) => ({
-      _id: user._id,
-      nom: user.lastname,
-      prenom: user.firstname,
-      adresse: user.address,
-      email: user.email,
-      "point de vente": user.sale_point_id?.name || "N/A",
-      rôle: user.role_id?.name || "N/A",
-    }))
-    setUsersFiltered(userTab) // Mise à jour propre du state
+    if (users?.length) {
+      const userTab = users.map((user) => ({
+        _id: user._id,
+        nom: user.lastname,
+        prenom: user.firstname,
+        adresse: user.address,
+        email: user.email,
+        "point de vente": user.sales_point?.name || "N/A", // ✅ Correction du champ sales_point
+        rôle: user.role?.name || "N/A", // ✅ Suppression de `role_id`
+      }))
+      setUsersFiltered(userTab)
+    }
   }, [users]) // 🔥 users est dans les dépendances, donc mise à jour automatique
 
   // Chargement initial des utilisateurs
   useEffect(() => {
-    fetchUsers()
+    dispatch(fetchUsers())
   }, [])
 
   // Fonction appelée pour recharger les données après une modification
   const handleDataChange = () => {
-    fetchUsers()
+    dispatch(fetchUsers())
   }
 
   // Mapping des en-têtes du tableau
@@ -55,8 +53,9 @@ export default function Users() {
     adresse: "Adresse",
     email: "Email",
     point_vente_nom: "Point de vente",
+    role: "Role",
   }
-
+  console.log(usersFiltered)
   return (
     <Box>
       {/* 🔍 Champ de recherche multi-critères */}

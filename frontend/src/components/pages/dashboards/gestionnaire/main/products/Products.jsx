@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { Box, TextField, Typography, Button } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
-import EnhancedTableDependancies from "../../../../../reusable-ui/EnhancedTableDependancies"
-import CustomSelect from "../../../../../reusable-ui/CustomSelect"
+import EnhancedTableDependancies from "../../../../../reusable-ui/tables/EnhancedTableDependancies"
+import CustomSelect from "../../../../../reusable-ui/selects/CustomSelect"
 
 export default function Products() {
   const [products, setProducts] = useState([])

@@ -11,7 +11,7 @@ import {
 } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
 import ProductCard from "./ProductCard"
-import CustomSelect from "../../../../../reusable-ui/CustomSelect"
+import CustomSelect from "../../../../../reusable-ui/selects/CustomSelect"
 
 export default function Shop() {
   const dispatch = useDispatch()

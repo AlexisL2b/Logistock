@@ -26,7 +26,7 @@ import { fetchOrdersWithDetails } from "../../../../../../../../redux/slices/ord
 import { fetchTransporters } from "../../../../../../../../redux/slices/transporterSlice"
 import _ from "lodash"
 import axiosInstance from "../../../../../../../../axiosConfig"
-import CustomSelect from "../../../../../../../reusable-ui/CustomSelect"
+import CustomSelect from "../../../../../../../reusable-ui/selects/CustomSelect"
 
 function ConfirmedRow({ row }) {
   const [open, setOpen] = useState(false)

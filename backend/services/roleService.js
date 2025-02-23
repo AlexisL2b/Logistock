@@ -1,4 +1,5 @@
 import RoleDAO from "../dao/roleDAO.js"
+import User from "../models/userModel.js"
 
 class RoleService {
   async getAllRoles() {
@@ -21,10 +22,18 @@ class RoleService {
   }
 
   async updateRole(id, roleData) {
+    // 1️⃣ Mettre à jour le rôle dans la collection `roles`
     const updatedRole = await RoleDAO.update(id, roleData)
     if (!updatedRole) {
       throw new Error("Rôle introuvable")
     }
+
+    // 2️⃣ Mettre à jour tous les utilisateurs qui ont ce rôle
+    await User.updateMany(
+      { "role._id": id }, // Trouver les utilisateurs ayant ce rôle
+      { $set: { "role.name": updatedRole.name } } // Modifier le nom du rôle
+    )
+
     return updatedRole
   }
 
@@ -33,6 +42,13 @@ class RoleService {
     if (!deletedRole) {
       throw new Error("Rôle introuvable")
     }
+
+    // Optionnel : Supprimer aussi le rôle chez les utilisateurs
+    await User.updateMany(
+      { "role._id": id },
+      { $unset: { role: "" } } // Supprime le champ `role`
+    )
+
     return deletedRole
   }
 }
