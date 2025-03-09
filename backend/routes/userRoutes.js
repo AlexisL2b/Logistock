@@ -43,6 +43,6 @@ router.put(
 )
 
 // 🔹 Supprimer un utilisateur (seuls les admins peuvent le faire)
-router.delete("/:id", protect, checkRole("admin"), deleteUser)
+router.delete("/:id", protect, checkRole("admin", "Gestionnaire"), deleteUser)
 
 export default router

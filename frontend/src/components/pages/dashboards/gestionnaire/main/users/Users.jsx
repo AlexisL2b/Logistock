@@ -14,13 +14,18 @@ import BasicTable from "./BasicTable"
 import { useDispatch, useSelector } from "react-redux"
 import { fetchSalesPoints } from "../../../../../../redux/slices/salesPointSlice"
 import CustomSelect from "../../../../../reusable-ui/selects/CustomSelect"
+import {
+  deleteUserById,
+  fetchBuyers,
+} from "../../../../../../redux/slices/userSlice"
 
 export default function Transporters() {
   const [users, setUsers] = useState([])
   const [usersFiltered, setUsersFiltered] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedPointVente, setSelectedPointVente] = useState("")
-
+  const users2 = useSelector((state) => state)
+  console.log("users2 depuis Users.jsx", users2)
   const salesPoints = useSelector((state) => state.salesPoints.list)
   const dispatch = useDispatch()
 
@@ -42,11 +47,12 @@ export default function Transporters() {
   useEffect(() => {
     let filteredUsers = users.map((user) => ({
       _id: user._id,
-      nom: user.name,
+      nom: user.lastname,
       prenom: user.firstname,
       adresse: user.address,
       email: user.email,
-      point_vente_nom: user.sale_point_id?.name || "N/A",
+      point_vente_nom: user.sales_point?.name || "N/A",
+      role: user.role?.name || "N/A",
     }))
 
     if (selectedPointVente) {
@@ -71,10 +77,11 @@ export default function Transporters() {
   useEffect(() => {
     fetchUsers()
     dispatch(fetchSalesPoints())
+    dispatch(fetchBuyers())
   }, [])
 
   const handleDataChange = () => {
-    fetchUsers()
+    dispatch(fetchUsers())
   }
 
   const headerMapping = {
@@ -154,7 +161,7 @@ export default function Transporters() {
         coll={"users"}
         onDataChange={handleDataChange}
         headerMapping={headerMapping}
-        trigger={users.length} // 🔥 Change la prop pour forcer un rerender
+        trigger={users.length}
       />
     </Box>
   )

@@ -7,57 +7,7 @@ class AuthService {
   /**
    * 🔹 Génération d'un Token JWT
    */
-  async generateToken(user) {
-    return jwt.sign(
-      { id: user._id, email: user.email, role: user.role_id.name },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    )
-  }
 
-  /**
-   * 🔹 Création d'un utilisateur avec un rôle lié par ObjectId
-   */
-  // async createUser(userData, currentUserRole) {
-  //   try {
-  //     const { email, password, prenom, nom, adresse, salesPoint, role_id } =
-  //       userData
-
-  //     // Vérifier si l'utilisateur existe déjà
-  //     const userExists = await User.findOne({ email })
-  //     if (userExists) {
-  //       throw new Error("L'utilisateur existe déjà !")
-  //     }
-
-  //     // 🔹 Vérifier si le rôle existe en base
-  //     const assignedRole = await Role.findById(role_id)
-  //     if (!assignedRole) {
-  //       throw new Error("Le rôle spécifié n'existe pas !")
-  //     }
-
-  //     // 🔹 Hashage du mot de passe
-
-  //     // 🔹 Enregistrement de l'utilisateur en MongoDB
-  //     const newUser = new User({
-  //       email,
-  //       password: hashedPassword,
-  //       role_id: assignedRole._id,
-  //       prenom,
-  //       nom,
-  //       adresse,
-  //       ...(salesPoint && { point_vente_id: salesPoint }),
-  //     })
-
-  //     await newUser.save()
-  //     return { message: "Utilisateur créé avec succès !" }
-  //   } catch (error) {
-  //     throw new Error(error.message)
-  //   }
-  // }
-
-  /**
-   * 🔹 Connexion utilisateur et récupération du rôle
-   */
   async loginUser(email, password, res) {
     // 🔥 Ajouter `res` comme paramètre
     try {

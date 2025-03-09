@@ -11,7 +11,6 @@ import useMediaQuery from "@mui/material/useMediaQuery"
 export default function Menu({ links, onLinkClick }) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
-
   return (
     <List
       sx={{

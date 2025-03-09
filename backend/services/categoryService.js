@@ -32,7 +32,7 @@ class CategoryService {
 
       return await CategoryDAO.create(categoryData)
     } else {
-      throw new Error("Cette catégorie existe déjàzzzz!")
+      throw new Error("Cette catégorie existe déjà!")
     }
   }
 

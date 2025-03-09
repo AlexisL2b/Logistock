@@ -7,7 +7,6 @@ import { useDispatch, useSelector } from "react-redux"
 import { fetchUsers } from "../../../../../../redux/slices/userSlice"
 
 export default function Users() {
-  // const [users, setUsers] = useState([])
   const [usersFiltered, setUsersFiltered] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
   const users = useSelector((state) => state.users.list)

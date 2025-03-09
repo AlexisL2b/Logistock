@@ -76,13 +76,10 @@ function BasicTable({
   const handleCloseDeleteDialog = () => setOpenDeleteDialog(false)
   const handleOpenAddDialog = () => setOpenAddDialog(true)
   const handleCloseAddDialog = () => setOpenAddDialog(false)
-  const handleOpenUpdateDialog = () => setOpenUpdateDialog(true)
   const handleCloseUpdateDialog = () => {
     setOpenUpdateDialog(false)
   }
 
-  const handleOpen = () => setOpen(true)
-  const handleClose = () => setOpen(false)
   const handleConfirm = () => {
     handleDelete()
   }
@@ -96,7 +93,7 @@ function BasicTable({
     if (onDataChange) {
       onDataChange()
     }
-    handleCloseUpdateDialog()
+    setOpenUpdateDialog(false)
   }
 
   const handleOpenEdit = (user) => {
@@ -153,20 +150,28 @@ function BasicTable({
   // ✅ Ajout d'un utilisateur via Redux
   const handleAddUser = async (newUserData) => {
     try {
-      // await dispatch(addUser(newUserData)) // 🔥 Ajout via Redux
+      setSnackbar({
+        open: true,
+        message: "Utilisateur ajouté avec succès !",
+        severity: "success",
+      })
+
+      // handleCloseAddDialog()
+
       if (onDataChange) {
         onDataChange()
       }
-      setMessage("Utilisateur ajouté avec succès !")
-      setSeverity("success")
-      setShowAlert(true)
-      handleCloseAddDialog()
     } catch (error) {
-      setMessage(error.message || "Erreur lors de l'ajout.")
-      setSeverity("error")
-      setShowAlert(true)
+      console.error("Erreur lors de l'ajout de l'utilisateuzaeeazazer :", error)
+
+      setSnackbar({
+        open: true,
+        message: error.message || "Erreur lors de l'ajout.",
+        severity: "error",
+      })
     }
   }
+
   // ✅ Suppression via Redux
   const handleDelete = async () => {
     try {
@@ -176,14 +181,14 @@ function BasicTable({
       }
 
       for (const id of selected) {
-        await dispatch(deleteUserById(id)) // 🔥 Suppression via Redux
+        dispatch(deleteUserById(id)) // 🔥 Suppression via Redux
       }
 
       setMessage("Suppression réussie !")
       setSeverity("success")
       setShowAlert(true)
       setSelected([])
-
+      setOpenDeleteDialog(false)
       if (onDataChange) {
         onDataChange()
       }
@@ -325,19 +330,23 @@ function BasicTable({
           <Button onClick={handleCloseAddDialog}>Annuler</Button>
         </DialogActions>
       </Dialog>
-      <Dialog open={openUpdateDialog} onClose={handleCloseUpdateDialog}>
+      <Dialog
+        open={openUpdateDialog}
+        onClose={() => setOpenUpdateDialog(false)}
+      >
         <DialogTitle>Modifier un utilisateur</DialogTitle>
         <DialogContent>
           {/* {selectedUser && ( */}
           <EditForm
+            admin={true}
             row={selectedUser}
-            onClose={handleClose}
+            // onClose={handleClose}
             onUserUpdated={handleUserUpdated}
           />
           {/* )} */}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseUpdateDialog}>Annuler</Button>
+          <Button onClick={() => setOpenUpdateDialog(false)}>Annuler</Button>
         </DialogActions>
       </Dialog>
       <ConfirmationDialog

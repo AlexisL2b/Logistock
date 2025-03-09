@@ -46,6 +46,7 @@ export const getAllUsers = async (req, res) => {
 export const getBuyers = async (req, res) => {
   try {
     const buyers = await UserService.getBuyers()
+    console.log("buyers depuis userController.js", buyers)
     res.status(200).json({ buyers })
   } catch (error) {
     console.error(
@@ -61,33 +62,51 @@ export const getBuyers = async (req, res) => {
 /**
  * 🔹 Créer un utilisateur
  */
+// export const createUser = async (req, res) => {
+//   try {
+//     console.log(
+//       "Données reçues par le backend :",
+//       JSON.stringify(req.body, null, 2)
+//     )
+
+//     // ✅ Convertir `_id` en `ObjectId` pour Mongoose
+//     const userData = {
+//       ...req.body,
+//       role: {
+//         _id: new mongoose.Types.ObjectId(req.body.role._id), // 🔥 Conversion ici
+//         name: req.body.role.name,
+//       },
+//       sales_point: {
+//         _id: new mongoose.Types.ObjectId(req.body.sales_point._id), // 🔥 Conversion ici
+//         name: req.body.sales_point.name,
+//       },
+//     }
+
+//     const user = new User(userData)
+//     await user.save()
+
+//     console.log("✅ Utilisateur sauvegardé :", JSON.stringify(user, null, 2))
+//     res.status(201).json({ message: "Utilisateur créé avec succès", user })
+//   } catch (error) {
+//     console.error("❌ Erreur lors de la création de l'utilisateur :", error)
+//     res.status(400).json({ message: error.message })
+//   }
+// }
 export const createUser = async (req, res) => {
   try {
     console.log(
-      "Données reçues par le backend :",
+      "❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌Données reçues par le backend :",
       JSON.stringify(req.body, null, 2)
     )
 
-    // ✅ Convertir `_id` en `ObjectId` pour Mongoose
-    const userData = {
-      ...req.body,
-      role: {
-        _id: new mongoose.Types.ObjectId(req.body.role._id), // 🔥 Conversion ici
-        name: req.body.role.name,
-      },
-      sales_point: {
-        _id: new mongoose.Types.ObjectId(req.body.sales_point._id), // 🔥 Conversion ici
-        name: req.body.sales_point.name,
-      },
-    }
+    const user = await UserService.createUser(req.body)
 
-    const user = new User(userData)
-    await user.save()
-
-    console.log("✅ Utilisateur sauvegardé :", JSON.stringify(user, null, 2))
     res.status(201).json({ message: "Utilisateur créé avec succès", user })
   } catch (error) {
-    console.error("❌ Erreur lors de la création de l'utilisateur :", error)
+    console.error(
+      "❌ Erreur lors de la création de l'utilisateur :",
+      error.message
+    )
     res.status(400).json({ message: error.message })
   }
 }
@@ -97,9 +116,9 @@ export const createUser = async (req, res) => {
  */
 export const updateUser = async (req, res) => {
   try {
-    console.log("🔹 Mise à jour de l'utilisateur avec ID:", req.params.id)
+    console.log("req.body depuis userController.js", req.body)
     const updatedUser = await UserService.updateUser(req.params.id, req.body)
-
+    console.log("updatedUser depuis userController.js", updatedUser)
     if (!updatedUser) {
       return res.status(404).json({ message: "Utilisateur introuvable." })
     }

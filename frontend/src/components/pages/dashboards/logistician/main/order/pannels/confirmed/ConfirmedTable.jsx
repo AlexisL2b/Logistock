@@ -22,11 +22,15 @@ import {
 } from "@mui/material"
 import { KeyboardArrowDown, KeyboardArrowUp, Close } from "@mui/icons-material"
 import { useSelector, useDispatch } from "react-redux"
-import { fetchOrdersWithDetails } from "../../../../../../../../redux/slices/orderSlice"
+import {
+  fetchOrders,
+  modifyOrder,
+} from "../../../../../../../../redux/slices/orderSlice"
 import { fetchTransporters } from "../../../../../../../../redux/slices/transporterSlice"
 import _ from "lodash"
 import axiosInstance from "../../../../../../../../axiosConfig"
 import CustomSelect from "../../../../../../../reusable-ui/selects/CustomSelect"
+import { createOrderShipment } from "../../../../../../../../redux/slices/orderShipmentSlice"
 
 function ConfirmedRow({ row }) {
   const [open, setOpen] = useState(false)
@@ -43,9 +47,9 @@ function ConfirmedRow({ row }) {
   }
   const dispatch = useDispatch()
   const transporters = useSelector((state) => state.transporters.list)
-
+  // console.log("transporters depuis ConfirmedTable.jsx", transporters)
   useEffect(() => {
-    dispatch(fetchOrdersWithDetails())
+    dispatch(fetchOrders())
     dispatch(fetchTransporters())
   }, [dispatch])
 
@@ -54,33 +58,40 @@ function ConfirmedRow({ row }) {
       if (!selectedTransporter) return
       setIsLoading(true)
       setErrorMessage("")
+      const responseOrder = await dispatch(
+        modifyOrder({
+          orderId: row._id,
+          orderData: {
+            statut: "expédiée",
+          },
+        })
+      )
 
-      await axiosInstance.put(`http://localhost:5000/api/orders/${row._id}`, {
-        statut: "expédiée",
-        transporteur_id: selectedTransporter,
-      })
-      console.log(row._id)
+      const responseShipment = await dispatch(
+        createOrderShipment({
+          order_id: row._id,
+          transporter_id: selectedTransporter,
 
-      await axiosInstance.post(`http://localhost:5000/api/order_shipments`, {
-        order_id: row._id,
-        transporter_id: selectedTransporter,
-      })
+          date_shipment: new Date(),
+        })
+      )
 
-      dispatch(fetchOrdersWithDetails())
+      dispatch(fetchOrders())
       setModalOpen(false)
     } catch (error) {
       setErrorMessage(
         error.response?.data?.message || "Erreur lors de l'expédition"
       )
+      console.error(error)
     } finally {
       setIsLoading(false)
     }
   }
-  console.log(transporters)
+  // console.log(transporters)
   return (
     <>
       {/* Ligne principale */}
-      <TableRow>
+      <TableRow sx={{ margin: 0, paddingTop: 0 }}>
         <TableCell>
           <IconButton
             aria-label="expand row"
@@ -91,7 +102,8 @@ function ConfirmedRow({ row }) {
           </IconButton>
         </TableCell>
         <TableCell>{row._id}</TableCell>
-        <TableCell>{new Date(row.date_order).toLocaleString()}</TableCell>
+        <TableCell>{new Date(row.orderedAt).toLocaleString()}</TableCell>
+        <TableCell>{new Date(row.confirmedAt).toLocaleString()}</TableCell>
         <TableCell
           sx={{
             color: color[row.statut] || "black",
@@ -104,12 +116,22 @@ function ConfirmedRow({ row }) {
 
       {/* Volet déroulant pour les détails */}
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box margin={2}>
               <Typography variant="h6" gutterBottom>
                 Détails des produits
               </Typography>
+              <Typography variant="body1" gutterBottom>
+                {row.buyer.firstname}
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                {row.buyer.lastname}
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                {row.buyer.address}
+              </Typography>
+
               <Table size="small" aria-label="details">
                 <TableHead>
                   <TableRow>
@@ -121,7 +143,7 @@ function ConfirmedRow({ row }) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.produitDetails.map((product) => (
+                  {row.details.map((product) => (
                     <TableRow key={product._id}>
                       <TableCell>{product.name}</TableCell>
                       <TableCell>{product.reference}</TableCell>
@@ -130,6 +152,35 @@ function ConfirmedRow({ row }) {
                       <TableCell>{product.quantity * product.price}</TableCell>
                     </TableRow>
                   ))}
+                  <TableRow>
+                    <TableCell
+                      align="right"
+                      colSpan={4}
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "1.1rem",
+                        paddingTop: "20px",
+                        paddingBottom: "10px",
+                        borderTop: "2px solid #ddd",
+                        backgroundColor: "#f5f5f5", // Fond léger pour différencier
+                      }}
+                    >
+                      Total de la commande :
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "1.2rem",
+                        paddingTop: "20px",
+                        paddingBottom: "10px",
+                        borderTop: "2px solid #ddd",
+                        backgroundColor: "#f5f5f5",
+                        color: "#d32f2f", // Couleur rouge pour mettre en valeur
+                      }}
+                    >
+                      {row.totalAmount}€
+                    </TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
 
@@ -281,6 +332,21 @@ export default function ConfirmedTable({ data }) {
               style={{ cursor: "pointer", fontWeight: "bold" }}
             >
               Date de Commande{" "}
+              {sortConfig.key === "date_order" && (
+                <IconButton size="small">
+                  {sortConfig.direction === "asc" ? (
+                    <KeyboardArrowUp />
+                  ) : (
+                    <KeyboardArrowDown />
+                  )}
+                </IconButton>
+              )}
+            </TableCell>
+            <TableCell
+              onClick={() => handleSort("date_order")}
+              style={{ cursor: "pointer", fontWeight: "bold" }}
+            >
+              Date de Confirmation{" "}
               {sortConfig.key === "date_order" && (
                 <IconButton size="small">
                   {sortConfig.direction === "asc" ? (

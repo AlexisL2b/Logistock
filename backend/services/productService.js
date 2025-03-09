@@ -1,34 +1,71 @@
 import ProductDAO from "../dao/productDAO.js"
-import stockDAO from "../dao/stockDAO.js"
 import StockDAO from "../dao/stockDAO.js"
-import stockLogDAO from "../dao/stockLogDAO.js"
+import StockLogDAO from "../dao/stockLogDAO.js"
+import sanitize from "mongo-sanitize" // 🔹 Évite les injections NoSQL
+import validator from "validator" // 🔹 Vérifie et nettoie les entrées
 
 class ProductService {
-  // ✅ Récupérer un produit avec gestion d'erreur
+  // ✅ Récupérer tous les produits
   async getAllProducts() {
-    // console.log("zzzz", ProductDAO.findAll())
     return await ProductDAO.findAll()
   }
 
+  // ✅ Récupérer un produit par ID avec sanitization
   async getProductById(id) {
-    const product = await ProductDAO.findById(id)
+    const sanitizedId = sanitize(id)
+    const product = await ProductDAO.findById(sanitizedId)
     if (!product) {
       throw new Error("Produit introuvable")
     }
     return product
   }
-  // ✅ Créer un produit avec validation
+
+  // ✅ Créer un produit avec sanitization et validation
   async createProduct(productData) {
     try {
-      console.log("🔵 Début de la création du produit", productData)
+      // 🛡️ Sanitize les entrées utilisateur
+      const sanitizedData = {
+        name: sanitize(productData.name?.trim()),
+        reference: sanitize(productData.reference?.trim()),
+        description: sanitize(productData.description?.trim()),
+        price: sanitize(productData.price),
+        category_id: sanitize(productData.category_id),
+        supplier_id: sanitize(productData.supplier_id),
+        quantity: sanitize(productData.quantity),
+      }
 
-      const { reference, quantity } = productData
-      let product = await ProductDAO.findByReference(reference)
-      console.log(
-        "🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵",
-        product,
-        "🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵🔵"
-      )
+      // 🔍 Validation des champs
+      if (
+        !sanitizedData.name ||
+        !validator.isLength(sanitizedData.name, { min: 3, max: 100 })
+      ) {
+        throw new Error(
+          "Le nom du produit doit contenir entre 3 et 100 caractères."
+        )
+      }
+      if (
+        !sanitizedData.reference ||
+        !validator.isAlphanumeric(sanitizedData.reference)
+      ) {
+        throw new Error("La référence doit être alphanumérique.")
+      }
+      if (
+        !sanitizedData.price ||
+        !validator.isNumeric(String(sanitizedData.price))
+      ) {
+        throw new Error("Le prix doit être un nombre valide.")
+      }
+      if (
+        !sanitizedData.quantity ||
+        !validator.isInt(String(sanitizedData.quantity), { min: 0 })
+      ) {
+        throw new Error("La quantité doit être un nombre entier positif.")
+      }
+
+      console.log("🛡️ Données après sanitization et validation", sanitizedData)
+
+      // 🔍 Vérifier si le produit existe déjà
+      let product = await ProductDAO.findByReference(sanitizedData.reference)
       if (product) {
         console.log("🔄 Produit existant, mise à jour du stock")
         let existingStock = await StockDAO.findByProductId(product._id)
@@ -36,42 +73,43 @@ class ProductService {
           console.log(
             "📈 Stock déjà existant, mise à jour au lieu de créer un nouveau."
           )
-          await StockDAO.incrementStock(existingStock._id, quantity)
+          await StockDAO.incrementStock(
+            existingStock._id,
+            sanitizedData.quantity
+          )
         } else {
           console.log("🆕 Création d'un nouveau stock")
           let stock = await StockDAO.createStock({
             product_id: product._id,
-            quantity,
+            quantity: sanitizedData.quantity,
             statut: "en_stock",
           })
 
-          await stockLogDAO.create({
+          await StockLogDAO.create({
             event: "création",
-            quantity: quantity,
+            quantity: sanitizedData.quantity,
             stock_id: stock._id,
           })
         }
-
-        return { message: "Produit existant, stock créé", data: product }
+        return { message: "Produit existant, stock mis à jour", data: product }
       }
 
-      console.log("🆕 productData", productData)
-      product = await ProductDAO.create(productData)
-      console.log(
-        "//////////////////////////////product//////////////////////////////",
-        product._id
-      )
+      // 🆕 Si le produit n'existe pas, on le crée avec un stock initial
+      console.log("🆕 Création d'un nouveau produit")
+      product = await ProductDAO.create(sanitizedData)
 
       let stock = await StockDAO.createStock({
         product_id: product._id,
-        quantity,
+        quantity: sanitizedData.quantity,
         statut: "en_stock",
       })
-      let stockLog = await stockLogDAO.create({
+
+      await StockLogDAO.create({
         event: "création",
-        quantity: quantity,
+        quantity: sanitizedData.quantity,
         stock_id: stock._id,
       })
+
       return { message: "Produit et stock créés", data: product }
     } catch (error) {
       console.error("❌ Erreur lors de la création du produit :", error)
@@ -80,82 +118,61 @@ class ProductService {
       )
     }
   }
-  // async createProduct(productData) {
-  //   try {
-  //     console.log("🔵 Début de la création du produit", productData)
-  //     const { reference, quantity } = productData
 
-  //     // 🔍 1️⃣ Vérifier si le produit avec cette référence existe déjà
-  //     let product = await ProductDAO.findByReference(reference)
-  //     console.log("🔵 Produit", product)
-
-  //     if (product) {
-  //       console.log("🔄 Produit existant, mise à jour du stock")
-
-  //       // 🔍 2️⃣ Vérifier si un stock existe pour ce produit
-  //       let existingStock = await StockDAO.findByProductId(product._id)
-
-  //       if (existingStock) {
-  //         console.log("📈 Mise à jour du stock existant")
-  //         await StockDAO.incrementStock(existingStock._id, quantity)
-  //         return { message: "Quantité mise à jour", data: product }
-  //       }
-
-  //       console.log("⚠️ Aucun stock trouvé, création d'un nouveau stock")
-  //       await StockDAO.createStock({
-  //         product_id: product._id,
-  //         quantity,
-  //         statut: "en_stock",
-  //       })
-
-  //       return { message: "Produit existant, stock créé", data: product }
-  //     }
-
-  //     // 🆕 3️⃣ Si le produit n'existe pas, on le crée avec un stock initial
-  //     console.log("🆕 Création d'un nouveau produit")
-  //     product = await ProductDAO.create(productData)
-
-  //     await StockDAO.createStock({
-  //       product_id: product._id,
-  //       quantity,
-  //       statut: "en_stock",
-  //     })
-
-  //     return { message: "Produit et stock créés", data: product }
-  //   } catch (error) {
-  //     console.error("❌ Erreur lors de la création du produit :", error)
-  //     throw new Error(
-  //       `Erreur lors de la création du produit : ${error.message}`
-  //     )
-  //   }
-  // }
-
-  // ✅ Mettre à jour un produit avec validation
+  // ✅ Mettre à jour un produit avec sanitization et validation
   async updateProduct(productId, updateData) {
-    const updatedProduct = await ProductDAO.updateProduct(productId, updateData)
+    const sanitizedId = sanitize(productId)
+    const sanitizedUpdateData = {
+      name: sanitize(updateData.name?.trim()),
+      reference: sanitize(updateData.reference?.trim()),
+      description: sanitize(updateData.description?.trim()),
+      price: sanitize(updateData.price),
+      category_id: sanitize(updateData.category_id),
+      supplier_id: sanitize(updateData.supplier_id),
+    }
+
+    if (
+      sanitizedUpdateData.price &&
+      !validator.isNumeric(String(sanitizedUpdateData.price))
+    ) {
+      throw new Error("Le prix doit être un nombre valide.")
+    }
+
+    const updatedProduct = await ProductDAO.updateProduct(
+      sanitizedId,
+      sanitizedUpdateData
+    )
     if (!updatedProduct) {
       throw new Error(
-        `Échec de la mise à jour. Produit introuvable avec l'ID: ${productId}`
+        `Échec de la mise à jour. Produit introuvable avec l'ID: ${sanitizedId}`
       )
     }
     return updatedProduct
   }
 
-  // ✅ Supprimer un produit avec vérification
+  // ✅ Supprimer un produit avec sanitization
   async deleteProduct(productId) {
-    console.log("productId", productId)
-    const stockToDelete = await stockDAO.findByProductId(productId)
+    console.log("🔴 Suppression du produit ID:", productId)
 
-    await stockLogDAO.create({
+    const sanitizedId = sanitize(productId)
+    const stockToDelete = await StockDAO.findByProductId(sanitizedId)
+
+    if (!stockToDelete) {
+      throw new Error("Aucun stock trouvé pour ce produit.")
+    }
+
+    await StockLogDAO.create({
       stock_id: stockToDelete._id,
       quantity: 0,
       event: "suppression",
     })
-    await stockDAO.deleteByProductId(productId)
-    const deletedProduct = await ProductDAO.deleteProduct(productId)
+
+    await StockDAO.deleteByProductId(sanitizedId)
+    const deletedProduct = await ProductDAO.deleteProduct(sanitizedId)
+
     if (!deletedProduct) {
       throw new Error(
-        `Échec de la suppression. Produit introuvable avec l'ID: ${productId}`
+        `Échec de la suppression. Produit introuvable avec l'ID: ${sanitizedId}`
       )
     }
     return { message: "Produit supprimé avec succès", deletedProduct }

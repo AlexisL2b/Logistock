@@ -9,7 +9,7 @@ const orderShipmentSchema = new mongoose.Schema(
     },
     transporter_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Transporter",
+      ref: "Transporters",
       required: true,
     },
     date_shipment: {

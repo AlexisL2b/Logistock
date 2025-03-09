@@ -78,17 +78,6 @@ export default function Shop() {
           gap: "24px",
           rowGap: "70px",
           mt: 2,
-          justifyContent: "start", // Évite l'espace inutile si un seul produit
-          minHeight: "calc(2 * (300px + 70px))", // Taille minimum = 2 lignes
-          maxHeight: "calc(4 * (300px + 70px))", // Limite max avant scroll
-          overflowY: "auto", // Activation du scroll interne
-          padding: "10px",
-          border: "1px solid #ddd", // Bordure légère pour mieux délimiter
-          borderRadius: "8px", // Coins arrondis
-          scrollbarWidth: "none", // Cacher la barre de scroll sur Firefox
-          "&::-webkit-scrollbar": {
-            display: "none", // Cacher la barre de scroll sur Chrome et Safari
-          },
         }}
       >
         {filteredProducts.map((product) => (

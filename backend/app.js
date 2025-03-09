@@ -12,7 +12,6 @@ import orderShipmentRoutes from "./routes/orderShipmentRoutes.js"
 import authRoutes from "./routes/authRoutes.js"
 import stockRoutes from "./routes/stockRoutes.js"
 import roleRoutes from "./routes/roleRoutes.js"
-import admin from "./config/firebase.js"
 
 import express from "express"
 import cors from "cors"

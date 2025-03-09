@@ -8,6 +8,10 @@ import transporterReducer from "./slices/transporterSlice"
 import roleReducer from "./slices/roleSlice"
 import salesPointReducer from "./slices/salesPointSlice"
 import userReducer from "./slices/userSlice"
+import orderDetailsReducer from "./slices/orderDetailsSlice"
+import notificationReducer from "./slices/notificationSlice"
+import stockLogsReducer from "./slices/stockLogSlice"
+import orderShipmentsReducer from "./slices/orderShipmentSlice"
 
 export const store = configureStore({
   reducer: {
@@ -20,5 +24,9 @@ export const store = configureStore({
     roles: roleReducer,
     salesPoints: salesPointReducer,
     users: userReducer,
+    orderDetails: orderDetailsReducer,
+    notification: notificationReducer,
+    stockLogs: stockLogsReducer,
+    orderShipments: orderShipmentsReducer,
   },
 })

@@ -24,10 +24,11 @@ export const getStock = async () => {
   )
   return response.data
 }
-export const decrementStock = async (orderDetails) => {
+export const decrementStocks = async (orderDetails) => {
+  console.log("orderDetails depuis stockApi.js", orderDetails)
   const response = await axiosInstance.post(
     `http://localhost:5000/api/stocks/decrement`,
-    { orderDetails }
+    orderDetails
   )
   return response.data
 }

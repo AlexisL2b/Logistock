@@ -4,7 +4,6 @@ import bcrypt from "bcryptjs"
 const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  // Garde une référence
   role: {
     _id: {
       type: mongoose.Schema.Types.ObjectId,
@@ -12,12 +11,11 @@ const UserSchema = new mongoose.Schema({
       required: true,
     },
     name: { type: String, required: true },
-  }, // Stocke le rôle en texte pour lecture rapide
+  },
   sales_point: {
     _id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "SalesPoint",
-      // required: true,
     },
     name: { type: String },
   },

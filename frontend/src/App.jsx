@@ -21,6 +21,7 @@ import { getFromLocalStorage } from "./utils/localStorage"
 import { fetchUserProfile, setUser } from "./redux/slices/authSlice"
 import { io } from "socket.io-client"
 import StockUpdater from "./components/sockets/StockUpdater"
+import NotificationSnackbar from "./components/error/notificationSnackbar"
 
 function App() {
   const dispatch = useDispatch()
@@ -46,6 +47,7 @@ function App() {
 
   return (
     <>
+      <NotificationSnackbar />
       <StockUpdater />
       <Routes>
         <Route path="/" element={<LoginPage />} />

@@ -11,7 +11,7 @@ const UserDAO = {
   },
 
   async findBuyers() {
-    return await User.find({ role: "Gestionnaire" })
+    return await User.find({ "role.name": "Acheteur" })
   },
 
   async findBySalesPointId(sales_point_id) {
@@ -25,11 +25,6 @@ const UserDAO = {
   async createUser(userData) {
     console.log("🔹 Création d'utilisateur avec les données :", userData)
 
-    // Vérifier que le rôle existe
-    // const role = await Role.findById(userData.role_id)
-    // if (!role) throw new Error("Le rôle spécifié n'existe pas.")
-
-    // Validation de `sales_point`
     if (
       !userData.sales_point ||
       !userData.sales_point._id ||

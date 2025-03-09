@@ -26,14 +26,11 @@ export default function DashboardAdmin() {
   const [activeComponent, setActiveComponent] = useState("dashboard")
   const [openDrawer, setOpenDrawer] = useState(false)
   const dispatch = useDispatch()
-
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down("md"))
-
   const handleLogout = () => {
     dispatch(logoutUser())
   }
-
   const links = [
     {
       path: "dashboard",
@@ -48,11 +45,9 @@ export default function DashboardAdmin() {
       component: <Users />,
     },
   ]
-
   const activeElement = links.find(
     (link) => link.path === activeComponent
   )?.component
-
   return (
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       {/* Drawer (menu latéral caché sur mobile) */}
@@ -88,7 +83,6 @@ export default function DashboardAdmin() {
         </Box>
       </Drawer>
 
-      {/* Menu latéral fixe sur desktop */}
       {!isMobile && (
         <Box
           sx={{

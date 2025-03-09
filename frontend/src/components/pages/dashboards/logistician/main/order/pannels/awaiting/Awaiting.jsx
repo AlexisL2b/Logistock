@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { fetchOrdersWithDetails } from "../../../../../../../../redux/slices/orderSlice"
+import { fetchOrders } from "../../../../../../../../redux/slices/orderSlice"
 import { fetchStocks } from "../../../../../../../../redux/slices/stockSlice"
 import { Box, TextField } from "@mui/material"
 import AwaitingTable from "./AwaitingTable"
@@ -8,16 +8,17 @@ import _ from "lodash" // Import de Lodash
 
 export default function Awaiting() {
   const dispatch = useDispatch()
-  const { orders } = useSelector((state) => state.orders)
+  const orders = useSelector((state) => state.orders.list)
   const { stocks } = useSelector((state) => state.stocks)
   const [searchTerm, setSearchTerm] = useState("")
+  console.log("orders", orders)
 
   // Références pour stocker les versions précédentes des données
   const prevOrdersRef = useRef(orders)
   const prevStocksRef = useRef(stocks)
   // Charger les données au démarrage
   useEffect(() => {
-    dispatch(fetchOrdersWithDetails())
+    dispatch(fetchOrders())
     dispatch(fetchStocks())
   }, [dispatch])
 
@@ -27,7 +28,7 @@ export default function Awaiting() {
       // Comparer les commandes et les stocks avec leur état précédent
       if (!_.isEqual(orders, prevOrdersRef.current)) {
         console.log("🔄 Mise à jour des commandes détectée")
-        dispatch(fetchOrdersWithDetails())
+        dispatch(fetchOrders())
         prevOrdersRef.current = orders // Mettre à jour la référence
       } else {
       }
@@ -48,7 +49,7 @@ export default function Awaiting() {
       order.statut === "en cours" &&
       order._id.toLowerCase().startsWith(searchTerm.toLowerCase())
   )
-  console.log("filteredOrders", filteredOrders)
+  console.log("filteredOrders depuis Awaiting.jsx", filteredOrders)
   // Conditions pour afficher le statut
   return (
     <Box>

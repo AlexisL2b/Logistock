@@ -4,6 +4,9 @@ import axiosInstance from "../../axiosConfig"
 export const getUsers = async () => {
   return await axiosInstance.get("http://localhost:5000/api/users/")
 }
+export const getBuyers = async () => {
+  return await axiosInstance.get("http://localhost:5000/api/users/buyers")
+}
 
 export const updateUser = async (userId, userUpdates) => {
   return await axiosInstance.put(

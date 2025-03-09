@@ -2,7 +2,8 @@ import axios from "axios"
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:5000/api",
-  withCredentials: true, // 🔥 Active l'envoi des cookies automatiquement
+  withCredentials: true,
+  // 🔥 Active l'envoi des cookies automatiquement
 })
 
 axiosInstance.interceptors.request.use(

@@ -20,12 +20,18 @@ import {
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material"
 import { useSelector, useDispatch } from "react-redux"
 import {
+  decrementStock,
   fetchStocks,
-  updateStock,
 } from "../../../../../../../../redux/slices/stockSlice"
-import { fetchOrdersWithDetails } from "../../../../../../../../redux/slices/orderSlice"
+import {
+  fetchOrders,
+  modifyOrder,
+} from "../../../../../../../../redux/slices/orderSlice"
 import _ from "lodash"
 import axiosInstance from "../../../../../../../../axiosConfig"
+import { showNotification } from "../../../../../../../../redux/slices/notificationSlice"
+import { createStockLog } from "../../../../../../../../redux/api/stockLogApi"
+import { createLog } from "../../../../../../../../redux/slices/stockLogSlice"
 
 function Row({ row }) {
   const [open, setOpen] = useState(false)
@@ -40,11 +46,11 @@ function Row({ row }) {
 
   useEffect(() => {
     dispatch(fetchStocks())
-    dispatch(fetchOrdersWithDetails())
+    // dispatch(fetchOrders())
   }, [dispatch])
 
   useEffect(() => {
-    dispatch(fetchOrdersWithDetails())
+    dispatch(fetchOrders())
   }, [dispatch])
 
   const handleCancel = async () => {
@@ -55,7 +61,7 @@ function Row({ row }) {
         statut: "annulée",
       })
 
-      dispatch(fetchOrdersWithDetails())
+      dispatch(fetchOrders())
       setModalOpen(false)
     } catch (error) {
       setErrorMessage(
@@ -65,7 +71,7 @@ function Row({ row }) {
       setIsLoading(false)
     }
   }
-  const hasStockIssue = row.produitDetails.some((product) => {
+  const hasStockIssue = row.details.some((product) => {
     const stockInfo = stocks?.find(
       (stock) => stock.product_id === product.product_id
     )
@@ -78,25 +84,27 @@ function Row({ row }) {
       setIsLoading(true)
       setErrorMessage("")
 
-      const orderDetails = row.produitDetails.map((product) => ({
+      const orderDetails = row.details.map((product) => ({
         product_id: product.product_id,
         quantity: product.quantity,
       }))
 
       console.log("orderDetails", orderDetails)
-      const responseStock = await axiosInstance.post(
-        "http://localhost:5000/api/stocks/decrement",
-        {
-          orderDetails,
-        }
+      const responseStock = await dispatch(decrementStock({ orderDetails }))
+      console.log("responseStock depuis AwaitingTable.jsx", responseStock)
+      console.log(responseStock.payload.updatedStocks)
+      console.log("row._id depuis AwaitingTable.jsx", row._id)
+      await dispatch(
+        modifyOrder({
+          orderId: row._id,
+          orderData: {
+            statut: "validée",
+            confirmedAt: new Date(),
+          },
+        })
       )
-      console.log(responseStock.data.updatedStocks)
 
-      await axiosInstance.put(`http://localhost:5000/api/orders/${row._id}`, {
-        statut: "validée",
-      })
-
-      responseStock.data.updatedStocks.map(async (stock) => {
+      responseStock.payload.updatedStocks.map(async (stock) => {
         // Trouver le produit correspondant dans le tableau d'origine
         const product = orderDetails.find(
           (p) => p.product_id === stock.product_id
@@ -106,22 +114,34 @@ function Row({ row }) {
         const quantity = product ? product.quantity : 0
 
         // Envoyer la requête avec la quantité trouvée
-        await axiosInstance.post(`http://localhost:5000/api/stock_logs`, {
-          stock_id: stock.stockId,
-          event: "sortie",
-          quantity: quantity, // Prend la valeur trouvée ou 0 par défaut
-        })
+
+        await dispatch(
+          createLog({
+            stock_id: stock.stockId,
+            event: "sortie",
+            quantity: quantity, // Prend la valeur trouvée ou 0 par défaut
+          })
+        )
       })
 
       dispatch(fetchStocks())
-      dispatch(fetchOrdersWithDetails())
+      dispatch(fetchOrders())
       setModalOpen(false)
-    } catch (error) {
-      setErrorMessage(
-        error.response?.data?.message || "❌ Erreur lors de la validation"
+      dispatch(
+        showNotification({
+          message: "Commande validée avec succès",
+          severity: "success",
+        })
       )
-    } finally {
-      setIsLoading(false)
+    } catch (error) {
+      dispatch(
+        showNotification({
+          message:
+            "Une erreur est survenue lors de la validation de la commande.",
+          severity: "error",
+        })
+      )
+      console.error(error)
     }
   }
 
@@ -134,7 +154,7 @@ function Row({ row }) {
           </IconButton>
         </TableCell>
         <TableCell>{row._id}</TableCell>
-        <TableCell>{new Date(row.date_order).toLocaleString()}</TableCell>
+        <TableCell>{new Date(row.orderedAt).toLocaleString()}</TableCell>
         <TableCell
           sx={{
             fontWeight: "bold",
@@ -152,6 +172,15 @@ function Row({ row }) {
               <Typography variant="h6" gutterBottom>
                 Détails des produits
               </Typography>
+              <Typography variant="body1" gutterBottom>
+                {row.buyer.firstname}
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                {row.buyer.lastname}
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                {row.buyer.address}
+              </Typography>
               <Table size="small">
                 <TableHead>
                   <TableRow>
@@ -163,22 +192,62 @@ function Row({ row }) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.produitDetails.map((product) => {
+                  {row.details.map((product) => {
                     const stockInfo = stocks.find(
                       (stock) => stock.product_id === product.product_id
                     )
+                    const isStockInsufficient =
+                      product.quantity > (stockInfo ? stockInfo.quantity : 0)
+
                     return (
-                      <TableRow key={product._id}>
+                      <TableRow
+                        key={product._id}
+                        sx={{
+                          backgroundColor: isStockInsufficient
+                            ? "#ffebee"
+                            : "#edffeb", // Rouge léger si stock insuffisant
+                          transition: "background-color 0.3s ease-in-out", // Effet fluide
+                        }}
+                      >
                         <TableCell>{product.product_id}</TableCell>
                         <TableCell>{product.name}</TableCell>
                         <TableCell>{product.quantity}</TableCell>
-                        <TableCell>{product.price}</TableCell>
+                        <TableCell>{product.price}€</TableCell>
                         <TableCell>
                           {stockInfo ? stockInfo.quantity : "N/A"}
                         </TableCell>
                       </TableRow>
                     )
                   })}
+                  <TableRow>
+                    <TableCell
+                      align="right"
+                      colSpan={4}
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "1.1rem",
+                        paddingTop: "20px",
+                        paddingBottom: "10px",
+                        borderTop: "2px solid #ddd",
+                        backgroundColor: "#f5f5f5", // Fond léger pour différencier
+                      }}
+                    >
+                      Total de la commande :
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "1.2rem",
+                        paddingTop: "20px",
+                        paddingBottom: "10px",
+                        borderTop: "2px solid #ddd",
+                        backgroundColor: "#f5f5f5",
+                        color: "#d32f2f", // Couleur rouge pour mettre en valeur
+                      }}
+                    >
+                      {row.totalAmount}€
+                    </TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
 
@@ -202,7 +271,7 @@ function Row({ row }) {
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: isMobile ? "90%" : 500,
+            width: isMobile ? "90%" : 700,
             bgcolor: "background.paper",
             borderRadius: "10px",
             boxShadow: 24,
@@ -217,20 +286,40 @@ function Row({ row }) {
               <TableHead>
                 <TableRow>
                   <TableCell>ID Produit</TableCell>
+                  <TableCell>Produit</TableCell>
                   <TableCell>Quantité</TableCell>
                   <TableCell>Prix Unitaire</TableCell>
-                  <TableCell>Total</TableCell>
+                  <TableCell>Total disponible</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {row.produitDetails.map((product) => (
-                  <TableRow key={product._id}>
-                    <TableCell>{product.product_id}</TableCell>
-                    <TableCell>{product.quantity}</TableCell>
-                    <TableCell>{product.price}</TableCell>
-                    <TableCell>{product.quantity * product.price}</TableCell>
-                  </TableRow>
-                ))}
+                {row.details.map((product) => {
+                  const stockInfo = stocks.find(
+                    (stock) => stock.product_id === product.product_id
+                  )
+                  const isStockInsufficient =
+                    product.quantity > (stockInfo ? stockInfo.quantity : 0)
+
+                  return (
+                    <TableRow
+                      key={product._id}
+                      sx={{
+                        backgroundColor: isStockInsufficient
+                          ? "#ffebee"
+                          : "#edffeb", // Rouge léger si stock insuffisant
+                        transition: "background-color 0.3s ease-in-out", // Effet de transition fluide
+                      }}
+                    >
+                      <TableCell>{product.product_id}</TableCell>
+                      <TableCell>{product.name}</TableCell>
+                      <TableCell>{product.quantity}</TableCell>
+                      <TableCell>{product.price}€</TableCell>
+                      <TableCell>
+                        {stockInfo ? stockInfo.quantity : "N/A"}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })}
               </TableBody>
             </Table>
           </TableContainer>
@@ -263,7 +352,7 @@ Row.propTypes = {
     _id: PropTypes.string.isRequired,
     date_order: PropTypes.string.isRequired,
     statut: PropTypes.string.isRequired,
-    produitDetails: PropTypes.arrayOf(
+    details: PropTypes.arrayOf(
       PropTypes.shape({
         _id: PropTypes.string.isRequired,
         product_id: PropTypes.string.isRequired,
@@ -306,7 +395,7 @@ export default function CollapsingTable({ data }) {
             <TableCell />
             <TableCell
               onClick={() => handleSort("_id")}
-              style={{ cursor: "pointer" }}
+              style={{ cursor: "pointer", fontWeight: "bold" }}
             >
               Order ID{" "}
               <IconButton aria-label="expand row" size="small">
@@ -320,7 +409,7 @@ export default function CollapsingTable({ data }) {
             </TableCell>
             <TableCell
               onClick={() => handleSort("date_order")}
-              style={{ cursor: "pointer" }}
+              style={{ cursor: "pointer", fontWeight: "bold" }}
             >
               Date de Commande{" "}
               <IconButton aria-label="expand row" size="small">
@@ -334,7 +423,7 @@ export default function CollapsingTable({ data }) {
             </TableCell>
             <TableCell
               onClick={() => handleSort("statut")}
-              style={{ cursor: "pointer" }}
+              style={{ cursor: "pointer", fontWeight: "bold" }}
             >
               Statut{" "}
               <IconButton aria-label="expand row" size="small">
@@ -364,7 +453,7 @@ CollapsingTable.propTypes = {
       _id: PropTypes.string.isRequired,
       date_order: PropTypes.string.isRequired,
       statut: PropTypes.string.isRequired,
-      produitDetails: PropTypes.arrayOf(
+      details: PropTypes.arrayOf(
         PropTypes.shape({
           _id: PropTypes.string.isRequired,
           product_id: PropTypes.string.isRequired,

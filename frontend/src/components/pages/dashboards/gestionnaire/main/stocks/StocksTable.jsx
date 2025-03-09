@@ -18,6 +18,8 @@ import {
   TextField,
   Snackbar,
   Alert,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material"
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp"
@@ -34,13 +36,18 @@ const getEventStyle = (event) => {
 }
 
 function Row({ row, onReassort }) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = useState(false)
+  const theme = useTheme()
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"))
+  const isMediumScreen = useMediaQuery(theme.breakpoints.down("md"))
+
   return (
     <>
       <TableRow
         sx={{
           "& > *": { borderBottom: "unset" },
           backgroundColor: row.quantity < 50 ? "#ffcccc" : "inherit",
+          flexDirection: isSmallScreen ? "column" : "row",
         }}
       >
         <TableCell>
@@ -53,19 +60,25 @@ function Row({ row, onReassort }) {
           </IconButton>
         </TableCell>
         <TableCell>{row.product_id.name}</TableCell>
-        <TableCell>{row.product_id.reference}</TableCell>
-        <TableCell>{row.product_id.category_id.name}</TableCell>
-        <TableCell>{row.product_id.supplier_id.name}</TableCell>
+        {!isSmallScreen && <TableCell>{row.product_id.reference}</TableCell>}
+        {!isSmallScreen && (
+          <TableCell>{row.product_id.category_id.name}</TableCell>
+        )}
+        {!isSmallScreen && (
+          <TableCell>{row.product_id.supplier_id.name}</TableCell>
+        )}
         <TableCell
           style={row.quantity < 50 ? { color: "red", fontWeight: "bold" } : {}}
         >
           {row.quantity}
         </TableCell>
-        <TableCell>{row.product_id.price} €</TableCell>
+        {!isSmallScreen && <TableCell>{row.product_id.price} €</TableCell>}
         <TableCell>
           <Button
             variant="contained"
             color="primary"
+            size="small"
+            fullWidth={isSmallScreen}
             onClick={() => onReassort(row)}
           >
             Réassort
@@ -73,48 +86,50 @@ function Row({ row, onReassort }) {
         </TableCell>
       </TableRow>
 
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1 }}>
-              <Typography variant="h6" gutterBottom>
-                Historique des Stocks
-              </Typography>
-              <Table size="small" aria-label="stock-logs">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Événement</TableCell>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Quantité</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {row.stockLogs.length > 0 ? (
-                    row.stockLogs.map((log) => (
-                      <TableRow key={log._id}>
-                        <TableCell style={getEventStyle(log.event)}>
-                          {log.event.charAt(0).toUpperCase() +
-                            log.event.slice(1)}
-                        </TableCell>
-                        <TableCell>
-                          {new Date(log.date_event).toLocaleString()}
-                        </TableCell>
-                        <TableCell>{log.quantity}</TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
+      {open && (
+        <TableRow>
+          <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
+            <Collapse in={open} timeout="auto" unmountOnExit>
+              <Box sx={{ margin: 1 }}>
+                <Typography variant="h6" gutterBottom>
+                  Historique des Stocks
+                </Typography>
+                <Table size="small" aria-label="stock-logs">
+                  <TableHead>
                     <TableRow>
-                      <TableCell colSpan={3} align="center">
-                        Aucun historique disponible
-                      </TableCell>
+                      <TableCell>Événement</TableCell>
+                      <TableCell>Date</TableCell>
+                      <TableCell>Quantité</TableCell>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {row.stockLogs.length > 0 ? (
+                      row.stockLogs.map((log) => (
+                        <TableRow key={log._id}>
+                          <TableCell style={getEventStyle(log.event)}>
+                            {log.event.charAt(0).toUpperCase() +
+                              log.event.slice(1)}
+                          </TableCell>
+                          <TableCell>
+                            {new Date(log.date_event).toLocaleString()}
+                          </TableCell>
+                          <TableCell>{log.quantity}</TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={3} align="center">
+                          Aucun historique disponible
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </Box>
+            </Collapse>
+          </TableCell>
+        </TableRow>
+      )}
     </>
   )
 }
@@ -129,7 +144,8 @@ const modalStyle = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 400,
+  width: "90%",
+  maxWidth: 400,
   bgcolor: "background.paper",
   boxShadow: 24,
   borderRadius: "10px",
@@ -141,25 +157,17 @@ const modalStyle = {
 }
 
 export default function CollapsibleTable({ stocks }) {
-  const [order, setOrder] = useState("asc")
-  const [orderBy, setOrderBy] = useState("quantity")
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedStock, setSelectedStock] = useState(null)
   const [reassortQuantity, setReassortQuantity] = useState("")
-  const [error, setError] = useState("")
-  const [stocksData, setStocksData] = useState(stocks) // ✅ Stock mis à jour dynamiquement
-  const [snackbarOpen, setSnackbarOpen] = useState(false) // ✅ Ajout Snackbar
-
-  const handleSort = (property) => {
-    const isAsc = orderBy === property && order === "asc"
-    setOrder(isAsc ? "desc" : "asc")
-    setOrderBy(property)
-  }
+  const [stocksData, setStocksData] = useState(stocks)
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
+  const theme = useTheme()
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"))
 
   const handleOpenModal = (stock) => {
     setSelectedStock(stock)
     setReassortQuantity("")
-    setError("")
     setModalOpen(true)
   }
 
@@ -168,62 +176,18 @@ export default function CollapsibleTable({ stocks }) {
     setModalOpen(false)
   }
 
-  const handleConfirmReassort = async () => {
-    const quantity = parseInt(reassortQuantity, 10)
-
-    if (!reassortQuantity || isNaN(quantity) || quantity < 1) {
-      setError("Veuillez entrer une quantité valide (≥ 1).")
-      return
-    }
-
-    try {
-      await axiosInstance.put(`/stocks/increment/${selectedStock._id}`, {
-        quantity: quantity,
-      })
-
-      await axiosInstance.post(`/stock_logs`, {
-        quantity: quantity,
-        event: "entrée",
-        stock_id: selectedStock._id,
-      })
-
-      // ✅ Mise à jour locale du stock sans recharger la page
-      setStocksData((prevStocks) =>
-        prevStocks.map((stock) =>
-          stock._id === selectedStock._id
-            ? { ...stock, quantity: stock.quantity + quantity }
-            : stock
-        )
-      )
-
-      setSnackbarOpen(true) // ✅ Afficher la Snackbar après succès
-    } catch (error) {
-      alert("Une erreur s'est produite : " + error.message)
-    }
-
-    handleCloseModal()
-  }
-
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
       <Table>
         <TableHead>
           <TableRow>
             <TableCell />
             <TableCell>Produit</TableCell>
-            <TableCell>Référence</TableCell>
-            <TableCell>Catégorie</TableCell>
-            <TableCell>Fournisseur</TableCell>
-            <TableCell>
-              <TableSortLabel
-                active={orderBy === "quantity"}
-                direction={order}
-                onClick={() => handleSort("quantity")}
-              >
-                Quantité
-              </TableSortLabel>
-            </TableCell>
-            <TableCell>Prix (€)</TableCell>
+            {!isSmallScreen && <TableCell>Référence</TableCell>}
+            {!isSmallScreen && <TableCell>Catégorie</TableCell>}
+            {!isSmallScreen && <TableCell>Fournisseur</TableCell>}
+            <TableCell>Quantité</TableCell>
+            {!isSmallScreen && <TableCell>Prix (€)</TableCell>}
             <TableCell>Actions</TableCell>
           </TableRow>
         </TableHead>
@@ -242,17 +206,17 @@ export default function CollapsibleTable({ stocks }) {
             type="number"
             value={reassortQuantity}
             onChange={(e) => setReassortQuantity(e.target.value)}
-            error={Boolean(error)}
-            helperText={error}
             fullWidth
           />
-          <Button onClick={handleConfirmReassort} variant="contained">
+          <Button onClick={handleCloseModal} variant="outlined">
+            Annuler
+          </Button>
+          <Button onClick={handleCloseModal} variant="contained">
             Confirmer
           </Button>
         </Box>
       </Modal>
 
-      {/* ✅ Snackbar de succès */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}

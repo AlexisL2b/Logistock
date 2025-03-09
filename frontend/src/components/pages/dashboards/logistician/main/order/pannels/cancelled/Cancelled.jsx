@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { fetchOrdersWithDetails } from "../../../../../../../../redux/slices/orderSlice"
+import { fetchOrders } from "../../../../../../../../redux/slices/orderSlice"
 import { fetchStocks } from "../../../../../../../../redux/slices/stockSlice"
 import { Box, TextField } from "@mui/material"
 import _ from "lodash" // Import de Lodash

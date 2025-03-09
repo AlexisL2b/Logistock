@@ -55,7 +55,7 @@ export const userSchema = Joi.object({
   sales_point: Joi.object({
     _id: Joi.string()
       .regex(/^[0-9a-fA-F]{24}$/)
-      .required()
+      // .required()
       .messages({
         "string.pattern.base":
           "L'ID du point de vente doit être un ObjectId MongoDB valide.",

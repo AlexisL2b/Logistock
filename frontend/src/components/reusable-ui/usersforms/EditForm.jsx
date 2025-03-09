@@ -12,12 +12,16 @@ import {
 import { useDispatch, useSelector } from "react-redux"
 import { updateUserInfo } from "../../../redux/slices/userSlice"
 import CustomSelect from "../selects/CustomSelect"
+import { showNotification } from "../../../redux/slices/notificationSlice"
 
-const EditForm = ({ row, onClose, onUserUpdated }) => {
+const EditForm = ({ row, onClose = null, onUserUpdated, admin = false }) => {
+  console.log("row depuis EditForm.jsx", row)
   const dispatch = useDispatch()
   const salesPoints = useSelector((state) => state.salesPoints.list)
   const roles = useSelector((state) => state.roles.list)
-
+  console.log("roles depuis EditForm.jsx", roles)
+  console.log("salesPoints depuis EditForm.jsx", salesPoints)
+  console.log(roles.find((role) => role.name === row["role"])?._id || "rrr")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -32,18 +36,17 @@ const EditForm = ({ row, onClose, onUserUpdated }) => {
     reset,
     formState: { errors },
   } = useForm()
-
   useEffect(() => {
     if (row) {
       reset({
-        nom: row.nom || "",
-        prenom: row.prenom || "",
-        adresse: row.adresse || "",
+        lastname: row.nom || "",
+        firstname: row.prenom || "",
+        address: row.adresse || "",
         email: row.email || "",
-        role: roles.find((role) => role.name === row["rôle"])?._id || "",
+        role: roles.find((role) => role.name === row["role"])?._id || "", // Ajoute "" comme fallback
         sales_point:
-          salesPoints.find((sp) => sp.name === row["point de vente"])?._id ||
-          "",
+          salesPoints.find((sp) => sp.name === row["point_vente_nom"])?._id ||
+          "", // Ajoute "" comme fallback
         oldPassword: "",
         newPassword: "",
       })
@@ -56,45 +59,77 @@ const EditForm = ({ row, onClose, onUserUpdated }) => {
   const onSubmit = async (data) => {
     setIsSubmitting(true)
     try {
+      console.log("data depuis EditForm.jsx", data)
+
       const { oldPassword, newPassword, ...userData } = data
-      if (newPassword && !oldPassword) {
+
+      // 🔥 Comparer les valeurs et ne garder que les champs modifiés
+      const updatedFields = {}
+      Object.keys(userData).forEach((key) => {
+        if (userData[key] !== row[key]) {
+          updatedFields[key] = userData[key]
+        }
+      })
+
+      // Vérifier si on doit mettre à jour le mot de passe
+      if (newPassword) {
+        if (!oldPassword) {
+          setSnackbar({
+            open: true,
+            message: "L'ancien mot de passe est requis.",
+            severity: "error",
+          })
+          setIsSubmitting(false)
+          return
+        }
+        updatedFields.password = newPassword
+        updatedFields.oldPassword = oldPassword
+      }
+
+      // Vérifier si `role` et `sales_point` ont changé
+      if (userData.role !== row.role) {
+        updatedFields.role = roles.find((role) => role._id === userData.role)
+      }
+      if (userData.sales_point !== row.point_vente_nom) {
+        updatedFields.sales_point = salesPoints.find(
+          (sp) => sp._id === userData.sales_point
+        )
+      }
+
+      // 🚨 Si aucun champ n'a changé, on ne fait rien
+      if (Object.keys(updatedFields).length === 0) {
         setSnackbar({
           open: true,
-          message: "L'ancien mot de passe est requis.",
-          severity: "error",
+          message: "Aucune modification détectée.",
+          severity: "info",
         })
         setIsSubmitting(false)
         return
       }
-      console.log("userData", userData)
-      const updatedUserData = {
-        ...userData,
-        role: roles.find((role) => role._id === userData.role),
-        sales_point: (() => {
-          const sp = salesPoints.find((sp) => sp._id === userData.sales_point)
-          return sp ? { _id: sp._id, name: sp.name } : null
-        })(),
-        password: newPassword ? newPassword : undefined,
-        oldPassword: newPassword ? oldPassword : undefined,
-      }
-      console.log("updatedUserData", updatedUserData)
+
+      console.log("updatedFields", updatedFields)
 
       await dispatch(
-        updateUserInfo({ userId: row._id, userUpdates: updatedUserData })
+        updateUserInfo({ userId: row._id, userUpdates: updatedFields })
+      ).unwrap()
+
+      dispatch(
+        showNotification({
+          message: "Utilisateur mis à jour avec succès !",
+          severity: "success",
+        })
       )
-      setSnackbar({
-        open: true,
-        message: "Utilisateur mis à jour avec succès !",
-        severity: "success",
-      })
+
       onUserUpdated()
-      onClose()
+      // onClose()
     } catch (error) {
-      setSnackbar({
-        open: true,
-        message: error.message || "Une erreur est survenue.",
-        severity: "error",
-      })
+      dispatch(
+        showNotification({
+          message: error.message || "Une erreur est survenue.",
+          severity: "error",
+        })
+      )
+      console.error(error)
     } finally {
       setIsSubmitting(false)
     }
@@ -102,11 +137,11 @@ const EditForm = ({ row, onClose, onUserUpdated }) => {
 
   return (
     <Box sx={{ maxWidth: 500, margin: "0 auto", mt: 4 }}>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
         <Grid container spacing={2}>
           <Grid item xs={12}>
             <Controller
-              name="nom"
+              name="lastname"
               control={control}
               rules={{ required: "Le nom est requis" }}
               render={({ field }) => (
@@ -123,7 +158,7 @@ const EditForm = ({ row, onClose, onUserUpdated }) => {
 
           <Grid item xs={12}>
             <Controller
-              name="prenom"
+              name="firstname"
               control={control}
               rules={{ required: "Le prénom est requis" }}
               render={({ field }) => (
@@ -140,7 +175,7 @@ const EditForm = ({ row, onClose, onUserUpdated }) => {
 
           <Grid item xs={12}>
             <Controller
-              name="adresse"
+              name="address"
               control={control}
               rules={{ required: "L'adresse est requise" }}
               render={({ field }) => (
@@ -156,9 +191,16 @@ const EditForm = ({ row, onClose, onUserUpdated }) => {
           </Grid>
 
           <Grid item xs={12}>
+            <input
+              type="text"
+              name="fake-email"
+              style={{ display: "none" }}
+              autoComplete="off"
+            />
             <Controller
               name="email"
               control={control}
+              autoComplete="off"
               rules={{ required: "L'email est requis" }}
               render={({ field }) => (
                 <TextField
@@ -171,22 +213,25 @@ const EditForm = ({ row, onClose, onUserUpdated }) => {
               )}
             />
           </Grid>
-
-          <Grid item xs={12}>
-            <Controller
-              name="role"
-              control={control}
-              render={({ field }) => (
-                <CustomSelect
-                  inputLabel="Rôle"
-                  selectLabel="Rôle"
-                  menuItems={roles}
-                  selectedValue={field.value}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-          </Grid>
+          {admin ? (
+            <Grid item xs={12}>
+              <Controller
+                name="role"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    inputLabel="Rôle"
+                    selectLabel="Rôle"
+                    menuItems={roles}
+                    selectedValue={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            </Grid>
+          ) : (
+            ""
+          )}
 
           <Grid item xs={12}>
             <Controller
@@ -198,6 +243,7 @@ const EditForm = ({ row, onClose, onUserUpdated }) => {
                   selectLabel="Point de Vente"
                   menuItems={salesPoints}
                   selectedValue={field.value}
+                  // onChange={(e) => console.log(e.target.value)}
                   onChange={field.onChange}
                 />
               )}
@@ -207,6 +253,7 @@ const EditForm = ({ row, onClose, onUserUpdated }) => {
           <Grid item xs={12}>
             <Controller
               name="oldPassword"
+              autoComplete="off"
               control={control}
               render={({ field }) => (
                 <TextField
@@ -222,6 +269,7 @@ const EditForm = ({ row, onClose, onUserUpdated }) => {
           <Grid item xs={12}>
             <Controller
               name="newPassword"
+              autoComplete="off"
               control={control}
               render={({ field }) => (
                 <TextField

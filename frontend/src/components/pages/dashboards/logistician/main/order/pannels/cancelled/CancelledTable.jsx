@@ -23,7 +23,7 @@ import {
   updateStock,
 } from "../../../../../../../../redux/slices/stockSlice"
 import { io } from "socket.io-client"
-import { fetchOrdersWithDetails } from "../../../../../../../../redux/slices/orderSlice"
+import { fetchOrders } from "../../../../../../../../redux/slices/orderSlice"
 import _ from "lodash"
 
 function Row({ row }) {

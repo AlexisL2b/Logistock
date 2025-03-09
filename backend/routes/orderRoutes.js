@@ -5,41 +5,66 @@ import {
   addOrder,
   updateOrder,
   deleteOrder,
-  getAllOrdersWithDetails,
-  confirmPayment,
-  getOrdersByBuyer, // ✅ Nouvelle route pour valider un paiement
+  getOrdersByBuyer,
 } from "../controllers/orderController.js"
 import validate from "../middlewares/validate.js"
-import { orderSchema } from "../validations/orderValidation.js"
+import {
+  orderSchemaPost,
+  orderSchemaPut,
+} from "../validations/orderValidation.js"
 import { protect } from "../middlewares/authMiddleware.js"
 import { checkRole } from "../middlewares/checkRole.js"
 
 const router = express.Router()
 
-router.get("/", getAllOrders) // GET /api/orders
-router.get("/all-orders-details", getAllOrdersWithDetails) // GET all orders with details
-router.get("/:id", getOrderById) // GET /api/orders/:id
-router.post("/", validate(orderSchema), addOrder) // ✅ Création avec Stripe intégrée
-// router.post("/confirm-payment", protect, confirmPayment) // ✅ Nouvelle route pour valider un paiement Stripe
+// ✅ Récupérer toutes les commandes (accessible à tous les rôles autorisés)
+router.get(
+  "/",
+  protect,
+  checkRole("Admin", "Gestionnaire", "Logisticien"),
+  getAllOrders
+)
+
+// ✅ Récupérer une commande par ID
+router.get(
+  "/:id",
+  protect,
+  checkRole("Admin", "Gestionnaire", "Logisticien", "Acheteur"),
+  getOrderById
+)
+
+// ✅ Ajouter une nouvelle commande (avec détails et expédition)
+router.post(
+  "/",
+  protect,
+  checkRole("Acheteur"),
+  validate(orderSchemaPost),
+  addOrder
+)
+
+// ✅ Modifier une commande
 router.put(
   "/:id",
   protect,
   checkRole("Admin", "Gestionnaire", "Logisticien", "Acheteur"),
-  // validate(orderSchema),
+  validate(orderSchemaPut),
   updateOrder
-) // ✅ Modification avec validation
-// ✅ Modification avec validation
+)
+
+// ✅ Supprimer une commande (uniquement pour Admin, Gestionnaire et Acheteur)
 router.delete(
   "/:id",
   protect,
   checkRole("Admin", "Gestionnaire", "Acheteur"),
   deleteOrder
-) // DELETE /api/orders/:id
+)
+
+// ✅ Récupérer toutes les commandes d'un acheteur donné
 router.get(
   "/user/:buyer_id",
-  // protect,
-  // checkRole("Admin", "Gestionnaire", "Acheteur"),
+  protect,
+  checkRole("Admin", "Gestionnaire", "Acheteur"),
   getOrdersByBuyer
-) // GET orders by user ID
+)
 
 export default router

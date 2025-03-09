@@ -4,6 +4,10 @@ import orderShipmentService from "../services/orderShipmentService.js"
 export const getAllOrderShipments = async (req, res) => {
   try {
     const orderShipments = await orderShipmentService.getAllOrderShipments()
+    console.log(
+      "🟢 🟢 🟢 🟢 🟢 🟢🟢 🟢 🟢 🟢 🟢 🟢🟢 🟢 🟢 🟢 🟢 🟢 controller"
+    )
+
     res.json(orderShipments)
   } catch (error) {
     res.status(500).json({ message: error.message })

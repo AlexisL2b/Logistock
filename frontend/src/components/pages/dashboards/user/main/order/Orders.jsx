@@ -67,7 +67,7 @@ export default function Orders() {
 
     try {
       await axiosInstance.put(
-        `http://localhost:5000/api/orders/${selectedOrder._id}/receive`
+        `http://localhost:5000/api/orders/${selectedOrder._id}`
       )
 
       // Mettre à jour le statut de la commande
@@ -105,7 +105,7 @@ export default function Orders() {
       <CollapsingTable data={filteredOrders} onConfirm={handleOpenDialog} />
 
       {/* 📦 Dialog de confirmation */}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
+      {/* <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>Confirmation</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -125,7 +125,7 @@ export default function Orders() {
             Confirmer
           </Button>
         </DialogActions>
-      </Dialog>
+      </Dialog> */}
     </Box>
   )
 }

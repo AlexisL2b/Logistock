@@ -80,6 +80,7 @@ class StockService {
 
   async decrementStockForOrder(orderDetails, io) {
     try {
+      console.log("orderDetails depuis stockService.js", orderDetails)
       if (!Array.isArray(orderDetails)) {
         throw new Error("Les détails de la commande doivent être un tableau.")
       }

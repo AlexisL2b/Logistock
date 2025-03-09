@@ -18,7 +18,7 @@ const productSchema = new mongoose.Schema(
     },
   },
   { collection: "products" },
-  { versionKey: false } // Force le nom de la collection
+  { versionKey: false }
 )
 
 const Product = mongoose.model("Product", productSchema)
