@@ -3,7 +3,7 @@ import ProductService from "../services/productService.js"
 export const getAllProducts = async (req, res) => {
   try {
     const products = await ProductService.getAllProducts()
-    console.log("products", products)
+
     res.json(products)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -22,6 +22,7 @@ export const getProductById = async (req, res) => {
 
 export const createProduct = async (req, res) => {
   try {
+    console.log("req.body depuis productController.js", req.body)
     const newProduct = await ProductService.createProduct(req.body)
     res.status(201).json(newProduct)
   } catch (error) {

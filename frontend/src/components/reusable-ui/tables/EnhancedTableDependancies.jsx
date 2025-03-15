@@ -19,6 +19,8 @@ import { Alert, Button, IconButton, Snackbar } from "@mui/material"
 import ModalDependancies from "../modals/ModalDependancies" // Import du composant modal
 import { useEffect } from "react"
 import axiosInstance from "../../../axiosConfig"
+import { useDispatch } from "react-redux"
+import { showNotification } from "../../../redux/slices/notificationSlice"
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1
@@ -110,18 +112,21 @@ export default function EnhancedTable({
   const [dense, setDense] = useState(false)
   const [rowsPerPage, setRowsPerPage] = useState(5)
   const [dropdownData, setDropdownData] = useState({})
+  const [edit, setEdit] = useState(false)
+  const dispatch = useDispatch()
   useEffect(() => {
     const fetchDropdownData = async () => {
       try {
         const fetchedData = {}
         for (const endpoint of endpoints) {
           const response = await axiosInstance.get(endpoint)
-          console.log(`Réponse API pour ${endpoint}:`, response.data) // 🔍 Ajoute ce log
+          // 🔍 Ajoute ce log
           fetchedData[endpoint] = response.data
         }
         setDropdownData(fetchedData)
-        console.log("dropdownData", dropdownData)
       } catch (error) {
+        console.error("oupsy")
+
         console.error("Erreur lors de la récupération des données :", error)
       }
     }
@@ -141,8 +146,6 @@ export default function EnhancedTable({
             headerMapping[key] || key.charAt(0).toUpperCase() + key.slice(1), // Utilise headerMapping pour les labels
         }))
     : []
-
-  console.log("headCells", headCells)
 
   // État pour gérer la modal
   const [openModal, setOpenModal] = useState(false)
@@ -200,7 +203,7 @@ export default function EnhancedTable({
         setSeverity("success")
         setShowAlert(true)
       }
-
+      setEdit(false)
       setSelected([])
 
       if (onDataChange) {
@@ -208,6 +211,8 @@ export default function EnhancedTable({
       }
     } catch (error) {
       if (error.response) {
+        console.error("oupsy")
+
         setMessage(
           error.response.data.message || "Erreur lors de la suppression."
         )
@@ -226,6 +231,7 @@ export default function EnhancedTable({
   const handleOpenModalForEdit = (row) => {
     setSelectedRow(row)
     setOpenModal(true)
+    setEdit(true)
   }
 
   const handleOpenModalForAdd = () => {
@@ -240,6 +246,7 @@ export default function EnhancedTable({
     }
     setSelectedRow(emptyObject)
     setOpenModal(true)
+    setEdit(false)
   }
 
   const handleCloseModal = () => {
@@ -248,30 +255,57 @@ export default function EnhancedTable({
 
   const handleModalSubmit = async (updatedData) => {
     try {
+      let dataToSend = updatedData._id
+        ? (({ _id, quantity, ...rest }) => rest)(updatedData) // Extrait un nouvel objet sans _id et quantity
+        : updatedData
+
       if (updatedData._id) {
-        await axiosInstance.put(
-          `http://localhost:5000/api/${coll}/${updatedData._id}`,
+        console.log(
+          "updatedData._id updatedData depuis EnhancedTableDependancies.jsx",
           updatedData
         )
+        await axiosInstance.put(
+          `http://localhost:5000/api/${coll}/${updatedData._id}`,
+          dataToSend
+        )
+        dispatch(
+          showNotification({
+            message: "Produit modifié avec succès !",
+            severity: "success",
+          })
+        )
       } else {
+        console.log(
+          "dataToSend depuis EnhancedTableDependancies.jsx",
+          dataToSend
+        )
         await axiosInstance.post(
           `http://localhost:5000/api/${coll}`,
           updatedData
         )
-      }
 
-      alert("Opération réussie !")
-      setOpenModal(false)
+        dispatch(
+          showNotification({
+            message: "Produit créé avec succès !",
+            severity: "success",
+          })
+        )
+      }
 
       if (onDataChange) {
         onDataChange()
       }
     } catch (error) {
-      console.error("Erreur lors de l'opération :", error)
-      alert("Erreur lors de l'opération !")
+      console.error(error)
+      dispatch(
+        showNotification({
+          message: error.response.data.message || "Une erreur est survenue.",
+          severity: "error",
+        })
+      )
     }
   }
-
+  console.log("selectedRow depuis EnhancedTableDependancies.jsx", selectedRow)
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0
 
@@ -283,7 +317,7 @@ export default function EnhancedTable({
     [data, order, orderBy, page, rowsPerPage]
   )
   console.count("Console log exécuté")
-  console.log("dropdownData from enhencedtable", dropdownData)
+
   return (
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
@@ -368,7 +402,8 @@ export default function EnhancedTable({
             handleModalSubmit(updatedData)
             setOpenModal(false)
           }}
-          title="Ajouter un élément"
+          edit={edit}
+          title={selectedRow ? "Modifier un élément" : "Ajouter un élément"}
         />
       )}
     </Box>

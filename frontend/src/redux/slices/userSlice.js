@@ -25,7 +25,7 @@ export const fetchBuyers = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await getBuyers()
-      console.log("response depuis userSlice.js", response)
+
       return response.data // Assure-toi que ton API retourne `response.data`
     } catch (error) {
       console.error("Erreur lors de la récupération des utilisateurs :", error)
@@ -40,8 +40,7 @@ export const updateUserInfo = createAsyncThunk(
   async ({ userId, userUpdates }, { rejectWithValue }) => {
     try {
       const updatedUser = await updateUser(userId, userUpdates)
-      console.log("userUpdates depuis userSlice.js", userUpdates)
-      console.log("upadtedUser depuis userSlice.js", updatedUser)
+
       return updatedUser.data // Assure-toi que ton API retourne `response.data`
     } catch (error) {
       console.error("Erreur lors de la mise à jour de l'utilisateur :", error)
@@ -126,7 +125,6 @@ const userSlice = createSlice({
       // 📌 Gestion de la mise à jour d'un utilisateur
       .addCase(updateUserInfo.fulfilled, (state, action) => {
         const updatedUser = action.payload
-        console.log("state.list depuis userSlice.js", state.list)
       })
 
       // 📌 Gestion de la suppression d'un utilisateur

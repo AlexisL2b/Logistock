@@ -47,7 +47,6 @@ class SalesPointService {
     const users = await userDAO.findBySalesPointId(id)
     const existingSalesPoint = await salesPointDAO.findById(id)
 
-    console.log("existingSalesPoint id", id)
     if (!existingSalesPoint) {
       throw new Error("Point de vente introuvable")
     }

@@ -12,12 +12,10 @@ const StockUpdater = () => {
   useEffect(() => {
     if (!socket.connected) {
       socket.connect() // Connecte le socket seulement s'il n'est pas déjà connecté
-      console.log("✅ WebSocket connecté :", socket.id)
     }
     dispatch(fetchStocks()) // 🔄 Met à jour Redux
 
     socket.on("stocksUpdated", (updatedStocks) => {
-      console.log("🟢 Mise à jour des stocks reçue :", updatedStocks)
       dispatch(
         updateStock({
           stockId: updatedStocks.stockId,
@@ -29,7 +27,6 @@ const StockUpdater = () => {
     })
 
     return () => {
-      console.log("🔴 Déconnexion propre du WebSocket :", socket.id)
       socket.off("stocksUpdated") // 🔥 Supprime l'écouteur
     }
   }, [dispatch])

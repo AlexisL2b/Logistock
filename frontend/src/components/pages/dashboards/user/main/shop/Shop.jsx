@@ -22,8 +22,6 @@ export default function Shop() {
   const [categories, setCategories] = useState([])
   const [selectedCategory, setSelectedCategory] = useState("")
 
-  console.log("products", products)
-
   // Charger les catégories depuis l'API
   useEffect(() => {
     axiosInstance
@@ -48,7 +46,7 @@ export default function Shop() {
           String(product.category_id?._id) === String(selectedCategory)
       )
     : products
-  console.log(filteredProducts)
+
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>

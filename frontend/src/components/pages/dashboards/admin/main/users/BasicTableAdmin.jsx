@@ -97,7 +97,6 @@ function BasicTable({
   }
 
   const handleOpenEdit = (user) => {
-    console.log(user)
     setSelectedUser(user)
     setOpenUpdateDialog(true)
   }
@@ -111,8 +110,6 @@ function BasicTable({
         label: headerMapping[key] || key.charAt(0).toUpperCase() + key.slice(1),
       }))
     : []
-
-  console.log(headCells)
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc"

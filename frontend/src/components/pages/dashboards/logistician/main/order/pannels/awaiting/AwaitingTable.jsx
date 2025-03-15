@@ -89,11 +89,8 @@ function Row({ row }) {
         quantity: product.quantity,
       }))
 
-      console.log("orderDetails", orderDetails)
       const responseStock = await dispatch(decrementStock({ orderDetails }))
-      console.log("responseStock depuis AwaitingTable.jsx", responseStock)
-      console.log(responseStock.payload.updatedStocks)
-      console.log("row._id depuis AwaitingTable.jsx", row._id)
+
       await dispatch(
         modifyOrder({
           orderId: row._id,

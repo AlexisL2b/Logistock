@@ -47,7 +47,7 @@ function ConfirmedRow({ row }) {
   }
   const dispatch = useDispatch()
   const transporters = useSelector((state) => state.transporters.list)
-  // console.log("transporters depuis ConfirmedTable.jsx", transporters)
+  //
   useEffect(() => {
     dispatch(fetchOrders())
     dispatch(fetchTransporters())
@@ -87,7 +87,7 @@ function ConfirmedRow({ row }) {
       setIsLoading(false)
     }
   }
-  // console.log(transporters)
+  //
   return (
     <>
       {/* Ligne principale */}

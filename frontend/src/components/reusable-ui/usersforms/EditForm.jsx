@@ -19,9 +19,7 @@ const EditForm = ({ row, onClose = null, onUserUpdated, admin = false }) => {
   const dispatch = useDispatch()
   const salesPoints = useSelector((state) => state.salesPoints.list)
   const roles = useSelector((state) => state.roles.list)
-  console.log("roles depuis EditForm.jsx", roles)
-  console.log("salesPoints depuis EditForm.jsx", salesPoints)
-  console.log(roles.find((role) => role.name === row["role"])?._id || "rrr")
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [snackbar, setSnackbar] = useState({
     open: false,

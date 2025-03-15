@@ -33,7 +33,7 @@ function Row({ row }) {
 
   // Récupérer les stocks depuis Redux
   const stocks = useSelector((state) => state.stocks.stocks)
-  console.log("row depuis ReceivedTable.jsx", row)
+
   // Écouter les mises à jour en temps réel via Socket.IO
 
   return (

@@ -25,7 +25,7 @@ export default function Transporters() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedPointVente, setSelectedPointVente] = useState("")
   const users2 = useSelector((state) => state)
-  console.log("users2 depuis Users.jsx", users2)
+
   const salesPoints = useSelector((state) => state.salesPoints.list)
   const dispatch = useDispatch()
 
@@ -33,7 +33,6 @@ export default function Transporters() {
   const fetchUsers = async () => {
     try {
       const response = await axiosInstance.get("/users/buyers")
-      console.log("Utilisateurs reçus :", response.data)
 
       const usersData = response.data.buyers || []
 
@@ -80,8 +79,8 @@ export default function Transporters() {
     dispatch(fetchBuyers())
   }, [])
 
-  const handleDataChange = () => {
-    dispatch(fetchUsers())
+  const handleDataChange = async () => {
+    await dispatch(fetchUsers())
   }
 
   const headerMapping = {

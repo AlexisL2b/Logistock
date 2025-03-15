@@ -12,7 +12,7 @@ import RemoveIcon from "@mui/icons-material/Remove"
 
 export default function CartCardModal({ product }) {
   const { name, quantity } = product
-  console.log(product)
+
   const dispatch = useDispatch()
   const cartItem = useSelector((state) =>
     state.cart.items.find((item) => item.product_id === product.product_id)
@@ -38,7 +38,7 @@ export default function CartCardModal({ product }) {
   const handleRemove = () => {
     dispatch(removeFromCart({ userId, product_id: cartItem.product_id }))
   }
-  console.log(product)
+
   return (
     <Box
       sx={{

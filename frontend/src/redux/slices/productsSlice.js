@@ -7,7 +7,7 @@ export const fetchProducts = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await getProducts()
-      console.log("'response from slice'", response)
+
       return response
     } catch (error) {
       console.error(

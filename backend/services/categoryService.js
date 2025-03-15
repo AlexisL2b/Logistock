@@ -22,14 +22,11 @@ class CategoryService {
     const categories = await categoryDAO.findAll()
 
     const existe = categories.some((item) => {
-      console.log("item", item) // ✅ Vérifie chaque item parcouru
+      // ✅ Vérifie chaque item parcouru
       return item.name === categoryData.name // ✅ Ajoute `return` pour que `some()` fonctionne
     })
 
     if (!existe) {
-      console.log("existe", existe)
-      console.log("categoryData", categoryData)
-
       return await CategoryDAO.create(categoryData)
     } else {
       throw new Error("Cette catégorie existe déjà!")
@@ -57,7 +54,7 @@ class CategoryService {
   async deleteCategory(id) {
     // Vérifier si la catégorie est associée à des produits avant de supprimer
     const products = await productDAO.findByCategoryId(id)
-    console.log(products)
+
     if (products.length > 0) {
       const noms = products.map((p) => p.name).join(", ")
       throw new Error(

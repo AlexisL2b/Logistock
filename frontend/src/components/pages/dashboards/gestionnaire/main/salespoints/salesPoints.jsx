@@ -12,7 +12,6 @@ export default function SalesPoints() {
     axiosInstance
       .get("/sales_points") // URL correcte pour récupérer les points de vente
       .then((response) => {
-        console.log("response", response)
         setSalesPoints(response.data) // Mise à jour du state avec les points de vente
       })
       .catch((error) => {
@@ -45,8 +44,6 @@ export default function SalesPoints() {
     telephone: "Téléphone",
   }
 
-  console.log("data: ", salesPoints)
-
   // 🔍 Filtrage multi-critères : Nom, ID, Adresse, Téléphone
   const filteredSalesPoints = salesPoints?.filter((salesPoint) => {
     const searchLower = searchTerm.toLowerCase()
@@ -59,8 +56,6 @@ export default function SalesPoints() {
       (salesPoint.telephone && salesPoint.telephone.includes(searchLower)) // Téléphone
     )
   })
-
-  console.log(filteredSalesPoints)
 
   return (
     <Box sx={{ padding: 3 }}>

@@ -21,22 +21,22 @@ export default function Shipped() {
     dispatch(fetchOrders())
     dispatch(fetchStocks())
   }, [dispatch])
-  // console.log("orders depuis Shipped.jsx", orders)
+  //
   // 🔄 Rafraîchir les données toutes les 45 secondes avec comparaison
   useEffect(() => {
     const interval = setInterval(() => {
-      // console.log("   ")
+      //
 
       // Comparer les commandes et les stocks avec leur état précédent
       if (!_.isEqual(orders, prevOrdersRef.current)) {
-        // console.log("🔄 Mise à jour des commandes détectée")
+        //
         dispatch(fetchOrders())
         prevOrdersRef.current = orders // Mettre à jour la référence
       } else {
       }
 
       if (!_.isEqual(stocks, prevStocksRef.current)) {
-        // console.log("🔄 Mise à jour des stocks détectée")
+        //
         dispatch(fetchStocks())
         prevStocksRef.current = stocks // Mettre à jour la référence
       } else {

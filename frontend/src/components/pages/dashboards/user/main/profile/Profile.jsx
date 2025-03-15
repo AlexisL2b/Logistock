@@ -100,8 +100,6 @@ const Profile = () => {
     setIsLoading(true)
 
     try {
-      console.log("🚀 Envoi des modifications utilisateur...")
-
       const updatedFields = {}
       Object.keys(userProfile).forEach((key) => {
         if (userProfile[key] !== user[key]) {
@@ -122,8 +120,6 @@ const Profile = () => {
         updatedFields,
         { withCredentials: true }
       )
-
-      console.log("✅ Réponse mise à jour :", response.data)
 
       const updatedUser = response.data.user
       if (updatedUser) {

@@ -11,7 +11,6 @@ export default function Awaiting() {
   const orders = useSelector((state) => state.orders.list)
   const { stocks } = useSelector((state) => state.stocks)
   const [searchTerm, setSearchTerm] = useState("")
-  console.log("orders", orders)
 
   // Références pour stocker les versions précédentes des données
   const prevOrdersRef = useRef(orders)
@@ -27,14 +26,12 @@ export default function Awaiting() {
     const interval = setInterval(() => {
       // Comparer les commandes et les stocks avec leur état précédent
       if (!_.isEqual(orders, prevOrdersRef.current)) {
-        console.log("🔄 Mise à jour des commandes détectée")
         dispatch(fetchOrders())
         prevOrdersRef.current = orders // Mettre à jour la référence
       } else {
       }
 
       if (!_.isEqual(stocks, prevStocksRef.current)) {
-        console.log("🔄 Mise à jour des stocks détectée")
         dispatch(fetchStocks())
         prevStocksRef.current = stocks // Mettre à jour la référence
       } else {
@@ -49,7 +46,7 @@ export default function Awaiting() {
       order.statut === "en cours" &&
       order._id.toLowerCase().startsWith(searchTerm.toLowerCase())
   )
-  console.log("filteredOrders depuis Awaiting.jsx", filteredOrders)
+
   // Conditions pour afficher le statut
   return (
     <Box>

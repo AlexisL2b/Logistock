@@ -12,10 +12,6 @@ export const getUserProfile = async (req, res) => {
     }
     res.status(200).json({ user })
   } catch (error) {
-    console.error(
-      "❌ Erreur lors de la récupération du profil :",
-      error.message
-    )
     res.status(500).json({
       message: "Erreur serveur. Impossible de récupérer l'utilisateur.",
     })
@@ -30,10 +26,6 @@ export const getAllUsers = async (req, res) => {
     const users = await UserService.getAllUsers()
     res.status(200).json(users)
   } catch (error) {
-    console.error(
-      "❌ Erreur lors de la récupération des utilisateurs :",
-      error.message
-    )
     res.status(500).json({
       message: "Erreur serveur. Impossible de récupérer les utilisateurs.",
     })
@@ -46,67 +38,19 @@ export const getAllUsers = async (req, res) => {
 export const getBuyers = async (req, res) => {
   try {
     const buyers = await UserService.getBuyers()
-    console.log("buyers depuis userController.js", buyers)
     res.status(200).json({ buyers })
   } catch (error) {
-    console.error(
-      "❌ Erreur lors de la récupération des acheteurs :",
-      error.message
-    )
     res.status(500).json({
       message: "Erreur serveur. Impossible de récupérer les acheteurs.",
     })
   }
 }
 
-/**
- * 🔹 Créer un utilisateur
- */
-// export const createUser = async (req, res) => {
-//   try {
-//     console.log(
-//       "Données reçues par le backend :",
-//       JSON.stringify(req.body, null, 2)
-//     )
-
-//     // ✅ Convertir `_id` en `ObjectId` pour Mongoose
-//     const userData = {
-//       ...req.body,
-//       role: {
-//         _id: new mongoose.Types.ObjectId(req.body.role._id), // 🔥 Conversion ici
-//         name: req.body.role.name,
-//       },
-//       sales_point: {
-//         _id: new mongoose.Types.ObjectId(req.body.sales_point._id), // 🔥 Conversion ici
-//         name: req.body.sales_point.name,
-//       },
-//     }
-
-//     const user = new User(userData)
-//     await user.save()
-
-//     console.log("✅ Utilisateur sauvegardé :", JSON.stringify(user, null, 2))
-//     res.status(201).json({ message: "Utilisateur créé avec succès", user })
-//   } catch (error) {
-//     console.error("❌ Erreur lors de la création de l'utilisateur :", error)
-//     res.status(400).json({ message: error.message })
-//   }
-// }
 export const createUser = async (req, res) => {
   try {
-    console.log(
-      "❌❌❌❌❌❌❌❌❌❌❌❌❌❌❌Données reçues par le backend :",
-      JSON.stringify(req.body, null, 2)
-    )
-
     const user = await UserService.createUser(req.body)
-
     res.status(201).json({ message: "Utilisateur créé avec succès", user })
   } catch (error) {
-    console.error(
-      "❌ Erreur lors de la création de l'utilisateur :",
-      error.message
-    )
     res.status(400).json({ message: error.message })
   }
 }
@@ -116,22 +60,15 @@ export const createUser = async (req, res) => {
  */
 export const updateUser = async (req, res) => {
   try {
-    console.log("req.body depuis userController.js", req.body)
     const updatedUser = await UserService.updateUser(req.params.id, req.body)
-    console.log("updatedUser depuis userController.js", updatedUser)
     if (!updatedUser) {
       return res.status(404).json({ message: "Utilisateur introuvable." })
     }
-
     res.status(200).json({
       message: "Utilisateur mis à jour avec succès",
       user: updatedUser,
     })
   } catch (error) {
-    console.error(
-      "❌ Erreur lors de la mise à jour de l'utilisateur :",
-      error.message
-    )
     res.status(400).json({ message: error.message })
   }
 }

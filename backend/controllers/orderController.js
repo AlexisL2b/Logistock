@@ -13,8 +13,6 @@ export const getAllOrders = async (req, res) => {
 // ✅ Ajouter une nouvelle commande avec `details` et `shipment`
 export const addOrder = async (req, res) => {
   try {
-    console.log("📥 Données reçues pour la commande :", req.body)
-
     if (
       !req.body.buyer_id ||
       !req.body.details ||
@@ -40,8 +38,6 @@ export const addOrder = async (req, res) => {
 // ✅ Mettre à jour une commande
 export const updateOrder = async (req, res) => {
   try {
-    console.log("📥 Mise à jour de la commande :", req.body)
-
     const updatedOrder = await OrderService.updateOrder(req.params.id, req.body)
 
     res.json({
@@ -57,7 +53,6 @@ export const updateOrder = async (req, res) => {
 export const getOrdersByBuyer = async (req, res) => {
   try {
     const { buyer_id } = req.params
-    console.log("🔍 Récupération des commandes de :", buyer_id)
 
     const orders = await OrderService.getOrdersByBuyerId(buyer_id)
     res.status(200).json(orders)

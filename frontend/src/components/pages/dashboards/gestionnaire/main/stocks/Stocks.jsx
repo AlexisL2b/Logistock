@@ -94,7 +94,8 @@ export default function Stocks() {
       (selectedSupplier === "" ||
         stock.product_id.supplier_id._id === selectedSupplier)
   )
-
+  console.log("filteredStocks depuis Stocks.jsx", filteredStocks)
+  console.log("stocks depuis Stocks.jsx", stocks)
   return (
     <Box>
       {/* Filtres */}

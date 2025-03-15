@@ -9,7 +9,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     // Suppression de la récupération du token via localStorage
-    console.log("✅ Requête envoyée avec les cookies activés")
+
     return config
   },
   (error) => Promise.reject(error)

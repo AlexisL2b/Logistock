@@ -22,13 +22,9 @@ class AuthService {
       }
 
       // Vérification du mot de passe
-      console.log("🔹 Mot de passe en clair reçu :", password)
-      console.log("🔹 Mot de passe hashé stocké :", user.password)
 
-      console.log("user", user)
       // Vérification du mot de passe
       const isMatch = await bcrypt.compare(password, user.password)
-      console.log("🔹 bcrypt.compare() résultat :", isMatch)
       if (!isMatch) {
         throw new Error("Mot de passe incorrect.")
       }

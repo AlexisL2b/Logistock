@@ -12,7 +12,7 @@ export default function Confirmed() {
   const orders = useSelector((state) => state.orders.list)
   const stocks = useSelector((state) => state.stocks.stocks)
   const [searchTerm, setSearchTerm] = useState("")
-  console.log("orders depuis Confirmed.jsx", orders)
+
   // Références pour stocker les versions précédentes des données
   const prevOrdersRef = useRef(orders)
   const prevStocksRef = useRef(stocks)
@@ -28,14 +28,12 @@ export default function Confirmed() {
     const interval = setInterval(() => {
       // Comparer les commandes et les stocks avec leur état précédent
       if (!_.isEqual(orders, prevOrdersRef.current)) {
-        console.log("🔄 Mise à jour des commandes détectée")
         dispatch(fetchOrders())
         prevOrdersRef.current = orders // Mettre à jour la référence
       } else {
       }
 
       if (!_.isEqual(stocks, prevStocksRef.current)) {
-        console.log("🔄 Mise à jour des stocks détectée")
         dispatch(fetchStocks())
         prevStocksRef.current = stocks // Mettre à jour la référence
       } else {
@@ -45,14 +43,12 @@ export default function Confirmed() {
     return () => clearInterval(interval) // Nettoyage à la suppression du composant
   }, [dispatch, orders, stocks])
 
-  console.log("orders", orders)
-
   const filteredOrders = orders.filter(
     (order) =>
       order.statut === "validée" &&
       order._id.toLowerCase().startsWith(searchTerm.toLowerCase())
   )
-  console.log("filteredOrdersfilteredOrdersfilteredOrders", filteredOrders)
+
   return (
     <Box>
       {/* 🔍 Champ de recherche */}

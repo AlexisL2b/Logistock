@@ -38,7 +38,6 @@ export const addOrderDetails = async (req, res) => {
     }
 
     const orderDetails = req.body
-    console.log("orderDetails from controller", orderDetails)
 
     const result = await orderDetailsService.addOrderDetails(orderDetails)
 

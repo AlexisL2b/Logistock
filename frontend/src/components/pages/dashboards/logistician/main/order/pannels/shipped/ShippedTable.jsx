@@ -36,10 +36,7 @@ function Row({ row }) {
   const transporters = useSelector((state) => state.transporters.list)
   const orderShipments = useSelector((state) => state.orderShipments.list)
   const orders = useSelector((state) => state.orders.list)
-  console.log("orders depuis ShippedTable.jsx", orders)
-  console.log("transporters depuis ShippedTable.jsx", transporters)
-  console.log("orderShipments depuis ShippedTable.jsx", orderShipments)
-  console.log("row depuis ShippedTable.jsx", row)
+
   // dispatch(fetchOrderShipments())
   useEffect(() => {
     dispatch(fetchOrderShipments()) // Assure-toi que l'action est bien dispatchée au chargement
@@ -65,8 +62,8 @@ function Row({ row }) {
     })
     return () => socket.disconnect() // Déconnexion propre
   }, [dispatch])
-  console.log(row)
-  // console.log("row", row)
+
+  //
   return (
     <>
       <TableRow>

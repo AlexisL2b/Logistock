@@ -22,7 +22,7 @@ export default function Orders() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [openDialog, setOpenDialog] = useState(false)
-  console.log(userId)
+
   useEffect(() => {
     const fetchOrdersWithDetails = async () => {
       try {
@@ -32,7 +32,7 @@ export default function Orders() {
         const response = await axiosInstance.get(
           `http://localhost:5000/api/orders/user/${userId}`
         )
-        console.log(response)
+
         setOrders(response.data) // Stocker les commandes
       } catch (err) {
         console.error("Erreur lors de la récupération des commandes :", err)
@@ -43,7 +43,7 @@ export default function Orders() {
 
     fetchOrdersWithDetails()
   }, [userId])
-  console.log(orders)
+
   // 🔍 Filtrer les commandes en fonction de la recherche
   const filteredOrders = orders?.filter((order) =>
     order._id.toLowerCase().includes(searchTerm.toLowerCase())

@@ -2,7 +2,6 @@ import OrderShipmentDAO from "../dao/orderShipmentDAO.js"
 
 class OrderShipmentService {
   async getAllOrderShipments() {
-    console.log("🟢 🟢 🟢 🟢 🟢 🟢🟢 🟢 🟢 🟢 🟢 🟢🟢 🟢 🟢 🟢 🟢 🟢 ")
     return await OrderShipmentDAO.findAll()
   }
 

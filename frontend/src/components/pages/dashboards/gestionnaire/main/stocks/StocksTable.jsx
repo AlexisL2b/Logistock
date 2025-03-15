@@ -25,6 +25,10 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp"
 import axiosInstance from "../../../../../../axiosConfig"
 import { useEffect, useState } from "react"
+import { useDispatch } from "react-redux"
+import { incrementStock } from "../../../../../../redux/api/stockApi"
+import { incrementStocks } from "../../../../../../redux/slices/stockSlice"
+import { createLog } from "../../../../../../redux/slices/stockLogSlice"
 
 const getEventStyle = (event) => {
   const styles = {
@@ -164,7 +168,7 @@ export default function CollapsibleTable({ stocks }) {
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const theme = useTheme()
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"))
-
+  const dispatch = useDispatch()
   const handleOpenModal = (stock) => {
     setSelectedStock(stock)
     setReassortQuantity("")
@@ -174,6 +178,55 @@ export default function CollapsibleTable({ stocks }) {
   const handleCloseModal = () => {
     setSelectedStock(null)
     setModalOpen(false)
+    console.log(reassortQuantity)
+  }
+  const handleConfirmReassort = async () => {
+    const quantity = parseInt(reassortQuantity, 10)
+
+    if (!reassortQuantity || isNaN(quantity) || quantity < 1) {
+      setError("Veuillez entrer une quantité valide (≥ 1).")
+      return
+    }
+
+    try {
+      await dispatch(
+        incrementStocks({
+          stockId: selectedStock._id,
+          quantity: reassortQuantity,
+        })
+      )
+      // await axiosInstance.put(`/stocks/increment/${selectedStock._id}`, {
+      //   quantity: quantity,
+      // })
+
+      await dispatch(
+        createLog({
+          stock_id: selectedStock._id,
+          event: "entrée",
+          quantity: quantity, // Prend la valeur trouvée ou 0 par défaut
+        })
+      )
+      // await axiosInstance.post(`/stock_logs`, {
+      //   quantity: quantity,
+      //   event: "entrée",
+      //   stock_id: selectedStock._id,
+      // })
+
+      // ✅ Mise à jour locale du stock sans recharger la page
+      setStocksData((prevStocks) =>
+        prevStocks.map((stock) =>
+          stock._id === selectedStock._id
+            ? { ...stock, quantity: stock.quantity + quantity }
+            : stock
+        )
+      )
+
+      setSnackbarOpen(true) // ✅ Afficher la Snackbar après succès
+    } catch (error) {
+      alert("Une erreur s'est produite : " + error.message)
+    }
+
+    handleCloseModal()
   }
 
   return (
@@ -211,7 +264,7 @@ export default function CollapsibleTable({ stocks }) {
           <Button onClick={handleCloseModal} variant="outlined">
             Annuler
           </Button>
-          <Button onClick={handleCloseModal} variant="contained">
+          <Button onClick={handleConfirmReassort} variant="contained">
             Confirmer
           </Button>
         </Box>

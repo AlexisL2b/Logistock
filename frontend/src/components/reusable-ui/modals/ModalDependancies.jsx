@@ -29,6 +29,7 @@ export default function BasicModal({
   title = "Modifier l'élément",
   objectData = {},
   dropdownData = {},
+  edit,
 }) {
   const [formData, setFormData] = useState({
     name: "",
@@ -88,7 +89,6 @@ export default function BasicModal({
 
   const handleSubmit = () => {
     if (validateForm()) {
-      console.log("Données envoyées :", { ...formData, _id: objectData._id })
       onSubmit({ ...formData, _id: objectData._id })
     }
   }
@@ -131,16 +131,21 @@ export default function BasicModal({
             helperText={errors.price}
             fullWidth
           />
-          <TextField
-            label="Quantité Disponible"
-            name="quantity"
-            type="number"
-            value={formData.quantity}
-            onChange={handleInputChange}
-            error={!!errors.quantity}
-            helperText={errors.quantity}
-            fullWidth
-          />
+
+          {!edit ? (
+            <TextField
+              label="Quantité Disponible"
+              name="quantity"
+              type="number"
+              value={formData.quantity}
+              onChange={handleInputChange}
+              error={!!errors.quantity}
+              helperText={errors.quantity}
+              fullWidth
+            />
+          ) : (
+            ""
+          )}
           <TextField
             label="Description"
             name="description"

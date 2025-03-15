@@ -16,7 +16,6 @@ const authenticate = async (req, res, next) => {
     const customClaims = userRecord.customClaims || {}
 
     // 📌 Ajouter les informations dans `req.user`
-    console.log("📌📌📌📌 `req.user`", customClaims.role)
 
     req.user = {
       uid: decodedToken.uid,

@@ -69,7 +69,6 @@ export default function BasicTable({
   const handleEditUser = (user) => {
     setSelectedUser(user) // Stocke les infos de l'utilisateur sélectionné
     setOpenEditDialog(true) // Ouvre la modale d'édition
-    console.log("user depuis BasicTable.jsx", user)
   }
 
   const handleUserUpdated = () => {

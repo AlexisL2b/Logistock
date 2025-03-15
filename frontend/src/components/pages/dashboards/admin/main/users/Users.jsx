@@ -14,7 +14,6 @@ export default function Users() {
   useEffect(() => {
     dispatch(fetchUsers()) // Charger les stocks une seule fois
   }, [dispatch])
-  console.log("users", users)
 
   // Fonction pour récupérer les utilisateurs depuis l'API
 
@@ -54,7 +53,7 @@ export default function Users() {
     point_vente_nom: "Point de vente",
     role: "Role",
   }
-  console.log(usersFiltered)
+
   return (
     <Box>
       {/* 🔍 Champ de recherche multi-critères */}

@@ -42,9 +42,9 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
   const onSubmit = async (data) => {
     try {
       const { confirmPassword, ...userData } = data
-      console.log("userData depuis SignUpForm.jsx", userData)
+
       const roleToAdd = roles.find((role) => role._id === userData.role)
-      console.log("roleToAdd", roleToAdd)
+
       const salePointToAdd = userData.sale_point_id
         ? salesPoints.find(
             (salesPoint) => salesPoint._id === userData.sale_point_id
@@ -74,8 +74,7 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
       onUserAdded()
       onClose()
     } catch (error) {
-      console.log("error depuis SignUpForm.jsx", error)
-      // console.log(error)
+      //
       // setSnackbar({
       //   open: true,
       //   message: error.message || "Une erreur est survenue.",

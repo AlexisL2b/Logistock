@@ -34,7 +34,6 @@ export default function Categories() {
     name: "Nom",
   }
   const fields = { name: { type: "text", label: "Nom", required: true } }
-  console.log("data: ", categories)
 
   // 🔍 Filtrage multi-critères : Nom, ID
   const filteredCategories = categories.filter((category) => {

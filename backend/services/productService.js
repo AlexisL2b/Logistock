@@ -33,6 +33,7 @@ class ProductService {
         supplier_id: sanitize(productData.supplier_id),
         quantity: sanitize(productData.quantity),
       }
+      const { quantity, ...productDataSanitized } = sanitizedData
 
       // 🔍 Validation des champs
       if (
@@ -62,12 +63,9 @@ class ProductService {
         throw new Error("La quantité doit être un nombre entier positif.")
       }
 
-      console.log("🛡️ Données après sanitization et validation", sanitizedData)
-
       // 🔍 Vérifier si le produit existe déjà
       let product = await ProductDAO.findByReference(sanitizedData.reference)
       if (product) {
-        console.log("🔄 Produit existant, mise à jour du stock")
         let existingStock = await StockDAO.findByProductId(product._id)
         if (existingStock) {
           console.log(
@@ -78,7 +76,6 @@ class ProductService {
             sanitizedData.quantity
           )
         } else {
-          console.log("🆕 Création d'un nouveau stock")
           let stock = await StockDAO.createStock({
             product_id: product._id,
             quantity: sanitizedData.quantity,
@@ -95,8 +92,11 @@ class ProductService {
       }
 
       // 🆕 Si le produit n'existe pas, on le crée avec un stock initial
-      console.log("🆕 Création d'un nouveau produit")
-      product = await ProductDAO.create(sanitizedData)
+      console.log(
+        "productDataSanitized depuis productService.js",
+        productDataSanitized
+      )
+      product = await ProductDAO.create(productDataSanitized)
 
       let stock = await StockDAO.createStock({
         product_id: product._id,
@@ -152,8 +152,6 @@ class ProductService {
 
   // ✅ Supprimer un produit avec sanitization
   async deleteProduct(productId) {
-    console.log("🔴 Suppression du produit ID:", productId)
-
     const sanitizedId = sanitize(productId)
     const stockToDelete = await StockDAO.findByProductId(sanitizedId)
 

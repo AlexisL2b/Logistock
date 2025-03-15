@@ -27,17 +27,12 @@ function App() {
   const dispatch = useDispatch()
   const socket = io("http://localhost:5000")
   useEffect(() => {
-    console.log("🔹 Récupération du profil utilisateur...")
     dispatch(fetchUserProfile()) // 🔹 Charger le profil utilisateur au montage
   }, [dispatch])
   useEffect(() => {
-    socket.on("connection", () => {
-      console.log(`🟢 Connecté au serveur WebSocket avec l'ID : ${socket.id}`)
-    })
+    socket.on("connection", () => {})
 
-    socket.on("disconnect", () => {
-      console.log("🔴 Déconnecté du serveur WebSocket")
-    })
+    socket.on("disconnect", () => {})
 
     return () => {
       socket.off("connection")

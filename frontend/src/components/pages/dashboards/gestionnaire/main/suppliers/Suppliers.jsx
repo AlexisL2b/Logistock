@@ -45,8 +45,6 @@ export default function Suppliers() {
     telephone: "Téléphone",
   }
 
-  console.log("data: ", suppliers)
-
   // 🔍 Filtrage multi-critères : Nom, ID, Email, Téléphone
   const filteredSuppliers = suppliers.filter((supplier) => {
     const searchLower = searchTerm.toLowerCase()

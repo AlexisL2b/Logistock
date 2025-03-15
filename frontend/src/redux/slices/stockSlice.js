@@ -5,6 +5,7 @@ import {
   getStockByProductId,
   getStockWithProducts,
   updateStockById,
+  incrementStock,
 } from "../api/stockApi"
 
 // Thunk pour récupérer le stock d'un produit
@@ -40,7 +41,7 @@ export const fetchStocksWithProduct = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await getStockWithProducts()
-      console.log("response from slice", response)
+
       return response // Retournez directement le tableau des stocks
     } catch (error) {
       console.error(
@@ -56,10 +57,25 @@ export const decrementStock = createAsyncThunk(
   async (orderdetails, { rejectWithValue }) => {
     try {
       const response = await decrementStocks(orderdetails)
-      console.log("response depuis stockSlice.js", response)
+
       return response
     } catch (error) {
       console.error("Erreur lors de la décrémentation des stocks :", error)
+      return rejectWithValue(error.response?.data || error.message)
+    }
+  }
+)
+export const incrementStocks = createAsyncThunk(
+  "stocks/incrementStocks",
+  async ({ stockId, quantity }, { rejectWithValue }) => {
+    try {
+      console.log("stockId depuis stockSlice.js", stockId)
+      console.log("quantity depuis stockSlice.js", quantity)
+      const response = await incrementStock(stockId, quantity)
+
+      return response
+    } catch (error) {
+      console.error("Erreur lors de l'incrementation' des stocks :", error)
       return rejectWithValue(error.response?.data || error.message)
     }
   }
@@ -77,7 +93,7 @@ const stockSlice = createSlice({
     updateStock: (state, action) => {
       const stockId = action.payload.stockId
       const stockUpdates = action.payload.stockUpdates
-      console.log("state from slice", state)
+
       // const stockIndex = state.stocksProducts.findIndex(
       //   (stock) => stock._id === stockId
       // )
@@ -141,7 +157,7 @@ const stockSlice = createSlice({
       })
       .addCase(decrementStock.fulfilled, (state, action) => {
         state.status = "succeeded"
-        console.log("action depuis stockSlice.js", action)
+
         const { productId, updatedStock } = action.payload
         const stockIndex = state.items.findIndex(
           (stock) => stock.product_id === productId
@@ -151,6 +167,24 @@ const stockSlice = createSlice({
         }
       })
       .addCase(decrementStock.rejected, (state, action) => {
+        state.status = "failed"
+        state.error = action.payload
+      })
+      .addCase(incrementStocks.pending, (state) => {
+        state.status = "loading"
+      })
+      .addCase(incrementStocks.fulfilled, (state, action) => {
+        state.status = "succeeded"
+
+        // const { productId, updatedStock } = action.payload
+        // const stockIndex = state.items.findIndex(
+        //   (stock) => stock.product_id === productId
+        // )
+        // if (stockIndex !== -1) {
+        //   state.items[stockIndex] = updatedStock
+        // }
+      })
+      .addCase(incrementStocks.rejected, (state, action) => {
         state.status = "failed"
         state.error = action.payload
       })

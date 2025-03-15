@@ -20,9 +20,7 @@ export default function LoginForm() {
         { email, password },
         { withCredentials: true } // 🔥 Nécessaire pour gérer les cookies HTTPOnly
       )
-      console.log("🔹 Mot de passe envoyé au backend :", password)
 
-      console.log("response from login", response)
       saveToLocalStorage("user", response.data.user)
       const { user } = response.data
       if (!user) {

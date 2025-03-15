@@ -28,6 +28,8 @@ import {
 
 import BasicModal from "../modals/BasicModal" // Import du composant modal
 import axiosInstance from "../../../axiosConfig"
+import { showNotification } from "../../../redux/slices/notificationSlice"
+import { useDispatch } from "react-redux"
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) return -1
@@ -122,7 +124,7 @@ export default function EnhancedTable({
   // État pour gérer la modal
   const [openModal, setOpenModal] = useState(false)
   const [selectedRow, setSelectedRow] = useState(null)
-
+  const dispatch = useDispatch()
   // Générer un objet vide basé sur la structure
   const generateEmptyObject = () => {
     if (data.length === 0) return {}
@@ -213,12 +215,19 @@ export default function EnhancedTable({
       if (onDataChange) {
         onDataChange()
       }
-    } catch (error) {
-      setMessage(
-        error.response?.data?.message || "Erreur lors de la suppression."
+      dispatch(
+        showNotification({
+          message: { coll } + " supprimé avec succès !",
+          severity: "success",
+        })
       )
-      setSeverity("error")
-      setShowAlert(true)
+    } catch (error) {
+      dispatch(
+        showNotification({
+          message: error.response.data.message || "Une erreur est survenue.",
+          severity: "error",
+        })
+      )
     }
 
     setOpenConfirmDialog(false)
@@ -230,7 +239,7 @@ export default function EnhancedTable({
         alert("Aucun élément sélectionné pour suppression !")
         return
       }
-      console.log("coll", coll)
+
       for (const id of selected) {
         const res = await axiosInstance.delete(
           `http://localhost:5000/api/${coll}/${id}`
@@ -248,11 +257,12 @@ export default function EnhancedTable({
       }
     } catch (error) {
       if (error.response) {
-        setMessage(
-          error.response.data.message || "Erreur lors de la suppression."
+        dispatch(
+          showNotification({
+            message: error.message || "Une erreur est survenue.",
+            severity: "error",
+          })
         )
-        setSeverity("error")
-        setShowAlert(true)
       } else if (error.request) {
         alert(
           "Impossible de contacter le serveur. Vérifiez votre connexion réseau."
@@ -310,14 +320,12 @@ export default function EnhancedTable({
         onDataChange()
       }
     } catch (error) {
-      console.error("Erreur lors de l'opération :", error)
-
-      // Gestion des erreurs et affichage du message
-      setMessage(
-        error.response?.data?.message || "Erreur lors de la modification."
+      dispatch(
+        showNotification({
+          message: error.response.data.errors[0] || "Une erreur est survenue.",
+          severity: "error",
+        })
       )
-      setSeverity("error")
-      setShowAlert(true)
     }
   }
 

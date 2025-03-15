@@ -20,6 +20,10 @@ export const productSchema = Joi.object({
     "number.min": "Le prix ne peut pas être négatif.",
     "any.required": "Le prix est obligatoire.",
   }),
+  quantity: Joi.number().min(0).required().messages({
+    "number.min": "La quantité ne peut pas être négative.",
+    "any.required": "La quantité  est obligatoire.",
+  }),
   category_id: Joi.string()
     .regex(/^[0-9a-fA-F]{24}$/)
     .required()

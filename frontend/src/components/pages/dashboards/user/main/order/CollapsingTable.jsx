@@ -34,7 +34,7 @@ function Row({ row, onStatusUpdate }) {
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"))
   const dispatch = useDispatch()
-  console.log("orderShipments depuis CollapsingTable.jsx", orderShipments)
+
   // Définition des couleurs pour les statuts
   const color = {
     "en cours": "orange",
@@ -46,7 +46,7 @@ function Row({ row, onStatusUpdate }) {
   useEffect(() => {
     dispatch(fetchOrderShipments())
   }, [dispatch])
-  console.log("row depuis CollapsingTable.jsx", row)
+
   const handleReception = async () => {
     try {
       const response = await dispatch(

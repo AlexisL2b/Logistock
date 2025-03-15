@@ -3,7 +3,7 @@ import axiosInstance from "../../axiosConfig"
 // Récupérer les produits
 export const getProducts = async () => {
   const response = await axiosInstance.get("http://localhost:5000/api/products")
-  console.log("response from apiSlice", response)
+
   return response.data
 }
 

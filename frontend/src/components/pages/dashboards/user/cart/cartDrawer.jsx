@@ -29,14 +29,12 @@ export default function CartDrawer({
   onRemove,
 }) {
   const user = getFromLocalStorage("user")
-  console.log("user", user)
+
   const userId = useSelector((state) => state.auth.user) // Récupération de l'ID utilisateur via Redux
   const { password, createdAt, updatedAt, __v, ...userInfos } = userId
   const dispatch = useDispatch()
-  console.log("userId", userInfos)
+
   const [orderId, setOrderId] = useState(null)
-  console.log("cartItems from cartDrawer.jsx", cartItems)
-  console.log("userId from cartDrawer.jsx", user._id)
 
   const handleCheckout = async () => {
     try {
