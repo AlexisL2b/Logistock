@@ -57,9 +57,12 @@ function Row({ row }) {
     if (!window.confirm("Confirmez-vous l'annulation de cette commande ?"))
       return
     try {
-      await axiosInstance.put(`http://localhost:5000/api/orders/${row._id}`, {
-        statut: "annulée",
-      })
+      await axiosInstance.put(
+        `https://intranet.logistock/api/orders/${row._id}`,
+        {
+          statut: "annulée",
+        }
+      )
 
       dispatch(fetchOrders())
       setModalOpen(false)

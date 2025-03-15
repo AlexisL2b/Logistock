@@ -42,7 +42,7 @@ function Row({ row }) {
 
   // Écouter les mises à jour en temps réel via Socket.IO
   useEffect(() => {
-    const socket = io("http://localhost:5000") // Connexion au backend
+    const socket = io("https://intranet.logistock") // Connexion au backend
 
     // Réception des mises à jour des stocks
     socket.on("stocksUpdated", (updatedStocks) => {

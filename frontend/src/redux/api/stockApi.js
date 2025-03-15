@@ -3,7 +3,7 @@ import axiosInstance from "../../axiosConfig"
 // Récupérer un stock par l'ID du produit
 export const getStockByProductId = async (productId) => {
   const response = await axiosInstance.get(
-    `http://localhost:5000/api/stocks/product/${productId}`
+    `https://intranet.logistock/api/stocks/product/${productId}`
   )
   return response.data
 }
@@ -11,7 +11,7 @@ export const getStockByProductId = async (productId) => {
 // Mettre à jour un stock par son ID
 export const updateStockById = async (stockId, stockUpdates) => {
   const response = await axiosInstance.put(
-    `http://localhost:5000/api/stocks/${stockId}`,
+    `https://intranet.logistock/api/stocks/${stockId}`,
     stockUpdates
   )
   return response.data
@@ -19,13 +19,13 @@ export const updateStockById = async (stockId, stockUpdates) => {
 
 export const getStock = async () => {
   const response = await axiosInstance.get(
-    `http://localhost:5000/api/stocks/all`
+    `https://intranet.logistock/api/stocks/all`
   )
   return response.data
 }
 export const decrementStocks = async (orderDetails) => {
   const response = await axiosInstance.post(
-    `http://localhost:5000/api/stocks/decrement`,
+    `https://intranet.logistock/api/stocks/decrement`,
     orderDetails
   )
   return response.data
@@ -33,7 +33,7 @@ export const decrementStocks = async (orderDetails) => {
 
 export const getStockWithProducts = async () => {
   const response = await axiosInstance.get(
-    "http://localhost:5000/api/stocks/stocks-with-products"
+    "https://intranet.logistock/api/stocks/stocks-with-products"
   )
   return response.data.data
 }

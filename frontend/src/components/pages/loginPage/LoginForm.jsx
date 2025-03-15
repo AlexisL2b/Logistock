@@ -16,7 +16,7 @@ export default function LoginForm() {
   const handleLogin = async () => {
     try {
       const response = await axiosInstance.post(
-        "http://localhost:5000/api/auth/login",
+        "https://intranet.logistock/api/auth/login",
         { email, password },
         { withCredentials: true } // 🔥 Nécessaire pour gérer les cookies HTTPOnly
       )

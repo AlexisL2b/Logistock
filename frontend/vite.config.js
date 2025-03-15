@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:5000", // Adresse de votre backend
+        target: "https://intranet.logistock", // Adresse de votre backend
         changeOrigin: true,
         secure: false,
       },

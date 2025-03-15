@@ -196,7 +196,7 @@ export default function EnhancedTable({
 
       for (const id of selected) {
         const res = await axiosInstance.delete(
-          `http://localhost:5000/api/${coll}/${id}`
+          `https://intranet.logistock/api/${coll}/${id}`
         )
         //(`Élément avec l'ID ${id} supprimé`)
         setMessage(res.data.message)
@@ -265,7 +265,7 @@ export default function EnhancedTable({
           updatedData
         )
         await axiosInstance.put(
-          `http://localhost:5000/api/${coll}/${updatedData._id}`,
+          `https://intranet.logistock/api/${coll}/${updatedData._id}`,
           dataToSend
         )
         dispatch(
@@ -280,7 +280,7 @@ export default function EnhancedTable({
           dataToSend
         )
         await axiosInstance.post(
-          `http://localhost:5000/api/${coll}`,
+          `https://intranet.logistock/api/${coll}`,
           updatedData
         )
 

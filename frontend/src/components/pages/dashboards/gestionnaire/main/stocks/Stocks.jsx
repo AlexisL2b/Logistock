@@ -56,7 +56,7 @@ export default function Stocks() {
   }, [])
 
   useEffect(() => {
-    const socket = io("http://localhost:5000")
+    const socket = io("https://intranet.logistock")
 
     socket.on("stocksUpdated", (updatedStocks) => {
       console.log(

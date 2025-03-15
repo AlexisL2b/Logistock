@@ -30,7 +30,7 @@ export default function Orders() {
 
         // Récupérer les commandes depuis le backend
         const response = await axiosInstance.get(
-          `http://localhost:5000/api/orders/user/${userId}`
+          `https://intranet.logistock/api/orders/user/${userId}`
         )
 
         setOrders(response.data) // Stocker les commandes
@@ -67,7 +67,7 @@ export default function Orders() {
 
     try {
       await axiosInstance.put(
-        `http://localhost:5000/api/orders/${selectedOrder._id}`
+        `https://intranet.logistock/api/orders/${selectedOrder._id}`
       )
 
       // Mettre à jour le statut de la commande

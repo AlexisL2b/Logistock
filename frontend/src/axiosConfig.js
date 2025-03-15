@@ -1,7 +1,7 @@
 import axios from "axios"
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "https://intranet.logistock/api",
   withCredentials: true,
   // 🔥 Active l'envoi des cookies automatiquement
 })

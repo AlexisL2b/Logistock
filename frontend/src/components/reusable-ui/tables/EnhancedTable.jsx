@@ -204,7 +204,7 @@ export default function EnhancedTable({
     try {
       for (const id of selected) {
         const res = await axiosInstance.delete(
-          `http://localhost:5000/api/${coll}/${id}`
+          `https://intranet.logistock/api/${coll}/${id}`
         )
         setMessage(res.data.message)
         setSeverity("success")
@@ -242,7 +242,7 @@ export default function EnhancedTable({
 
       for (const id of selected) {
         const res = await axiosInstance.delete(
-          `http://localhost:5000/api/${coll}/${id}`
+          `https://intranet.logistock/api/${coll}/${id}`
         )
         //(`Élément avec l'ID ${id} supprimé`)
         setMessage(res.data.message)
@@ -295,18 +295,18 @@ export default function EnhancedTable({
           Object.entries(updatedData).filter(([key]) => key !== "_id")
         )
         const res = await axiosInstance.put(
-          `http://localhost:5000/api/${coll}/${updatedData._id}`,
+          `https://intranet.logistock/api/${coll}/${updatedData._id}`,
           updateDataToPut
         )
         setMessage(res.data.message || "Opération réussie")
         setSeverity("success")
         setShowAlert(true)
 
-        //(`http://localhost:5000/api/${coll}/${updatedData._id}`)
+        //(`https://intranet.logistock/api/${coll}/${updatedData._id}`)
         // //("Réponse de mise à jour :", res)
       } else {
         const res = await axiosInstance.post(
-          `http://localhost:5000/api/${coll}`,
+          `https://intranet.logistock/api/${coll}`,
           updatedData
         )
         setMessage(res.data.message || "Opération réussie")

@@ -2,14 +2,16 @@ import axiosInstance from "../../axiosConfig"
 
 // Récupérer tous les rôles
 export const getRoles = async () => {
-  const response = await axiosInstance.get("http://localhost:5000/api/roles/")
+  const response = await axiosInstance.get(
+    "https://intranet.logistock/api/roles/"
+  )
   return response.data
 }
 
 // Récupérer un rôle par ID
 export const getRoleById = async (roleId) => {
   const response = await axiosInstance.get(
-    `http://localhost:5000/api/roles/${roleId}`
+    `https://intranet.logistock/api/roles/${roleId}`
   )
   return response.data
 }
@@ -17,7 +19,7 @@ export const getRoleById = async (roleId) => {
 // Ajouter un nouveau rôle
 export const addRole = async (roleData) => {
   const response = await axiosInstance.post(
-    "http://localhost:5000/api/roles",
+    "https://intranet.logistock/api/roles",
     roleData
   )
   return response.data
@@ -26,7 +28,7 @@ export const addRole = async (roleData) => {
 // Mettre à jour un rôle par ID
 export const updateRoleById = async (roleId, roleUpdates) => {
   const response = await axiosInstance.put(
-    `http://localhost:5000/api/roles/${roleId}`,
+    `https://intranet.logistock/api/roles/${roleId}`,
     roleUpdates
   )
   return response.data
@@ -35,7 +37,7 @@ export const updateRoleById = async (roleId, roleUpdates) => {
 // Supprimer un rôle par ID
 export const deleteRoleById = async (roleId) => {
   const response = await axiosInstance.delete(
-    `http://localhost:5000/api/roles/${roleId}`
+    `https://intranet.logistock/api/roles/${roleId}`
   )
   return response.data
 }

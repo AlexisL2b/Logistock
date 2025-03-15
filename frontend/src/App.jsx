@@ -25,7 +25,7 @@ import NotificationSnackbar from "./components/error/notificationSnackbar"
 
 function App() {
   const dispatch = useDispatch()
-  const socket = io("http://localhost:5000")
+  const socket = io("https://intranet.logistock")
   useEffect(() => {
     dispatch(fetchUserProfile()) // 🔹 Charger le profil utilisateur au montage
   }, [dispatch])

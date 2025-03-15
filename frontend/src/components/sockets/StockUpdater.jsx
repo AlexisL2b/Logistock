@@ -4,7 +4,7 @@ import { fetchStocks, updateStock } from "../../redux/slices/stockSlice"
 import { io } from "socket.io-client"
 
 // 🔥 Évite de recréer plusieurs fois la connexion
-const socket = io("http://localhost:5000", { autoConnect: false })
+const socket = io("https://intranet.logistock", { autoConnect: false })
 
 const StockUpdater = () => {
   const dispatch = useDispatch()

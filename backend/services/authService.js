@@ -39,9 +39,9 @@ class AuthService {
       // 🔹 Stocker le token dans un Cookie HTTPOnly sécurisé
       res.cookie("authToken", token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "Strict",
-        maxAge: 3600000, // Expiration : 1 heure
+        secure: true, // ✅ Obligatoire pour SameSite=None
+        sameSite: "None", // ✅ Permet l’envoi en contexte intersite
+        maxAge: 3600000, // 1 heure
       })
 
       return {

@@ -28,17 +28,23 @@ dotenv.config()
 connectDB()
 const app = express()
 // Pour lire les JSON
+app.use((req, res, next) => {
+  console.log(`🔍 Requête reçue : ${req.method} ${req.url}`)
+  next()
+})
+
 app.use(cookieParser())
 
 // ✅ Configuration CORS unique (placée AVANT les routes)
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["https://intranet.logistock", "http://localhost:5173"], // Autorise l'accès depuis le frontend
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 )
+
 console.log("✅ WebSocket Server initialisé !")
 const server = createServer(app)
 
@@ -97,6 +103,6 @@ app.use((req, res, next) => {
   res.status(404).json({ message: "Route non trouvée" })
 })
 const PORT = process.env.PORT || 5000
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Serveur démarré sur le port ${PORT}`)
 })

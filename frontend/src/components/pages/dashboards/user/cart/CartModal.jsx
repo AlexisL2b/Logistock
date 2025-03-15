@@ -32,7 +32,7 @@ export default function CartModal({
     try {
       if (cartItems.length > 0) {
         const responseOrder = await axiosInstance.post(
-          "http://localhost:5000/api/orders",
+          "https://intranet.logistock/api/orders",
           { acheteur_id: userId }
         )
         const orderId = responseOrder.data._id
@@ -53,7 +53,7 @@ export default function CartModal({
             reference: reference,
           }
           const responseOrder = await axiosInstance.post(
-            "http://localhost:5000/api/order_details",
+            "https://intranet.logistock/api/order_details",
             orderDetailToAdd
           )
           dispatch(clearCart())
