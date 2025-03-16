@@ -2,7 +2,7 @@ import express from "express"
 import {
   createUser,
   loginUser,
-  getUserProfile,
+  // getUserProfile,
 } from "../controllers/authController.js"
 import validate from "../middlewares/validate.js"
 import { protect } from "../middlewares/authMiddleware.js"
@@ -16,6 +16,6 @@ router.post("/login", validate(loginSchema), loginUser)
 /**
  * 🔹 Route protégée : Récupération du profil utilisateur
  */
-router.get("/profile", protect, getUserProfile)
+// router.get("/profile", protect, getUserProfile)
 
 export default router

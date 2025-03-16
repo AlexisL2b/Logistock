@@ -24,7 +24,6 @@ export default function Transporters() {
   const [usersFiltered, setUsersFiltered] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedPointVente, setSelectedPointVente] = useState("")
-  const users2 = useSelector((state) => state)
 
   const salesPoints = useSelector((state) => state.salesPoints.list)
   const dispatch = useDispatch()

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --detectOpenHandles --runInBand"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +24,7 @@
     "express-validator": "^7.2.1",
     "firebase": "^11.1.0",
     "firebase-admin": "^13.0.2",
+    "helmet": "^8.0.0",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
@@ -31,5 +32,20 @@
     "mongoose": "^8.9.3",
     "socket.io": "^4.8.1",
     "stripe": "^17.6.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "mongodb-memory-server": "^10.1.4",
+    "supertest": "^7.0.0"
+  },
+  "jest": {
+    "transform": {},
+    "verbose": true,
+    "testTimeout": 10000,
+    "collectCoverage": true,
+    "coverageReporters": [
+      "text",
+      "lcov"
+    ]
   }
 }

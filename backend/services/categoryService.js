@@ -8,7 +8,7 @@ class CategoryService {
   }
 
   async getCategoryById(id) {
-    const category = await CategoryDAO.findById(id)
+    const category = await CategoryDAO.getById(id)
     if (!category) {
       throw new Error("Catégorie introuvable")
     }
@@ -53,12 +53,12 @@ class CategoryService {
 
   async deleteCategory(id) {
     // Vérifier si la catégorie est associée à des produits avant de supprimer
-    const products = await productDAO.findByCategoryId(id)
+    const products = (await productDAO.findByCategoryId(id)) || []
 
     if (products.length > 0) {
       const noms = products.map((p) => p.name).join(", ")
       throw new Error(
-        `Impossible de supprimer la catégorie. Elle est associée aux produits suivants : ${noms}`
+        `Impossible de supprimer cette catégorie, elle est encore utilisée par des produits.`
       )
     }
 

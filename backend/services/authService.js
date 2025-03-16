@@ -67,21 +67,21 @@ class AuthService {
   /**
    * 🔹 Récupérer le profil utilisateur avec son rôle
    */
-  async getUserProfile(userId) {
-    try {
-      const user = await User.findById(userId)
-        .populate("role_id", "nom") // Récupérer le rôle et ses permissions
-        .populate("point_vente_id", "nom adresse")
+  //   async getUserProfile(userId) {
+  //     try {
+  //       const user = await User.findById(userId)
+  //         .populate("role_id", "nom") // Récupérer le rôle et ses permissions
+  //         .populate("point_vente_id", "nom adresse")
 
-      if (!user) {
-        throw new Error("Utilisateur introuvable.")
-      }
+  //       if (!user) {
+  //         throw new Error("Utilisateur introuvable.")
+  //       }
 
-      return user
-    } catch (error) {
-      throw new Error(error.message)
-    }
-  }
+  //       return user
+  //     } catch (error) {
+  //       throw new Error(error.message)
+  //     }
+  //   }
 }
 
 export default new AuthService()

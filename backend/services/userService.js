@@ -25,8 +25,14 @@ class UserService {
         throw new Error("L'adresse e-mail est déjà utilisée.")
       }
 
-      if (!userData.role?._id || !userData.sales_point?._id) {
-        throw new Error("Le rôle et le point de vente sont obligatoires.")
+      if (!userData.role?._id) {
+        throw new Error("Le rôle est obligatoire.")
+      }
+      if (
+        userData.role._id === "677cf977b39853e4a17727e3" &&
+        !userData.sale_point
+      ) {
+        throw new Error("Le point de vente est obligatoire pour les acheteurs.")
       }
 
       // Conversion des `ObjectId`

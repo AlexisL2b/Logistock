@@ -103,29 +103,6 @@ export default function Orders() {
 
       {/* 📋 Table filtrée */}
       <CollapsingTable data={filteredOrders} onConfirm={handleOpenDialog} />
-
-      {/* 📦 Dialog de confirmation */}
-      {/* <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>Confirmation</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Confirmez-vous la réception de cette commande ?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="secondary">
-            Annuler
-          </Button>
-          <Button
-            onClick={handleConfirmReception}
-            // onClick={handleConfirmReception}
-            color="primary"
-            variant="contained"
-          >
-            Confirmer
-          </Button>
-        </DialogActions>
-      </Dialog> */}
     </Box>
   )
 }

@@ -86,15 +86,19 @@ export default function Products() {
       {/* 🎛️ Filtres */}
       <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
         <CustomSelect
-          inputLabel="Filtrer par Catégorie"
+          inputLabel="Catégorie"
+          selectLabel="Catégorie"
+          selectId="filtreCategorie"
           defaultMenuItemLabel="Toutes les catégories"
           menuItems={data.categories}
           selectedValue={filters.selectedCategory}
           onChange={handleFilterChange("selectedCategory")}
         />
         <CustomSelect
-          inputLabel="Filtrer par Fournisseur"
+          inputLabel="Fournisseur"
           defaultMenuItemLabel="Tous les fournisseurs"
+          selectLabel="Fournisseur"
+          selectId="filtreFournisseur"
           menuItems={data.suppliers}
           selectedValue={filters.selectedSupplier}
           onChange={handleFilterChange("selectedSupplier")}

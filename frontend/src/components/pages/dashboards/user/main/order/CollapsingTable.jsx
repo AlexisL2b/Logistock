@@ -63,6 +63,7 @@ function Row({ row, onStatusUpdate }) {
       console.error("Erreur lors de la mise à jour du statut :", error)
     }
   }
+  console.log("row depuis CollapsingTable.jsx", row)
 
   return (
     <>
@@ -79,11 +80,14 @@ function Row({ row, onStatusUpdate }) {
         <TableCell>{row._id}</TableCell>
         <TableCell>{new Date(row.createdAt).toLocaleString()}</TableCell>
         <TableCell>
-          {new Date(
-            orderShipments?.find(
-              (order) => order.order_id._id === row._id
-            )?.date_shipment
-          ).toLocaleString()}
+          {orderShipments?.find((order) => order.order_id._id === row._id)
+            ?.date_shipment
+            ? new Date(
+                orderShipments?.find(
+                  (order) => order.order_id._id === row._id
+                )?.date_shipment
+              ).toLocaleString()
+            : "En attente d'expédition"}
         </TableCell>
         <TableCell
           sx={{ color: color[row.statut] || "black", fontWeight: "700" }}
