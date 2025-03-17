@@ -57,9 +57,18 @@ function Row({ row }) {
     if (!window.confirm("Confirmez-vous l'annulation de cette commande ?"))
       return
     try {
-      await axiosInstance.put(`http://localhost:5000/api/orders/${row._id}`, {
-        statut: "annulée",
-      })
+      // await axiosInstance.put(`http://localhost:5000/api/orders/${row._id}`, {
+      //   statut: "annulée",
+      // })
+      await dispatch(
+        modifyOrder({
+          orderId: row._id,
+          orderData: {
+            statut: "annulée",
+            canceledAt: new Date(),
+          },
+        })
+      )
 
       dispatch(fetchOrders())
       setModalOpen(false)
@@ -71,13 +80,6 @@ function Row({ row }) {
       setIsLoading(false)
     }
   }
-  const hasStockIssue = row.details.some((product) => {
-    const stockInfo = stocks?.find(
-      (stock) => stock.product_id === product.product_id
-    )
-    return product.quantity > (stockInfo ? stockInfo.quantity : 0)
-  })
-
   const handleValidate = async () => {
     try {
       dispatch(fetchStocks())
@@ -141,6 +143,12 @@ function Row({ row }) {
       console.error(error)
     }
   }
+  const hasStockIssue = row.details.some((product) => {
+    const stockInfo = stocks?.find(
+      (stock) => stock.product_id === product.product_id
+    )
+    return product.quantity > (stockInfo ? stockInfo.quantity : 0)
+  })
 
   return (
     <>
@@ -347,7 +355,6 @@ function Row({ row }) {
 Row.propTypes = {
   row: PropTypes.shape({
     _id: PropTypes.string.isRequired,
-    date_order: PropTypes.string.isRequired,
     statut: PropTypes.string.isRequired,
     details: PropTypes.arrayOf(
       PropTypes.shape({
@@ -448,7 +455,6 @@ CollapsingTable.propTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({
       _id: PropTypes.string.isRequired,
-      date_order: PropTypes.string.isRequired,
       statut: PropTypes.string.isRequired,
       details: PropTypes.arrayOf(
         PropTypes.shape({

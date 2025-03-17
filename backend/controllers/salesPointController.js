@@ -68,3 +68,21 @@ export const deleteSalesPoint = async (req, res) => {
     res.status(400).json({ message: error.message })
   }
 }
+
+// ✅ 🔹 Récupérer les points de vente sans utilisateur
+export const getSalesPointsWithoutUsers = async (req, res) => {
+  try {
+    const salesPoints = await salesPointService.getSalesPointsWithoutUsers()
+    res.json({
+      message: "Points de vente sans utilisateur récupérés avec succès",
+      data: salesPoints,
+    })
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        message:
+          "Erreur lors de la récupération des points de vente sans utilisateur",
+      })
+  }
+}

@@ -17,4 +17,5 @@ export const orderSchemaPut = Joi.object({
   confirmedAt: Joi.date().optional(),
   shippedAt: Joi.date().optional(),
   receivedAt: Joi.date().optional(),
+  canceledAt: Joi.date().optional(),
 })

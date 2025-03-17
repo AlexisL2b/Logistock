@@ -1,29 +1,62 @@
-import StockLog from "../models/stockLogModel.js"
+import StockLogDAO from "../dao/stockLogDAO.js"
 
-class StockLogDAO {
-  async findAll() {
-    return await StockLog.find().populate("product_id", "nom description")
+class StockLogService {
+  /**
+   * ✅ Récupérer tous les logs de stock
+   */
+  async getAllStockLogs() {
+    return await StockLogDAO.findAll()
   }
 
-  async findById(id) {
-    return await StockLog.findById(id).populate("product_id", "nom description")
+  /**
+   * ✅ Récupérer un log de stock par ID
+   */
+  async getStockLogById(id) {
+    const stockLog = await StockLogDAO.findById(id)
+    if (!stockLog) {
+      throw new Error("Log de stock introuvable")
+    }
+    return stockLog
   }
 
-  async create(stockLogData) {
-    const newStockLog = new StockLog(stockLogData)
-    return await newStockLog.save()
+  /**
+   * ✅ Ajouter un log de stock
+   */
+  async addStockLog(stockLogData) {
+    if (
+      !stockLogData.stock_id ||
+      !stockLogData.quantity ||
+      !stockLogData.event
+    ) {
+      throw new Error(
+        "Tous les champs 'product_id', 'quantity' et 'event' sont requis"
+      )
+    }
+
+    return await StockLogDAO.create(stockLogData)
   }
 
-  async update(id, stockLogData) {
-    return await StockLog.findByIdAndUpdate(id, stockLogData, {
-      new: true,
-      runValidators: true,
-    })
+  /**
+   * ✅ Mettre à jour un log de stock
+   */
+  async updateStockLog(id, stockLogData) {
+    const updatedStockLog = await StockLogDAO.update(id, stockLogData)
+    if (!updatedStockLog) {
+      throw new Error("Log de stock introuvable")
+    }
+    return updatedStockLog
   }
 
-  async delete(id) {
-    return await StockLog.findByIdAndDelete(id)
+  /**
+   * ✅ Supprimer un log de stock
+   */
+  async deleteStockLog(id) {
+    const deletedStockLog = await StockLogDAO.delete(id)
+    if (!deletedStockLog) {
+      throw new Error("Log de stock introuvable")
+    }
+    return deletedStockLog
   }
 }
 
-export default new StockLogDAO()
+export default new StockLogService()

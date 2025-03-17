@@ -13,11 +13,16 @@ import { useDispatch, useSelector } from "react-redux"
 import { updateUserInfo } from "../../../redux/slices/userSlice"
 import CustomSelect from "../selects/CustomSelect"
 import { showNotification } from "../../../redux/slices/notificationSlice"
+import { fetchSalesPointsWithoutUsers } from "../../../redux/slices/salesPointSlice"
 
 const EditForm = ({ row, onClose = null, onUserUpdated, admin = false }) => {
   console.log("row depuis EditForm.jsx", row)
   const dispatch = useDispatch()
   const salesPoints = useSelector((state) => state.salesPoints.list)
+  const { withoutUsers, status, error } = useSelector(
+    (state) => state.salesPoints
+  )
+  console.log("withoutUsers depuis EditForm.jsx", withoutUsers)
   const roles = useSelector((state) => state.roles.list)
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -50,10 +55,12 @@ const EditForm = ({ row, onClose = null, onUserUpdated, admin = false }) => {
       })
     }
   }, [row, reset, roles, salesPoints])
-
+  useEffect(() => {
+    dispatch(fetchSalesPointsWithoutUsers())
+  }, [dispatch])
   const newPassword = watch("newPassword")
   const oldPassword = watch("oldPassword")
-
+  console.log("row depuis EditForm.jsx", row)
   const onSubmit = async (data) => {
     setIsSubmitting(true)
     try {
@@ -230,23 +237,29 @@ const EditForm = ({ row, onClose = null, onUserUpdated, admin = false }) => {
           ) : (
             ""
           )}
-
-          <Grid item xs={12}>
-            <Controller
-              name="sales_point"
-              control={control}
-              render={({ field }) => (
-                <CustomSelect
-                  inputLabel="Point de Vente"
-                  selectLabel="Point de Vente"
-                  menuItems={salesPoints}
-                  selectedValue={field.value}
-                  // onChange={(e) => console.log(e.target.value)}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-          </Grid>
+          {row.rôle === "Acheteur" ? (
+            <Grid item xs={12}>
+              <Controller
+                name="sales_point"
+                control={control}
+                render={({ field }) => (
+                  console.log("field depuis EditForm.jsx", field),
+                  (
+                    <CustomSelect
+                      inputLabel="Point de Vente"
+                      selectLabel="Point de Vente"
+                      menuItems={withoutUsers.data}
+                      selectedValue={field.value}
+                      // onChange={(e) => console.log(e.target.value)}
+                      onChange={field.onChange}
+                    />
+                  )
+                )}
+              />
+            </Grid>
+          ) : (
+            ""
+          )}
 
           <Grid item xs={12}>
             <Controller

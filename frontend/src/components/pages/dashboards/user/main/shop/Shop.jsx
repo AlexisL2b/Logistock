@@ -16,9 +16,10 @@ import CustomSelect from "../../../../../reusable-ui/selects/CustomSelect"
 export default function Shop() {
   const dispatch = useDispatch()
   const products = useSelector((state) => state.products.items)
+  const products2 = useSelector((state) => state.products)
   const status = useSelector((state) => state.products.status)
   const error = useSelector((state) => state.products.error)
-
+  console.log("products2 depuis Shop.jsx", products2)
   const [categories, setCategories] = useState([])
   const [selectedCategory, setSelectedCategory] = useState("")
 

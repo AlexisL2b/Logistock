@@ -208,7 +208,7 @@ function Row({ row, onStatusUpdate }) {
 Row.propTypes = {
   row: PropTypes.shape({
     _id: PropTypes.string.isRequired,
-    date_order: PropTypes.string.isRequired,
+    // date_order: PropTypes.string.isRequired,
     statut: PropTypes.string.isRequired,
     details: PropTypes.arrayOf(
       PropTypes.shape({
@@ -254,8 +254,4 @@ export default function CollapsingTable({ data }) {
       </Table>
     </TableContainer>
   )
-}
-
-CollapsingTable.propTypes = {
-  data: PropTypes.arrayOf(Row.propTypes.row).isRequired,
 }

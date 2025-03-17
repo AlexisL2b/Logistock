@@ -36,8 +36,6 @@ function Row({ row }) {
   const transporters = useSelector((state) => state.transporters.list)
   const orderShipments = useSelector((state) => state.orderShipments.list)
   const orders = useSelector((state) => state.orders.list)
-
-  // dispatch(fetchOrderShipments())
   useEffect(() => {
     dispatch(fetchOrderShipments()) // Assure-toi que l'action est bien dispatchée au chargement
   }, [dispatch])
@@ -194,9 +192,8 @@ function Row({ row }) {
 Row.propTypes = {
   row: PropTypes.shape({
     _id: PropTypes.string.isRequired,
-    date_order: PropTypes.string.isRequired,
     statut: PropTypes.string.isRequired,
-    produitDetails: PropTypes.arrayOf(
+    details: PropTypes.arrayOf(
       PropTypes.shape({
         _id: PropTypes.string.isRequired,
         product_id: PropTypes.string.isRequired,
@@ -341,9 +338,8 @@ ShippedTable.propTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({
       _id: PropTypes.string.isRequired,
-      date_order: PropTypes.string.isRequired,
       statut: PropTypes.string.isRequired,
-      produitDetails: PropTypes.arrayOf(
+      details: PropTypes.arrayOf(
         PropTypes.shape({
           _id: PropTypes.string.isRequired,
           product_id: PropTypes.string.isRequired,

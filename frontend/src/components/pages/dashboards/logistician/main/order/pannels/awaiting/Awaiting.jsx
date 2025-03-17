@@ -60,7 +60,6 @@ export default function Awaiting() {
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
-      {/* Table des commandes filtrées */}
       <AwaitingTable data={filteredOrders} />
     </Box>
   )

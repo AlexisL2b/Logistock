@@ -30,7 +30,7 @@ class UserService {
       }
       if (
         userData.role._id === "677cf977b39853e4a17727e3" &&
-        !userData.sale_point
+        !userData.sales_point
       ) {
         throw new Error("Le point de vente est obligatoire pour les acheteurs.")
       }
