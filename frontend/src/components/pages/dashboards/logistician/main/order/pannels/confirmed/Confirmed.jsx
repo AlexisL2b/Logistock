@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import { fetchOrdersWithDetails } from "../../../../../../../../redux/slices/orderSlice"
+import { fetchOrders } from "../../../../../../../../redux/slices/orderSlice"
 import { fetchStocks } from "../../../../../../../../redux/slices/stockSlice"
 import { Box, TextField } from "@mui/material"
 import AwaitingTable from "../../pannels/awaiting/AwaitingTable"
@@ -9,7 +9,7 @@ import ConfirmedTable from "./ConfirmedTable"
 
 export default function Confirmed() {
   const dispatch = useDispatch()
-  const { orders, status, error } = useSelector((state) => state.orders)
+  const orders = useSelector((state) => state.orders.list)
   const stocks = useSelector((state) => state.stocks.stocks)
   const [searchTerm, setSearchTerm] = useState("")
 
@@ -19,7 +19,7 @@ export default function Confirmed() {
 
   // Charger les données au démarrage
   useEffect(() => {
-    dispatch(fetchOrdersWithDetails())
+    dispatch(fetchOrders())
     dispatch(fetchStocks())
   }, [dispatch])
 
@@ -28,14 +28,12 @@ export default function Confirmed() {
     const interval = setInterval(() => {
       // Comparer les commandes et les stocks avec leur état précédent
       if (!_.isEqual(orders, prevOrdersRef.current)) {
-        console.log("🔄 Mise à jour des commandes détectée")
-        dispatch(fetchOrdersWithDetails())
+        dispatch(fetchOrders())
         prevOrdersRef.current = orders // Mettre à jour la référence
       } else {
       }
 
       if (!_.isEqual(stocks, prevStocksRef.current)) {
-        console.log("🔄 Mise à jour des stocks détectée")
         dispatch(fetchStocks())
         prevStocksRef.current = stocks // Mettre à jour la référence
       } else {
@@ -45,14 +43,12 @@ export default function Confirmed() {
     return () => clearInterval(interval) // Nettoyage à la suppression du composant
   }, [dispatch, orders, stocks])
 
-  console.log("orders", orders)
-
   const filteredOrders = orders.filter(
     (order) =>
       order.statut === "validée" &&
       order._id.toLowerCase().startsWith(searchTerm.toLowerCase())
   )
-  console.log("filteredOrdersfilteredOrdersfilteredOrders", filteredOrders)
+
   return (
     <Box>
       {/* 🔍 Champ de recherche */}

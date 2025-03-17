@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
-import { getProducts, updateProductStock } from "../api/productsApi"
+import { getProducts, updateProductStock } from "../api/productApi"
 
 // Thunk pour récupérer les produits depuis l'API
 export const fetchProducts = createAsyncThunk(
@@ -7,7 +7,7 @@ export const fetchProducts = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await getProducts()
-      console.log("'response from slice'", response)
+      console.log("response depuis productsSlice.js", response)
       return response
     } catch (error) {
       console.error(

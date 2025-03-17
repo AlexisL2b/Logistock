@@ -23,7 +23,7 @@ import {
   updateStock,
 } from "../../../../../../../../redux/slices/stockSlice"
 import { io } from "socket.io-client"
-import { fetchOrdersWithDetails } from "../../../../../../../../redux/slices/orderSlice"
+import { fetchOrders } from "../../../../../../../../redux/slices/orderSlice"
 import _ from "lodash"
 
 function Row({ row }) {
@@ -55,7 +55,7 @@ function Row({ row }) {
         )
       })
       dispatch(fetchStocks())
-      dispatch(fetchOrdersWithDetails())
+      dispatch(fetchOrders())
     })
     return () => socket.disconnect() // Déconnexion propre
   }, [dispatch])
@@ -73,7 +73,8 @@ function Row({ row }) {
           </IconButton>
         </TableCell>
         <TableCell>{row._id}</TableCell>
-        <TableCell>{new Date(row.date_order).toLocaleString()}</TableCell>
+        <TableCell>{new Date(row.orderedAt).toLocaleString()}</TableCell>
+        <TableCell>{new Date(row.canceledAt).toLocaleString()}</TableCell>
         <TableCell
           sx={{
             color: color[row.statut] || "black",
@@ -102,7 +103,7 @@ function Row({ row }) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.produitDetails.map((product) => {
+                  {row.details.map((product) => {
                     const stockInfo = stocks.find(
                       (stock) => stock.product_id === product.product_id
                     )
@@ -132,9 +133,8 @@ function Row({ row }) {
 Row.propTypes = {
   row: PropTypes.shape({
     _id: PropTypes.string.isRequired,
-    date_order: PropTypes.string.isRequired,
     statut: PropTypes.string.isRequired,
-    produitDetails: PropTypes.arrayOf(
+    details: PropTypes.arrayOf(
       PropTypes.shape({
         _id: PropTypes.string.isRequired,
         product_id: PropTypes.string.isRequired,
@@ -194,7 +194,22 @@ export default function CancelledTable({ data }) {
               onClick={() => handleSort("date_order")}
               style={{ cursor: "pointer", fontWeight: "bold" }}
             >
-              Date de Commande{" "}
+              Date de commande{" "}
+              {sortConfig.key === "date_order" && (
+                <IconButton size="small">
+                  {sortConfig.direction === "asc" ? (
+                    <KeyboardArrowUp />
+                  ) : (
+                    <KeyboardArrowDown />
+                  )}
+                </IconButton>
+              )}
+            </TableCell>
+            <TableCell
+              onClick={() => handleSort("date_order")}
+              style={{ cursor: "pointer", fontWeight: "bold" }}
+            >
+              Date d'annulation{" "}
               {sortConfig.key === "date_order" && (
                 <IconButton size="small">
                   {sortConfig.direction === "asc" ? (
@@ -236,9 +251,8 @@ CancelledTable.propTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({
       _id: PropTypes.string.isRequired,
-      date_order: PropTypes.string.isRequired,
       statut: PropTypes.string.isRequired,
-      produitDetails: PropTypes.arrayOf(
+      details: PropTypes.arrayOf(
         PropTypes.shape({
           _id: PropTypes.string.isRequired,
           product_id: PropTypes.string.isRequired,

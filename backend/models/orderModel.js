@@ -1,39 +1,35 @@
 import mongoose from "mongoose"
 
-const orderSchema = new mongoose.Schema(
-  {
-    date_order: {
-      type: Date,
-      default: Date.now,
-    },
-    statut: {
-      type: String,
-      enum: ["en cours", "validée", "expédiée", "annulée", "réceptionné"],
-      default: "en cours",
-    },
-    buyer_id: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    // stripePayment: {
-    //   paymentIntentId: { type: String, default: null }, // 🔥 Stocker l’ID Stripe
-    //   status: {
-    //     type: String,
-    //     enum: ["pending", "succeeded", "failed"],
-    //     default: "pending",
-    //   }, // 🔥 Suivi du paiement
-    // },
-    totalAmount: {
-      // 🔥 Ajoute ce champ
-      type: Number,
-      required: true,
-    },
+const orderSchemaPost = new mongoose.Schema({
+  buyer: {
+    _id: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    firstname: { type: String, required: true },
+    lastname: { type: String, required: true },
+    address: { type: String, required: true },
+    email: { type: String, required: true },
   },
-  { timestamps: true },
-  { versionKey: false }
-)
+  statut: { type: String, required: true },
+  totalAmount: { type: Number, required: true },
+  details: [
+    {
+      product_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product", // à modifier par order_details
+        required: true,
+      },
+      name: { type: String, required: true },
+      reference: { type: String, required: true },
+      quantity: { type: Number, required: true },
+      price: { type: Number, required: true },
+    },
+  ],
+  orderedAt: { type: Date }, // Date de création de la commande
+  confirmedAt: { type: Date }, // Date de confirmation par l’admin ou auto
+  receivedAt: { type: Date }, // Date de réception par le client
+  canceledAt: { type: Date },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
+})
 
-const Order = mongoose.model("Orders", orderSchema)
-
+const Order = mongoose.model("Order", orderSchemaPost)
 export default Order

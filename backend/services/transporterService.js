@@ -14,7 +14,7 @@ class TransporterService {
   }
 
   async addTransporter(transporterData) {
-    if (!transporterData.nom) {
+    if (!transporterData.name) {
       throw new Error("Le champ 'nom' est requis")
     }
     return await TransporterDAO.create(transporterData)

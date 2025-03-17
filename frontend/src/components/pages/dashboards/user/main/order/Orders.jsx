@@ -10,6 +10,7 @@ import {
   DialogContentText,
   DialogTitle,
   Button,
+  Typography,
 } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
 
@@ -21,7 +22,7 @@ export default function Orders() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [openDialog, setOpenDialog] = useState(false)
-  console.log(userId)
+
   useEffect(() => {
     const fetchOrdersWithDetails = async () => {
       try {
@@ -31,7 +32,7 @@ export default function Orders() {
         const response = await axiosInstance.get(
           `http://localhost:5000/api/orders/user/${userId}`
         )
-        console.log(response)
+
         setOrders(response.data) // Stocker les commandes
       } catch (err) {
         console.error("Erreur lors de la récupération des commandes :", err)
@@ -42,7 +43,7 @@ export default function Orders() {
 
     fetchOrdersWithDetails()
   }, [userId])
-  console.log(orders)
+
   // 🔍 Filtrer les commandes en fonction de la recherche
   const filteredOrders = orders?.filter((order) =>
     order._id.toLowerCase().includes(searchTerm.toLowerCase())
@@ -66,7 +67,7 @@ export default function Orders() {
 
     try {
       await axiosInstance.put(
-        `http://localhost:5000/api/orders/${selectedOrder._id}/receive`
+        `http://localhost:5000/api/orders/${selectedOrder._id}`
       )
 
       // Mettre à jour le statut de la commande
@@ -87,6 +88,10 @@ export default function Orders() {
   return (
     <Box sx={{ maxWidth: "1200px", margin: "auto", p: 3 }}>
       {/* 🔍 Champ de recherche */}
+      {/* 🏷️ Titre principal */}
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
+        Commandes
+      </Typography>
       <TextField
         label="Rechercher une commande par ID"
         variant="outlined"
@@ -98,29 +103,6 @@ export default function Orders() {
 
       {/* 📋 Table filtrée */}
       <CollapsingTable data={filteredOrders} onConfirm={handleOpenDialog} />
-
-      {/* 📦 Dialog de confirmation */}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>Confirmation</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            Confirmez-vous la réception de cette commande ?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog} color="secondary">
-            Annuler
-          </Button>
-          <Button
-            onClick={handleConfirmReception}
-            // onClick={handleConfirmReception}
-            color="primary"
-            variant="contained"
-          >
-            Confirmer
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   )
 }

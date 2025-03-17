@@ -8,7 +8,7 @@ class CategoryService {
   }
 
   async getCategoryById(id) {
-    const category = await CategoryDAO.findById(id)
+    const category = await CategoryDAO.getById(id)
     if (!category) {
       throw new Error("Catégorie introuvable")
     }
@@ -22,18 +22,14 @@ class CategoryService {
     const categories = await categoryDAO.findAll()
 
     const existe = categories.some((item) => {
-      console.log(item) // ✅ Vérifie chaque item parcouru
+      // ✅ Vérifie chaque item parcouru
       return item.name === categoryData.name // ✅ Ajoute `return` pour que `some()` fonctionne
     })
 
     if (!existe) {
-      console.log("existe", existe)
-      console.log("categoryData", categoryData)
-
       return await CategoryDAO.create(categoryData)
     } else {
       throw new Error("Cette catégorie existe déjà!")
-      console.log("existe", existe)
     }
   }
 
@@ -44,13 +40,9 @@ class CategoryService {
     const categories = await categoryDAO.findAll()
 
     const existe = categories.some((item) => {
-      console.log(item) // ✅ Vérifie chaque item parcouru
-      return item.nom === categoryData.nom // ✅ Ajoute `return` pour que `some()` fonctionne
+      return item.name === categoryData.name // ✅ Ajoute `return` pour que `some()` fonctionne
     })
     if (!existe) {
-      console.log("existe", existe)
-      console.log("categoryData", categoryData)
-
       const updatedCategory = await CategoryDAO.update(id, categoryData)
 
       return updatedCategory
@@ -61,12 +53,12 @@ class CategoryService {
 
   async deleteCategory(id) {
     // Vérifier si la catégorie est associée à des produits avant de supprimer
-    const products = await productDAO.findByCategoryId(id)
-    console.log(products)
+    const products = (await productDAO.findByCategoryId(id)) || []
+
     if (products.length > 0) {
       const noms = products.map((p) => p.name).join(", ")
       throw new Error(
-        `Impossible de supprimer la catégorie. Elle est associée aux produits suivants : ${noms}`
+        `Impossible de supprimer cette catégorie, elle est encore utilisée par des produits.`
       )
     }
 

@@ -1,4 +1,5 @@
 import SalesPoint from "../models/salesPointModel.js"
+import User from "../models/userModel.js"
 
 class SalesPointDAO {
   async findAll() {
@@ -23,6 +24,13 @@ class SalesPointDAO {
 
   async delete(id) {
     return await SalesPoint.findByIdAndDelete(id)
+  }
+  async findWithoutUsers() {
+    const salesPointsWithUsers = await User.aggregate([
+      { $match: { "sales_point._id": { $exists: true } } }, // Filtrer ceux qui ont un sales_point
+      { $group: { _id: "$sales_point._id" } }, // Extraire les IDs uniques
+    ]) // Récupère les sales_point utilisés
+    return await SalesPoint.find({ _id: { $nin: salesPointsWithUsers } }) // Exclut ceux qui sont dans User
   }
 }
 

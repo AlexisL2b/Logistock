@@ -6,7 +6,6 @@ import AuthService from "../services/authService.js"
 export const createUser = async (req, res) => {
   try {
     const currentUserRole = req.user?.role || "Acheteur" // Rôle par défaut si non défini
-    console.log("🔹 Rôle du créateur :", currentUserRole)
 
     const newUser = await AuthService.createUser(req.body, currentUserRole)
 
@@ -29,7 +28,7 @@ export const loginUser = async (req, res) => {
 
     res.status(200).json(response)
   } catch (error) {
-    res.status(401).json({ message: error.message })
+    res.status(401).json({ message: error.message, file: "authController" })
   }
 }
 

@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import PropTypes from "prop-types"
 import {
   Table,
@@ -23,12 +23,17 @@ import {
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material"
 import axiosInstance from "../../../../../../axiosConfig"
 import _ from "lodash"
+import { useDispatch, useSelector } from "react-redux"
+import { modifyOrder } from "../../../../../../redux/slices/orderSlice"
+import { fetchOrderShipments } from "../../../../../../redux/slices/orderShipmentSlice"
 
 function Row({ row, onStatusUpdate }) {
   const [open, setOpen] = useState(false)
+  const orderShipments = useSelector((state) => state.orderShipments.list)
   const [dialogOpen, setDialogOpen] = useState(false)
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"))
+  const dispatch = useDispatch()
 
   // Définition des couleurs pour les statuts
   const color = {
@@ -38,23 +43,27 @@ function Row({ row, onStatusUpdate }) {
     annulée: "red",
     réceptionné: "purple",
   }
+  useEffect(() => {
+    dispatch(fetchOrderShipments())
+  }, [dispatch])
 
   const handleReception = async () => {
     try {
-      const response = await axiosInstance.put(
-        `http://localhost:5000/api/orders/${row._id}`,
-        { statut: "réceptionné" }
+      const response = await dispatch(
+        modifyOrder({
+          orderId: row._id,
+          orderData: { statut: "réceptionné", receivedAt: new Date() },
+        })
       )
 
-      if (response.status === 200) {
-        // 🔥 Mettre à jour le statut de la commande dans l'interface
-        onStatusUpdate(row._id, "réceptionné")
-        setDialogOpen(false)
-      }
+      // 🔥 Mettre à jour le statut de la commande dans l'interface
+      onStatusUpdate(row._id, "réceptionné")
+      setDialogOpen(false)
     } catch (error) {
       console.error("Erreur lors de la mise à jour du statut :", error)
     }
   }
+  console.log("row depuis CollapsingTable.jsx", row)
 
   return (
     <>
@@ -69,7 +78,17 @@ function Row({ row, onStatusUpdate }) {
           </IconButton>
         </TableCell>
         <TableCell>{row._id}</TableCell>
-        <TableCell>{new Date(row.date_order).toLocaleString()}</TableCell>
+        <TableCell>{new Date(row.createdAt).toLocaleString()}</TableCell>
+        <TableCell>
+          {orderShipments?.find((order) => order.order_id._id === row._id)
+            ?.date_shipment
+            ? new Date(
+                orderShipments?.find(
+                  (order) => order.order_id._id === row._id
+                )?.date_shipment
+              ).toLocaleString()
+            : "En attente d'expédition"}
+        </TableCell>
         <TableCell
           sx={{ color: color[row.statut] || "black", fontWeight: "700" }}
         >
@@ -84,6 +103,15 @@ function Row({ row, onStatusUpdate }) {
               <Typography variant="h6" gutterBottom>
                 Détails des produits
               </Typography>
+              <Typography variant="body1" gutterBottom>
+                {row.buyer.firstname}
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                {row.buyer.lastname}
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                {row.buyer.address}
+              </Typography>
               <Table size="small" aria-label="details">
                 <TableHead>
                   <TableRow>
@@ -95,7 +123,7 @@ function Row({ row, onStatusUpdate }) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.produitDetails.map((product) => (
+                  {row.details.map((product) => (
                     <TableRow key={product._id}>
                       <TableCell>{product.name}</TableCell>
                       <TableCell>{product.reference}</TableCell>
@@ -104,6 +132,35 @@ function Row({ row, onStatusUpdate }) {
                       <TableCell>{product.quantity * product.price}</TableCell>
                     </TableRow>
                   ))}
+                  <TableRow>
+                    <TableCell
+                      align="right"
+                      colSpan={4}
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "1.1rem",
+                        paddingTop: "20px",
+                        paddingBottom: "10px",
+                        borderTop: "2px solid #ddd",
+                        backgroundColor: "#f5f5f5", // Fond léger pour différencier
+                      }}
+                    >
+                      Total de la commande :
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "1.2rem",
+                        paddingTop: "20px",
+                        paddingBottom: "10px",
+                        borderTop: "2px solid #ddd",
+                        backgroundColor: "#f5f5f5",
+                        color: "#d32f2f", // Couleur rouge pour mettre en valeur
+                      }}
+                    >
+                      {row.totalAmount}€
+                    </TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
 
@@ -151,9 +208,9 @@ function Row({ row, onStatusUpdate }) {
 Row.propTypes = {
   row: PropTypes.shape({
     _id: PropTypes.string.isRequired,
-    date_order: PropTypes.string.isRequired,
+    // date_order: PropTypes.string.isRequired,
     statut: PropTypes.string.isRequired,
-    produitDetails: PropTypes.arrayOf(
+    details: PropTypes.arrayOf(
       PropTypes.shape({
         _id: PropTypes.string.isRequired,
         name: PropTypes.string.isRequired,
@@ -185,6 +242,7 @@ export default function CollapsingTable({ data }) {
             <TableCell />
             <TableCell>Identifiant commande</TableCell>
             <TableCell>Date de Commande</TableCell>
+            <TableCell>Date d'éxpédition</TableCell>
             <TableCell>Statut</TableCell>
           </TableRow>
         </TableHead>
@@ -196,8 +254,4 @@ export default function CollapsingTable({ data }) {
       </Table>
     </TableContainer>
   )
-}
-
-CollapsingTable.propTypes = {
-  data: PropTypes.arrayOf(Row.propTypes.row).isRequired,
 }

@@ -1,9 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import {
+  decrementStocks,
   getStock,
   getStockByProductId,
   getStockWithProducts,
   updateStockById,
+  incrementStock,
 } from "../api/stockApi"
 
 // Thunk pour récupérer le stock d'un produit
@@ -39,13 +41,41 @@ export const fetchStocksWithProduct = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await getStockWithProducts()
-      console.log("response from slice", response)
+
       return response // Retournez directement le tableau des stocks
     } catch (error) {
       console.error(
         "Erreur lors de la récupération des stocksWithProducts :",
         error
       )
+      return rejectWithValue(error.response?.data || error.message)
+    }
+  }
+)
+export const decrementStock = createAsyncThunk(
+  "stocks/decrementStock",
+  async (orderdetails, { rejectWithValue }) => {
+    try {
+      const response = await decrementStocks(orderdetails)
+
+      return response
+    } catch (error) {
+      console.error("Erreur lors de la décrémentation des stocks :", error)
+      return rejectWithValue(error.response?.data || error.message)
+    }
+  }
+)
+export const incrementStocks = createAsyncThunk(
+  "stocks/incrementStocks",
+  async ({ stockId, quantity }, { rejectWithValue }) => {
+    try {
+      console.log("stockId depuis stockSlice.js", stockId)
+      console.log("quantity depuis stockSlice.js", quantity)
+      const response = await incrementStock(stockId, quantity)
+
+      return response
+    } catch (error) {
+      console.error("Erreur lors de l'incrementation' des stocks :", error)
       return rejectWithValue(error.response?.data || error.message)
     }
   }
@@ -63,16 +93,16 @@ const stockSlice = createSlice({
     updateStock: (state, action) => {
       const stockId = action.payload.stockId
       const stockUpdates = action.payload.stockUpdates
-      console.log("state from slice", state)
-      const stockIndex = state.stocksProducts.findIndex(
-        (stock) => stock._id === stockId
-      )
-      if (stockIndex !== -1) {
-        state.stocksProducts[stockIndex] = {
-          ...state.stocksProducts[stockIndex],
-          ...stockUpdates,
-        }
-      }
+
+      // const stockIndex = state.stocksProducts.findIndex(
+      //   (stock) => stock._id === stockId
+      // )
+      // if (stockIndex !== -1) {
+      //   state.stocksProducts[stockIndex] = {
+      //     ...state.stocksProducts[stockIndex],
+      //     ...stockUpdates,
+      //   }
+      // }
     },
   },
   extraReducers: (builder) => {
@@ -122,7 +152,42 @@ const stockSlice = createSlice({
         state.status = "failed"
         state.error = action.payload
       })
+      .addCase(decrementStock.pending, (state) => {
+        state.status = "loading"
+      })
+      .addCase(decrementStock.fulfilled, (state, action) => {
+        state.status = "succeeded"
 
+        const { productId, updatedStock } = action.payload
+        const stockIndex = state.items.findIndex(
+          (stock) => stock.product_id === productId
+        )
+        if (stockIndex !== -1) {
+          state.items[stockIndex] = updatedStock
+        }
+      })
+      .addCase(decrementStock.rejected, (state, action) => {
+        state.status = "failed"
+        state.error = action.payload
+      })
+      .addCase(incrementStocks.pending, (state) => {
+        state.status = "loading"
+      })
+      .addCase(incrementStocks.fulfilled, (state, action) => {
+        state.status = "succeeded"
+
+        // const { productId, updatedStock } = action.payload
+        // const stockIndex = state.items.findIndex(
+        //   (stock) => stock.product_id === productId
+        // )
+        // if (stockIndex !== -1) {
+        //   state.items[stockIndex] = updatedStock
+        // }
+      })
+      .addCase(incrementStocks.rejected, (state, action) => {
+        state.status = "failed"
+        state.error = action.payload
+      })
     // Gestion de updateStock
     // .addCase(updateStock.fulfilled, (state, action) => {
     //   const updatedStock = action.payload

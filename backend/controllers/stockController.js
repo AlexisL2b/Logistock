@@ -84,11 +84,9 @@ export const updateStockByProductId = async (req, res) => {
 // Décrémente le stock pour une commande
 export const decrementStockForOrder = async (req, res) => {
   try {
-    console.log("🔹 Order details reçus :", req.body)
-
     //Je récupère @io dans ma requete.
     const io = req.io
-    // console.log("❌❌❌❌❌❌❌❌❌", io, "❌❌❌❌❌❌❌❌❌")
+
     if (!io) {
       console.warn(
         "⚠️ io n'est pas défini dans req, l'événement ne sera pas émis."
@@ -100,8 +98,8 @@ export const decrementStockForOrder = async (req, res) => {
         .status(400)
         .json({ message: "Le corps de la requête est vide." })
     }
-    const { orderDetails } = req.body
 
+    const { orderDetails } = req.body
     if (!orderDetails || !Array.isArray(orderDetails)) {
       return res.status(400).json({
         message: "Les détails de la commande sont invalides.",
@@ -111,7 +109,7 @@ export const decrementStockForOrder = async (req, res) => {
     }
 
     const result = await stockService.decrementStockForOrder(orderDetails, io)
-    console.log(result)
+
     res.json(result)
   } catch (error) {
     console.error("❌ Erreur dans decrementStockForOrder :", error.message)

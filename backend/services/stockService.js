@@ -84,8 +84,6 @@ class StockService {
         throw new Error("Les détails de la commande doivent être un tableau.")
       }
 
-      console.log("✅ Décrémentation des stocks :", orderDetails)
-
       const updatedStocks = []
 
       for (const detail of orderDetails) {
@@ -110,7 +108,6 @@ class StockService {
       }
 
       io.emit("stocksUpdated", updatedStocks)
-      console.log("📢 Envoi de la mise à jour des stocks via Socket.IO")
 
       return { success: true, message: "Stocks mis à jour", updatedStocks }
     } catch (error) {

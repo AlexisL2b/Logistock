@@ -1,6 +1,5 @@
 import salesPointDAO from "../dao/salesPointDAO.js"
 import userDAO from "../dao/userDAO.js"
-import userService from "./userService.js"
 
 class SalesPointService {
   // 🔹 Récupérer tous les points de vente
@@ -47,21 +46,28 @@ class SalesPointService {
     const users = await userDAO.findBySalesPointId(id)
     const existingSalesPoint = await salesPointDAO.findById(id)
 
-    console.log("existingSalesPoint id", id)
     if (!existingSalesPoint) {
       throw new Error("Point de vente introuvable")
     }
     if (users.length > 0) {
       const noms = users.map((p) => `${p.firstname} ${p.lastname}`).join(", ")
       throw new Error(
-        `Impossible de supprimer le point de vente. Il est associée aux utilisateurs suivants : ${noms}`
+        `Impossible de supprimer le point de vente. Il est associé aux utilisateurs suivants : ${noms}`
       )
     }
-    const deletedSalesPoint = await salesPointDAO.delete(id)
-    // if (!deletedSalesPoint) {
-    //   throw new Error("Catégorie introuvable")
-    // }
-    return deletedSalesPoint
+    return await salesPointDAO.delete(id)
+  }
+
+  // ✅ 🔹 Récupérer les points de vente qui ne sont associés à aucun utilisateur
+  async getSalesPointsWithoutUsers() {
+    try {
+      return await salesPointDAO.findWithoutUsers()
+    } catch (error) {
+      throw new Error(
+        "Erreur lors de la récupération des points de vente sans utilisateur : " +
+          error.message
+      )
+    }
   }
 }
 

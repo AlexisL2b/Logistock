@@ -1,31 +1,19 @@
 import { useEffect, useState } from "react"
-import { Box, TextField } from "@mui/material"
+import { Box, TextField, Typography } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
-import EnhancedTable from "../../../../../reusable-ui/EnhancedTable"
+import EnhancedTable from "../../../../../reusable-ui/tables/EnhancedTable"
+import { useDispatch, useSelector } from "react-redux"
+import { fetchTransporters } from "../../../../../../redux/slices/transporterSlice"
 
 export default function Transporters() {
-  const [transporters, setTransporters] = useState([])
   const [searchTerm, setSearchTerm] = useState("")
-
-  // Fonction pour recharger les données
-  const fetchTransporters = () => {
-    axiosInstance
-      .get("/transporters") // URL relative correcte si axiosInstance est bien configuré
-      .then((response) => {
-        setTransporters(response.data.data) // Mise à jour des transporteurs dans le state
-      })
-      .catch((error) => {
-        console.error(
-          "Erreur lors de la récupération des transporteurs :",
-          error
-        )
-      })
-  }
+  const transporters = useSelector((state) => state.transporters.list)
+  const dispatch = useDispatch()
 
   // Chargement initial des transporteurs
   useEffect(() => {
-    fetchTransporters()
-  }, [])
+    dispatch(fetchTransporters())
+  }, [transporters])
 
   // Callback pour gérer les changements de données
   const handleDataChange = () => {
@@ -44,7 +32,6 @@ export default function Transporters() {
     phone: { type: "tel", label: "phone", required: true },
     email: { type: "email", label: "Email", required: true },
   }
-  console.log("data: ", transporters)
 
   // 🔍 Filtrage multi-critères : Nom, ID, Téléphone, Email
   const filteredTransporters = transporters.filter((transporter) => {
@@ -60,7 +47,11 @@ export default function Transporters() {
   })
 
   return (
-    <Box>
+    <Box sx={{ padding: 3 }}>
+      {/* 🏷️ Titre principal */}
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
+        Transporteurs
+      </Typography>
       {/* 🔍 Champ de recherche multi-critères */}
       <TextField
         label="Rechercher par Nom, ID, Téléphone, Email"

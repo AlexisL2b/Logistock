@@ -27,7 +27,7 @@ export default function CartModal({
   const userId = user._id
   const dispatch = useDispatch()
   //(cartItems)
-  console.log("cartItems", cartItems)
+
   const handleCheckout = async () => {
     try {
       if (cartItems.length > 0) {
@@ -37,10 +37,10 @@ export default function CartModal({
         )
         const orderId = responseOrder.data._id
         //(orderId)
-        console.log("cartItems", cartItems)
+
         cartItems.forEach(async (item) => {
           const productId = item.product_id
-          const name = item.detailsProduit.nom
+          const name = item.detailsProduit.name
           const quantity = item.quantity
           const priceUnite = item.detailsProduit.prix
           const reference = item.detailsProduit.reference

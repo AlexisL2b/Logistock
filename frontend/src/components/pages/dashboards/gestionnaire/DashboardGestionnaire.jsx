@@ -103,6 +103,7 @@ export default function DashboardGestionnaire() {
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       {/* Drawer (menu latéral caché sur mobile) */}
       <Drawer
+        sx={{ position: "absolute" }}
         anchor="left"
         open={openDrawer}
         onClose={() => setOpenDrawer(false)}

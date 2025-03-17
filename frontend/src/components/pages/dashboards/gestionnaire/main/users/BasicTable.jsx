@@ -20,9 +20,15 @@ import {
   DialogTitle,
   DialogContent,
   Typography,
+  IconButton,
 } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
-import SignUpForm from "../../../../signupPage/SignUpForm"
+import SignUpForm from "../../../../../reusable-ui/usersforms/SignUpForm"
+import EditForm from "../../../../../reusable-ui/usersforms/EditForm"
+import { Edit as EditIcon } from "@mui/icons-material" // Icône de crayon
+import { useDispatch } from "react-redux"
+import { deleteUserById } from "../../../../../../redux/slices/userSlice"
+import ConfirmationDialog from "../../../../../reusable-ui/dialogs/ConfirmationDialog"
 
 export default function BasicTable({
   data,
@@ -30,6 +36,7 @@ export default function BasicTable({
   onDataChange,
   headerMapping,
   admin,
+  onDelete,
 }) {
   const [order, setOrder] = useState("asc")
   const [orderBy, setOrderBy] = useState(Object.keys(data[0] || [])[0] || "")
@@ -41,13 +48,55 @@ export default function BasicTable({
   const [severity, setSeverity] = useState("")
   const [openDialog, setOpenDialog] = useState(false)
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false)
+  const [openEditDialog, setOpenEditDialog] = useState(false)
+  const [selectedUser, setSelectedUser] = useState(null)
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false)
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false)
 
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  })
+  const [open, setOpen] = useState(false)
+
+  const dispatch = useDispatch()
   const handleOpenConfirmDialog = () => setOpenConfirmDialog(true)
   const handleCloseConfirmDialog = () => setOpenConfirmDialog(false)
 
   const handleOpenDialog = () => setOpenDialog(true)
   const handleCloseDialog = () => setOpenDialog(false)
+  const handleEditUser = (user) => {
+    setSelectedUser(user) // Stocke les infos de l'utilisateur sélectionné
+    setOpenEditDialog(true) // Ouvre la modale d'édition
+  }
 
+  const handleUserUpdated = () => {
+    setSnackbar({
+      open: true,
+      message: "Utilisateur mis à jour avec succès !",
+      severity: "success",
+    })
+    setTimeout(() => setSnackbar({ ...snackbar, open: false }), 3000)
+    if (onDataChange) {
+      onDataChange()
+    }
+    setOpenUpdateDialog(false)
+    setOpenEditDialog(false)
+  }
+  const handleUserAdded = () => {
+    setSnackbar({
+      open: true,
+      message: "Utilisateur ajouté avec succès !",
+      severity: "success",
+    })
+    setTimeout(() => setSnackbar({ ...snackbar, open: false }), 3000)
+    if (onDataChange) {
+      onDataChange()
+    }
+    setOpenUpdateDialog(false)
+    setOpenEditDialog(false)
+  }
   const onClose = () => {
     setOpenDialog(false)
     setMessage("Inscription réussie")
@@ -63,22 +112,19 @@ export default function BasicTable({
       }
 
       for (const id of selected) {
-        await axiosInstance.delete(`http://localhost:5000/api/${coll}/${id}`)
+        dispatch(deleteUserById(id)) // 🔥 Suppression via Redux
       }
 
-      setMessage("Suppression réussie")
+      setMessage("Suppression réussie !")
       setSeverity("success")
       setShowAlert(true)
       setSelected([])
-      handleCloseConfirmDialog()
-
+      setOpenDeleteDialog(false)
       if (onDataChange) {
         onDataChange()
       }
     } catch (error) {
-      setMessage(
-        error.response?.data?.message || "Erreur lors de la suppression."
-      )
+      setMessage(error.message || "Erreur lors de la suppression.")
       setSeverity("error")
       setShowAlert(true)
     }
@@ -174,6 +220,14 @@ export default function BasicTable({
                       .map((key) => (
                         <TableCell key={key}>{row[key]}</TableCell>
                       ))}
+                    <TableCell>
+                      <IconButton
+                        color="primary"
+                        onClick={() => handleEditUser(row)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </TableCell>
                   </TableRow>
                 )
               })}
@@ -198,7 +252,7 @@ export default function BasicTable({
         <Button
           variant="contained"
           color="error"
-          onClick={handleOpenConfirmDialog}
+          onClick={() => setOpenDeleteDialog(true)}
           sx={{ minWidth: "120px" }}
         >
           Supprimer
@@ -221,27 +275,35 @@ export default function BasicTable({
           <SignUpForm
             onClose={onClose}
             admin={admin}
-            onUserAdded={onDataChange}
+            onUserAdded={handleUserAdded}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Annuler</Button>
         </DialogActions>
       </Dialog>
-
-      {/* Boîte de dialogue de confirmation de suppression */}
-      <Dialog open={openConfirmDialog} onClose={handleCloseConfirmDialog}>
-        <DialogTitle>Confirmation</DialogTitle>
+      <Dialog open={openEditDialog} onClose={() => setOpenEditDialog(false)}>
+        <DialogTitle>Modifier l'utilisateur</DialogTitle>
         <DialogContent>
-          <Typography>Voulez-vous vraiment supprimer ces éléments ?</Typography>
+          {selectedUser && (
+            <EditForm
+              row={selectedUser}
+              onClose={() => setOpen(false)}
+              onUserUpdated={handleUserUpdated}
+            />
+          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseConfirmDialog}>Annuler</Button>
-          <Button color="error" onClick={handleDelete}>
-            Confirmer
-          </Button>
+          <Button onClick={() => setOpenEditDialog(false)}>Annuler</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Boîte de dialogue de confirmation de suppression */}
+      <ConfirmationDialog
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+        onConfirm={handleDelete}
+      />
     </Box>
   )
 }

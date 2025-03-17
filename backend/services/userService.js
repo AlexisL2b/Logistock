@@ -1,55 +1,48 @@
 import bcrypt from "bcryptjs"
 import UserDAO from "../dao/userDAO.js"
 import User from "../models/userModel.js"
-import Role from "../models/roleModel.js"
+import mongoose from "mongoose"
 
-const UserService = {
+class UserService {
+  // 📌 Récupérer le profil utilisateur
   async getUserProfile(userId) {
     const user = await UserDAO.findById(userId)
-    if (!user) {
-      throw new Error("Utilisateur introuvable.")
-    }
+    if (!user) throw new Error("Utilisateur introuvable.")
     return user
-  },
+  }
 
+  // 📌 Récupérer tous les acheteurs
   async getBuyers() {
     const buyers = await UserDAO.findBuyers()
-    if (!buyers) {
-      throw new Error("Utilisateur introuvable.")
-    }
+    if (!buyers.length) throw new Error("Aucun acheteur trouvé.")
     return buyers
-  },
+  }
 
-  async createUser(userData, currentUserRole) {
+  // 📌 Créer un utilisateur
+  async createUser(userData) {
     try {
-      const { email, password, prenom, nom, adresse, sale_point_id, role_id } =
-        userData
-
-      const userExists = await User.findOne({ email })
-      if (userExists) {
-        throw new Error("L'utilisateur existe déjà !")
+      if (await User.findOne({ email: userData.email })) {
+        throw new Error("L'adresse e-mail est déjà utilisée.")
       }
 
-      const assignedRole = role_id
-        ? await Role.findById(role_id)
-        : { _id: "677cf977b39853e4a17727e3" }
-      if (!assignedRole) {
-        throw new Error("Le rôle spécifié n'existe pas !")
+      if (!userData.role?._id) {
+        throw new Error("Le rôle est obligatoire.")
+      }
+      if (
+        userData.role._id === "677cf977b39853e4a17727e3" &&
+        !userData.sales_point
+      ) {
+        throw new Error("Le point de vente est obligatoire pour les acheteurs.")
       }
 
-      const newUser = new User({
-        email,
-        password: userData.password,
-        role_id: assignedRole._id,
-        firstname: userData.firstname,
-        lastname: userData.lastname,
-        address: userData.address,
-        ...(sale_point_id && { sale_point_id: userData.sale_point_id }),
-      })
+      // Conversion des `ObjectId`
+      userData.role._id = new mongoose.Types.ObjectId(userData.role._id)
+      userData.sales_point._id = new mongoose.Types.ObjectId(
+        userData.sales_point._id
+      )
 
-      await newUser.save()
-      console.log("✅ Utilisateur créé avec succès :", newUser)
-      return { message: "Utilisateur créé avec succès !" }
+      const newUser = new User(userData)
+      return await newUser.save()
     } catch (error) {
       console.error(
         "❌ Erreur lors de la création de l'utilisateur :",
@@ -57,26 +50,59 @@ const UserService = {
       )
       throw new Error(error.message)
     }
-  },
+  }
 
+  // 📌 Récupérer tous les utilisateurs
   async getAllUsers() {
     return await UserDAO.findAll()
-  },
+  }
 
+  // 📌 Mettre à jour un utilisateur
   async updateUser(userId, updateData) {
-    // ✅ Si l'utilisateur met à jour son mot de passe, on le hash avant de l'enregistrer
-    if (updateData.password) {
-      const salt = await bcrypt.genSalt(10)
-      updateData.password = await bcrypt.hash(updateData.password, salt)
-      console.log("🔹 Mot de passe hashé mis à jour :", updateData.password)
+    try {
+      const existingUser = await UserDAO.findById(userId)
+      if (!existingUser) throw new Error("Utilisateur introuvable.")
+
+      if (
+        updateData.email &&
+        (await User.findOne({ email: updateData.email }))
+      ) {
+        throw new Error("L'adresse e-mail est déjà utilisée.")
+      }
+
+      // Gestion du changement de mot de passe
+      if (updateData.password) {
+        if (!updateData.oldPassword) {
+          throw new Error("L'ancien mot de passe est requis.")
+        }
+
+        const isMatch = await bcrypt.compare(
+          updateData.oldPassword,
+          existingUser.password
+        )
+        if (!isMatch) throw new Error("L'ancien mot de passe est incorrect.")
+
+        updateData.password = await bcrypt.hash(
+          updateData.password,
+          await bcrypt.genSalt(10)
+        )
+        delete updateData.oldPassword
+      }
+
+      updateData.updatedAt = Date.now()
+      const updatedUser = await UserDAO.updateUser(userId, updateData)
+
+      if (!updatedUser) throw new Error("Mise à jour échouée.")
+      return updatedUser
+    } catch (error) {
+      throw new Error(error.message)
     }
+  }
 
-    return await UserDAO.updateUser(userId, updateData)
-  },
-
+  // 📌 Supprimer un utilisateur
   async deleteUser(userId) {
     return await UserDAO.deleteUser(userId)
-  },
+  }
 }
 
-export default UserService
+export default new UserService()

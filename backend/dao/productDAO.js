@@ -14,7 +14,7 @@ class ProductDAO {
     }
 
     const products = await Product.find({ category_id }) // 🔥 Optionnel : récupérer les infos de la catégorie
-    console.log("products dans productsDAO findbycategorieId", products)
+
     return products
   }
   async findBySupplierId(supplier_id) {
@@ -23,7 +23,7 @@ class ProductDAO {
     }
 
     const products = await Product.find({ supplier_id }) // 🔥 Optionnel : récupérer les infos de la catégorie
-    console.log("products dans productsDAO findbySupplierId", products)
+
     return products
   }
 

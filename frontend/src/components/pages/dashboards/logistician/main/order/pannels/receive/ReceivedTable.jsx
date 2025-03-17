@@ -23,7 +23,7 @@ import {
   updateStock,
 } from "../../../../../../../../redux/slices/stockSlice"
 import { io } from "socket.io-client"
-import { fetchOrdersWithDetails } from "../../../../../../../../redux/slices/orderSlice"
+import { fetchOrders } from "../../../../../../../../redux/slices/orderSlice"
 import _ from "lodash"
 
 function Row({ row }) {
@@ -49,7 +49,8 @@ function Row({ row }) {
           </IconButton>
         </TableCell>
         <TableCell>{row._id}</TableCell>
-        <TableCell>{new Date(row.date_order).toLocaleString()}</TableCell>
+        <TableCell>{new Date(row.orderedAt).toLocaleString()}</TableCell>
+        <TableCell>{new Date(row.receivedAt).toLocaleString()}</TableCell>
         <TableCell
           sx={{
             color: "blue" || "black",
@@ -61,7 +62,7 @@ function Row({ row }) {
       </TableRow>
 
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box margin={2}>
               <Typography variant="h6" gutterBottom>
@@ -77,12 +78,12 @@ function Row({ row }) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.produitDetails.map((product) => {
+                  {row.details.map((product) => {
                     const stockInfo = stocks.find(
                       (stock) => stock.product_id === product.product_id
                     )
                     return (
-                      <TableRow key={product._id}>
+                      <TableRow key={product._id} colSpan={6}>
                         <TableCell>{product.product_id}</TableCell>
                         <TableCell>{product.quantity}</TableCell>
                         <TableCell>{product.price}</TableCell>
@@ -92,6 +93,35 @@ function Row({ row }) {
                       </TableRow>
                     )
                   })}
+                  <TableRow>
+                    <TableCell
+                      align="right"
+                      colSpan={4}
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "1.1rem",
+                        paddingTop: "20px",
+                        paddingBottom: "10px",
+                        borderTop: "2px solid #ddd",
+                        backgroundColor: "#f5f5f5", // Fond léger pour différencier
+                      }}
+                    >
+                      Total de la commande :
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "1.2rem",
+                        paddingTop: "20px",
+                        paddingBottom: "10px",
+                        borderTop: "2px solid #ddd",
+                        backgroundColor: "#f5f5f5",
+                        color: "#d32f2f", // Couleur rouge pour mettre en valeur
+                      }}
+                    >
+                      {row.totalAmount}€
+                    </TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </Box>
@@ -168,6 +198,21 @@ export default function ReceivedTable({ data }) {
               style={{ cursor: "pointer", fontWeight: "bold" }}
             >
               Date de Commande{" "}
+              {sortConfig.key === "date_order" && (
+                <IconButton size="small">
+                  {sortConfig.direction === "asc" ? (
+                    <KeyboardArrowUp />
+                  ) : (
+                    <KeyboardArrowDown />
+                  )}
+                </IconButton>
+              )}
+            </TableCell>
+            <TableCell
+              onClick={() => handleSort("date_order")}
+              style={{ cursor: "pointer", fontWeight: "bold" }}
+            >
+              Date de réception{" "}
               {sortConfig.key === "date_order" && (
                 <IconButton size="small">
                   {sortConfig.direction === "asc" ? (

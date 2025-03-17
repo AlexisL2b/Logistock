@@ -43,7 +43,6 @@ export default function DashboardLogistician() {
 
   return (
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      {/* Drawer pour mobile */}
       {isMobile && (
         <Drawer
           anchor="left"
@@ -70,7 +69,6 @@ export default function DashboardLogistician() {
         </Drawer>
       )}
 
-      {/* Menu latéral sur desktop */}
       {!isMobile && (
         <Box
           sx={{
@@ -100,7 +98,6 @@ export default function DashboardLogistician() {
         </Box>
       )}
 
-      {/* Contenu principal */}
       <Box sx={{ flexGrow: 1, overflowY: "auto", p: 2 }}>
         {/* Header avec menu burger (gauche) */}
         {isMobile && (

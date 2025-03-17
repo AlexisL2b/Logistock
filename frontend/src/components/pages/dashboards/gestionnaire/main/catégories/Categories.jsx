@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
-import { Box, TextField } from "@mui/material"
+import { Box, TextField, Typography } from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
-import EnhancedTable from "../../../../../reusable-ui/EnhancedTable"
+import EnhancedTable from "../../../../../reusable-ui/tables/EnhancedTable"
 
 export default function Categories() {
   const [categories, setCategories] = useState([])
@@ -34,7 +34,6 @@ export default function Categories() {
     name: "Nom",
   }
   const fields = { name: { type: "text", label: "Nom", required: true } }
-  console.log("data: ", categories)
 
   // 🔍 Filtrage multi-critères : Nom, ID
   const filteredCategories = categories.filter((category) => {
@@ -47,7 +46,11 @@ export default function Categories() {
   })
 
   return (
-    <Box>
+    <Box sx={{ padding: 3 }}>
+      {/* 🏷️ Titre principal */}
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
+        Catégories
+      </Typography>
       {/* 🔍 Champ de recherche multi-critères */}
       <TextField
         label="Rechercher par Nom ou ID"

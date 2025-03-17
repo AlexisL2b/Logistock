@@ -76,7 +76,7 @@ export const deleteRole = createAsyncThunk(
 const roleSlice = createSlice({
   name: "roles",
   initialState: {
-    roles: [],
+    list: [],
     status: "idle",
     error: null,
   },
@@ -88,35 +88,35 @@ const roleSlice = createSlice({
       })
       .addCase(fetchRoles.fulfilled, (state, action) => {
         state.status = "succeeded"
-        state.roles = action.payload
+        state.list = action.payload
       })
       .addCase(fetchRoles.rejected, (state, action) => {
         state.status = "failed"
         state.error = action.payload
       })
       .addCase(fetchRoleById.fulfilled, (state, action) => {
-        const roleIndex = state.roles.findIndex(
+        const roleIndex = state.list.findIndex(
           (item) => item._id === action.payload._id
         )
         if (roleIndex === -1) {
-          state.roles.push(action.payload)
+          state.list.push(action.payload)
         } else {
-          state.roles[roleIndex] = action.payload
+          state.list[roleIndex] = action.payload
         }
       })
       .addCase(createRole.fulfilled, (state, action) => {
-        state.roles.push(action.payload)
+        state.list.push(action.payload)
       })
       .addCase(updateRole.fulfilled, (state, action) => {
-        const roleIndex = state.roles.findIndex(
+        const roleIndex = state.list.findIndex(
           (item) => item._id === action.payload._id
         )
         if (roleIndex !== -1) {
-          state.roles[roleIndex] = action.payload
+          state.list[roleIndex] = action.payload
         }
       })
       .addCase(deleteRole.fulfilled, (state, action) => {
-        state.roles = state.roles.filter((item) => item._id !== action.payload)
+        state.list = state.list.filter((item) => item._id !== action.payload)
       })
   },
 })

@@ -23,20 +23,22 @@ import {
   updateStock,
 } from "../../../../../../../../redux/slices/stockSlice"
 import { io } from "socket.io-client"
-import { fetchOrdersWithDetails } from "../../../../../../../../redux/slices/orderSlice"
+import { fetchOrders } from "../../../../../../../../redux/slices/orderSlice"
 import _ from "lodash"
 import { fetchTransporters } from "../../../../../../../../redux/slices/transporterSlice"
+import { fetchOrderShipments } from "../../../../../../../../redux/slices/orderShipmentSlice"
 
 function Row({ row }) {
   const [open, setOpen] = useState(false)
   const dispatch = useDispatch()
-
   // Récupérer les stocks depuis Redux
   const stocks = useSelector((state) => state.stocks.stocks)
-  const transportersState = useSelector((state) => state.transporters)
-  const transporters = transportersState.list.data
-
-  console.log("transporters", transporters)
+  const transporters = useSelector((state) => state.transporters.list)
+  const orderShipments = useSelector((state) => state.orderShipments.list)
+  const orders = useSelector((state) => state.orders.list)
+  useEffect(() => {
+    dispatch(fetchOrderShipments()) // Assure-toi que l'action est bien dispatchée au chargement
+  }, [dispatch])
   // Écouter les mises à jour en temps réel via Socket.IO
   useEffect(() => {
     dispatch(fetchTransporters())
@@ -54,11 +56,12 @@ function Row({ row }) {
         )
       })
       dispatch(fetchStocks())
-      dispatch(fetchOrdersWithDetails())
+      dispatch(fetchOrders())
     })
     return () => socket.disconnect() // Déconnexion propre
   }, [dispatch])
-  console.log("row", row)
+
+  //
   return (
     <>
       <TableRow>
@@ -72,8 +75,17 @@ function Row({ row }) {
           </IconButton>
         </TableCell>
         <TableCell>{row._id}</TableCell>
-        <TableCell>{new Date(row.date_order).toLocaleString()}</TableCell>
-        <TableCell>{new Date(row.date_shipment).toLocaleString()}</TableCell>
+        <TableCell>{new Date(row.orderedAt).toLocaleString()}</TableCell>
+        <TableCell>
+          {orderShipments?.length > 0
+            ? new Date(
+                orderShipments.find((order) => order.order_id?._id === row._id)
+                  ?.date_shipment || 0 // Evite new Date(undefined)
+              ).toLocaleString()
+            : "En attente..."}{" "}
+          {/* Message par défaut si pas encore chargé */}
+        </TableCell>
+
         <TableCell
           sx={{
             color: "purple" || "black",
@@ -83,18 +95,35 @@ function Row({ row }) {
           {_.capitalize(row.statut)}
         </TableCell>
         <TableCell>
-          {transporters?.find(
-            (transporter) => transporter._id === row.transporter_id
-          )?.name || "Non trouvé"}
+          {orderShipments?.find((order) => order.order_id._id === row._id)
+            ?.transporter_id.name || "Non trouvé"}
+
+          {/* {transporters.find((transporter) => {
+            const orderShipped = orderShipments.find(
+              (order) => order.order_id._id === row._id
+            )
+            return (
+              orderShipped && transporter._id === orderShipped.transporter_id
+            )
+          })?.name || "Non trouvé"} */}
         </TableCell>
       </TableRow>
 
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box margin={2}>
               <Typography variant="h6" gutterBottom>
                 Détails des produits
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                {row.buyer.firstname}
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                {row.buyer.lastname}
+              </Typography>
+              <Typography variant="body1" gutterBottom>
+                {row.buyer.address}
               </Typography>
               <Table size="small" aria-label="details">
                 <TableHead>
@@ -106,7 +135,7 @@ function Row({ row }) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.produitDetails.map((product) => {
+                  {row.details.map((product) => {
                     const stockInfo = stocks.find(
                       (stock) => stock.product_id === product.product_id
                     )
@@ -121,6 +150,35 @@ function Row({ row }) {
                       </TableRow>
                     )
                   })}
+                  <TableRow>
+                    <TableCell
+                      align="right"
+                      colSpan={4}
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "1.1rem",
+                        paddingTop: "20px",
+                        paddingBottom: "10px",
+                        borderTop: "2px solid #ddd",
+                        backgroundColor: "#f5f5f5", // Fond léger pour différencier
+                      }}
+                    >
+                      Total de la commande :
+                    </TableCell>
+                    <TableCell
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "1.2rem",
+                        paddingTop: "20px",
+                        paddingBottom: "10px",
+                        borderTop: "2px solid #ddd",
+                        backgroundColor: "#f5f5f5",
+                        color: "#d32f2f", // Couleur rouge pour mettre en valeur
+                      }}
+                    >
+                      {row.totalAmount}€
+                    </TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </Box>
@@ -134,9 +192,8 @@ function Row({ row }) {
 Row.propTypes = {
   row: PropTypes.shape({
     _id: PropTypes.string.isRequired,
-    date_order: PropTypes.string.isRequired,
     statut: PropTypes.string.isRequired,
-    produitDetails: PropTypes.arrayOf(
+    details: PropTypes.arrayOf(
       PropTypes.shape({
         _id: PropTypes.string.isRequired,
         product_id: PropTypes.string.isRequired,
@@ -281,9 +338,8 @@ ShippedTable.propTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({
       _id: PropTypes.string.isRequired,
-      date_order: PropTypes.string.isRequired,
       statut: PropTypes.string.isRequired,
-      produitDetails: PropTypes.arrayOf(
+      details: PropTypes.arrayOf(
         PropTypes.shape({
           _id: PropTypes.string.isRequired,
           product_id: PropTypes.string.isRequired,

@@ -96,7 +96,7 @@ export default function BasicModal({
                   >
                     {dropdownData[dropdownKey]?.map((item) => (
                       <MenuItem key={item._id} value={item._id}>
-                        {item.nom}
+                        {item.name}
                       </MenuItem>
                     ))}
                   </TextField>

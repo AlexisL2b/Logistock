@@ -1,20 +1,27 @@
 import React, { useEffect, useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { fetchProducts } from "../../../../../../redux/slices/productsSlice"
-import { Box, FormControl, InputLabel, Select, MenuItem } from "@mui/material"
+import {
+  Box,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Typography,
+} from "@mui/material"
 import axiosInstance from "../../../../../../axiosConfig"
 import ProductCard from "./ProductCard"
+import CustomSelect from "../../../../../reusable-ui/selects/CustomSelect"
 
 export default function Shop() {
   const dispatch = useDispatch()
   const products = useSelector((state) => state.products.items)
+  const products2 = useSelector((state) => state.products)
   const status = useSelector((state) => state.products.status)
   const error = useSelector((state) => state.products.error)
-
+  console.log("products2 depuis Shop.jsx", products2)
   const [categories, setCategories] = useState([])
   const [selectedCategory, setSelectedCategory] = useState("")
-
-  console.log("products", products)
 
   // Charger les catégories depuis l'API
   useEffect(() => {
@@ -36,30 +43,27 @@ export default function Shop() {
   // Filtrer les produits par catégorie sélectionnée
   const filteredProducts = selectedCategory
     ? products.filter(
-        (product) => product.categorie_id?._id === selectedCategory
+        (product) =>
+          String(product.category_id?._id) === String(selectedCategory)
       )
     : products
-  console.log(filteredProducts)
+
   return (
     <Box sx={{ p: 3 }}>
-      {/* 🏷️ Filtre par catégorie */}
-      <FormControl fullWidth margin="normal">
-        <InputLabel id="category-filter-label">
-          Filtrer par Catégorie
-        </InputLabel>
-        <Select
-          labelId="category-filter-label"
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
-        >
-          <MenuItem value="">Toutes les catégories</MenuItem>
-          {categories.map((category) => (
-            <MenuItem key={category._id} value={category._id}>
-              {category.name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
+        Produits
+      </Typography>
+      <CustomSelect
+        inputLabelId="filtreCategorieLabel"
+        inputLabel="Filtrer par Catégorie"
+        selectId="filtreCategorie"
+        selectLabel="Filtrer par Catégorie"
+        defaultMenuItemLabel="Toutes les catégories"
+        menuItems={categories}
+        selectedValue={selectedCategory}
+        onChange={(e) => setSelectedCategory(e.target.value)}
+      />
+      {/* 🏷️ Titre principal */}
 
       {/* 🌟 Affichage ultra responsive des produits */}
       <Box
@@ -70,10 +74,9 @@ export default function Shop() {
             sm: "repeat(2, 1fr)", // 2 produits par ligne sur tablette
             md: "repeat(3, 1fr)", // 3 produits par ligne sur PC
           },
-          gap: "24px", // Espacement horizontal
-          rowGap: "70px", // Espacement vertical
+          gap: "24px",
+          rowGap: "70px",
           mt: 2,
-          justifyContent: "center",
         }}
       >
         {filteredProducts.map((product) => (

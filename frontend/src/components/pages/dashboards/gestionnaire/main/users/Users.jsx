@@ -13,6 +13,11 @@ import axiosInstance from "../../../../../../axiosConfig"
 import BasicTable from "./BasicTable"
 import { useDispatch, useSelector } from "react-redux"
 import { fetchSalesPoints } from "../../../../../../redux/slices/salesPointSlice"
+import CustomSelect from "../../../../../reusable-ui/selects/CustomSelect"
+import {
+  deleteUserById,
+  fetchBuyers,
+} from "../../../../../../redux/slices/userSlice"
 
 export default function Transporters() {
   const [users, setUsers] = useState([])
@@ -20,14 +25,13 @@ export default function Transporters() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedPointVente, setSelectedPointVente] = useState("")
 
-  const salesPoints = useSelector((state) => state.salesPoints.salesPoints)
+  const salesPoints = useSelector((state) => state.salesPoints.list)
   const dispatch = useDispatch()
 
   // Fonction pour récupérer les utilisateurs depuis l'API
   const fetchUsers = async () => {
     try {
       const response = await axiosInstance.get("/users/buyers")
-      console.log("Utilisateurs reçus :", response.data)
 
       const usersData = response.data.buyers || []
 
@@ -41,11 +45,12 @@ export default function Transporters() {
   useEffect(() => {
     let filteredUsers = users.map((user) => ({
       _id: user._id,
-      nom: user.name,
+      nom: user.lastname,
       prenom: user.firstname,
       adresse: user.address,
       email: user.email,
-      point_vente_nom: user.sale_point_id?.name || "N/A",
+      point_vente_nom: user.sales_point?.name || "N/A",
+      role: user.role?.name || "N/A",
     }))
 
     if (selectedPointVente) {
@@ -58,7 +63,7 @@ export default function Transporters() {
       const lowerSearchTerm = searchTerm.toLowerCase()
       filteredUsers = filteredUsers.filter(
         (user) =>
-          user.nom.toLowerCase().includes(lowerSearchTerm) ||
+          user.name.toLowerCase().includes(lowerSearchTerm) ||
           user.prenom.toLowerCase().includes(lowerSearchTerm) ||
           user.email.toLowerCase().includes(lowerSearchTerm)
       )
@@ -70,10 +75,11 @@ export default function Transporters() {
   useEffect(() => {
     fetchUsers()
     dispatch(fetchSalesPoints())
+    dispatch(fetchBuyers())
   }, [])
 
-  const handleDataChange = () => {
-    fetchUsers()
+  const handleDataChange = async () => {
+    await dispatch(fetchUsers())
   }
 
   const headerMapping = {
@@ -85,7 +91,11 @@ export default function Transporters() {
   }
 
   return (
-    <Box>
+    <Box sx={{ padding: 3 }}>
+      {/* 🏷️ Titre principal */}
+      <Typography variant="h4" sx={{ mb: 3, fontWeight: "bold" }}>
+        Utilisateurs
+      </Typography>
       {/* Filtres alignés proprement */}
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
         {/* 🔍 Champ de recherche */}
@@ -98,35 +108,16 @@ export default function Transporters() {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
 
-        {/* 📍 Filtre par Point de Vente */}
-        <FormControl variant="outlined" sx={{ minWidth: 200 }}>
-          <InputLabel
-            shrink
-            sx={{
-              position: "absolute",
-              background: "white",
-              px: 1,
-              mt: -0.5,
-              // Ajuste la hauteur pour éviter l'encadrement
-            }}
-          >
-            Point de Vente
-          </InputLabel>
-          <Select
-            value={selectedPointVente}
-            onChange={(e) => setSelectedPointVente(e.target.value)}
-            displayEmpty
-            sx={{ textAlign: "left" }}
-          >
-            <MenuItem value="">Points de vente</MenuItem>
-
-            {salesPoints.map((point) => (
-              <MenuItem key={point._id} value={point.nom}>
-                {point.nom}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <CustomSelect
+          inputLabelId="filtrePointVenteLabel"
+          inputLabel="Filtrer par Points de vente"
+          selectId="filtrePointVente"
+          selectLabel="Filtrer par Points de vente"
+          defaultMenuItemLabel="Tous les Points de vente"
+          menuItems={salesPoints}
+          selectedValue={selectedPointVente}
+          onChange={(e) => setSelectedPointVente(e.target.value)}
+        />
 
         {/* 🔄 Bouton de réinitialisation (hauteur réduite) */}
         <Button
@@ -168,7 +159,7 @@ export default function Transporters() {
         coll={"users"}
         onDataChange={handleDataChange}
         headerMapping={headerMapping}
-        trigger={users.length} // 🔥 Change la prop pour forcer un rerender
+        trigger={users.length}
       />
     </Box>
   )

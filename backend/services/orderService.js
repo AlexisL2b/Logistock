@@ -1,38 +1,65 @@
 import OrderDAO from "../dao/orderDAO.js"
+import UserDAO from "../dao/userDAO.js"
 
 class OrderService {
+  // 🔥 Récupérer toutes les commandes
   async getAllOrders() {
     return await OrderDAO.findAllOrders()
   }
-  async getAllOrdersWithDetails() {
-    return await OrderDAO.findAllWithDetails()
-  }
-  async getOrdersByBuyerId(buyerId) {
-    return await OrderDAO.findOrdersByBuyerId(buyerId)
-  }
-  async updateOrder(id, orderData) {
-    const updatedOrder = await OrderDAO.update(id, orderData)
-    if (!updatedOrder) {
+
+  // 🔥 Récupérer une commande par ID
+  async getOrderById(id) {
+    const order = await OrderDAO.findById(id)
+    if (!order) {
       throw new Error("Commande introuvable")
     }
-    return updatedOrder
+    return order
   }
-  async addOrder(buyer_id, totalAmount) {
+
+  // 🔥 Récupérer toutes les commandes d'un acheteur donné
+  async getOrdersByBuyerId(buyerId) {
+    return await OrderDAO.findByUserId(buyerId)
+  }
+
+  // 🔥 Ajouter une commande avec `details` et `shipment`
+  async addOrder(orderData) {
     try {
-      const montantTotal = Math.round(Number(totalAmount) * 100) // Convertir en centimes
-      if (isNaN(montantTotal) || montantTotal <= 0) {
-        throw new Error("Le montant total est invalide")
+      // Vérifier l'acheteur
+      const buyer = await UserDAO.findById(orderData.buyer_id)
+      if (!buyer) {
+        throw new Error("Acheteur introuvable")
+      }
+      // Construire l'objet `order`
+      const newOrderData = {
+        buyer: {
+          _id: buyer._id,
+          firstname: `${buyer.firstname}`,
+          lastname: `${buyer.lastname}`,
+          address: `${buyer.address}`,
+          sales_point: `${buyer.sales_point.name}`,
+          email: `${buyer.email}`,
+        },
+        statut: "en cours",
+        totalAmount: orderData.totalAmount,
+        date_order: new Date(),
+        details: orderData.details.map((detail) => ({
+          product_id: detail.product_id,
+          name: detail.name,
+          reference: detail.reference,
+          quantity: detail.quantity,
+          price: detail.price,
+        })),
+        orderedAt: orderData.orderedAt,
+        shipment: orderData.shipment
+          ? {
+              transporter_id: orderData.shipment.transporter_id,
+              date_shipment: orderData.shipment.date_shipment,
+            }
+          : null,
       }
 
-      console.log("🔍 Montant total transformé :", montantTotal)
-
-      // 🔥 Étape 1 : Créer la commande dans la base de données
-      const newOrder = await OrderDAO.createOrder(buyer_id, totalAmount)
-
-      console.log("✅ Commande créée :", newOrder)
-
-      // 🔥 Étape 3 : Associer le PaymentIntent à la commande
-
+      // 🔹 Créer la commande
+      const newOrder = await OrderDAO.createOrder(newOrderData)
       return { order: newOrder }
     } catch (error) {
       console.error("❌ Erreur addOrder service :", error)
@@ -40,7 +67,16 @@ class OrderService {
     }
   }
 
-  // ✅ Confirmer un paiement Stripe et mettre à jour la commande
+  // 🔥 Mettre à jour une commande
+  async updateOrder(id, orderData) {
+    const updatedOrder = await OrderDAO.updateOrder(id, orderData)
+    if (!updatedOrder) {
+      throw new Error("Commande introuvable")
+    }
+    return updatedOrder
+  }
+
+  // 🔥 Confirmer un paiement Stripe et mettre à jour la commande
   async confirmPayment(orderId, paymentIntentId) {
     try {
       return await OrderDAO.updateOrderPaymentStatus(
@@ -54,16 +90,7 @@ class OrderService {
     }
   }
 
-  // ✅ Récupérer une commande par ID
-  async getOrderById(id) {
-    const order = await OrderDAO.findById(id)
-    if (!order) {
-      throw new Error("Commande introuvable")
-    }
-    return order
-  }
-
-  // ✅ Supprimer une commande
+  // 🔥 Supprimer une commande
   async deleteOrder(id) {
     const deletedOrder = await OrderDAO.delete(id)
     if (!deletedOrder) {

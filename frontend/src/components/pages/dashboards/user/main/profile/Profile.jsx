@@ -100,8 +100,6 @@ const Profile = () => {
     setIsLoading(true)
 
     try {
-      console.log("🚀 Envoi des modifications utilisateur...")
-
       const updatedFields = {}
       Object.keys(userProfile).forEach((key) => {
         if (userProfile[key] !== user[key]) {
@@ -122,8 +120,6 @@ const Profile = () => {
         updatedFields,
         { withCredentials: true }
       )
-
-      console.log("✅ Réponse mise à jour :", response.data)
 
       const updatedUser = response.data.user
       if (updatedUser) {
@@ -205,7 +201,7 @@ const Profile = () => {
             variant="outlined"
             fullWidth
             value={
-              salesPoints?.find((s) => s._id === user?.point_vente_id)?.nom ||
+              salesPoints?.find((s) => s._id === user?.point_vente_id)?.name ||
               ""
             }
             disabled

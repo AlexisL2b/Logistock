@@ -1,11 +1,11 @@
 import {
   Box,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
   Button,
   Typography,
+  Grid,
+  Stack,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material"
 import React, { useEffect, useState } from "react"
 import StocksTable from "./StocksTable"
@@ -16,6 +16,7 @@ import {
 } from "../../../../../../redux/slices/stockSlice"
 import axiosInstance from "../../../../../../axiosConfig"
 import { io } from "socket.io-client"
+import CustomSelect from "../../../../../reusable-ui/selects/CustomSelect"
 
 export default function Stocks() {
   const dispatch = useDispatch()
@@ -25,6 +26,9 @@ export default function Stocks() {
   const [selectedCategory, setSelectedCategory] = useState("")
   const [suppliers, setSuppliers] = useState([])
   const [selectedSupplier, setSelectedSupplier] = useState("")
+
+  const theme = useTheme()
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"))
 
   useEffect(() => {
     dispatch(fetchStocksWithProduct()) // Charger les stocks une seule fois
@@ -51,7 +55,6 @@ export default function Stocks() {
       )
   }, [])
 
-  // Fonction pour écouter WebSocket et mettre à jour Redux
   useEffect(() => {
     const socket = io("http://localhost:5000")
 
@@ -61,7 +64,6 @@ export default function Stocks() {
         updatedStocks
       )
 
-      // Vérifie si updatedStocks est bien un tableau
       if (!Array.isArray(updatedStocks)) {
         console.error("❌ Format incorrect de stocksUpdated :", updatedStocks)
         return
@@ -72,7 +74,6 @@ export default function Stocks() {
           console.error("❌ Données manquantes dans le stock reçu :", stock)
           return
         }
-        console.log(stock.stockId)
         dispatch(
           updateStock({
             stockId: stock.stockId,
@@ -85,7 +86,6 @@ export default function Stocks() {
     return () => socket.disconnect()
   }, [dispatch])
 
-  // Filtrage des stocks en fonction des sélections
   const filteredStocks = stocks.filter(
     (stock) =>
       stock.product_id !== null &&
@@ -94,63 +94,88 @@ export default function Stocks() {
       (selectedSupplier === "" ||
         stock.product_id.supplier_id._id === selectedSupplier)
   )
-
+  console.log("filteredStocks depuis Stocks.jsx", filteredStocks)
+  console.log("stocks depuis Stocks.jsx", stocks)
   return (
     <Box>
       {/* Filtres */}
-      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-        {/* Filtre par catégorie */}
-        <FormControl variant="outlined" sx={{ minWidth: 200 }}>
-          <InputLabel shrink>Catégorie</InputLabel>
-          <Select
-            value={selectedCategory}
+      <Grid
+        container
+        spacing={2}
+        alignItems="center"
+        justifyContent="center"
+        sx={{
+          mb: 2,
+          flexDirection: isSmallScreen ? "column" : "row",
+        }}
+      >
+        <Grid item xs={12} sm={6} md={4}>
+          <CustomSelect
+            inputLabelId="filtreCategorieLabel"
+            inputLabel="Filtrer par Catégorie"
+            selectId="filtreCategorie"
+            selectLabel="Filtrer par Catégorie"
+            defaultMenuItemLabel="Toutes les catégories"
+            menuItems={categories}
+            selectedValue={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            displayEmpty
-          >
-            <MenuItem value="">Toutes les catégories</MenuItem>
-            {categories.map((cat) => (
-              <MenuItem key={cat._id} value={cat._id}>
-                {cat.nom}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+            fullWidth
+          />
+        </Grid>
 
-        {/* Filtre par fournisseur */}
-        <FormControl variant="outlined" sx={{ minWidth: 200 }}>
-          <InputLabel shrink>Fournisseur</InputLabel>
-          <Select
-            value={selectedSupplier}
+        <Grid item xs={12} sm={6} md={4}>
+          <CustomSelect
+            inputLabelId="filtreFournisseurLabel"
+            inputLabel="Filtrer par Fournisseur"
+            selectId="filtreFournisseur"
+            selectLabel="Filtrer par Fournisseur"
+            defaultMenuItemLabel="Tous les fournisseurs"
+            menuItems={suppliers}
+            selectedValue={selectedSupplier}
             onChange={(e) => setSelectedSupplier(e.target.value)}
-            displayEmpty
-          >
-            <MenuItem value="">Tous les fournisseurs</MenuItem>
-            {suppliers.map((sup) => (
-              <MenuItem key={sup._id} value={sup._id}>
-                {sup.nom}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+            fullWidth
+          />
+        </Grid>
 
-        {/* Bouton de réinitialisation */}
-        <Button
-          variant="contained"
-          onClick={() => {
-            setSelectedCategory("")
-            setSelectedSupplier("")
-          }}
-        >
-          Réinitialiser
-        </Button>
-      </Box>
+        <Grid item xs={12} sm={6} md={4}>
+          <Stack direction="row" spacing={1} justifyContent="center">
+            <Button
+              variant="contained"
+              onClick={() => {
+                setSelectedCategory("")
+                setSelectedSupplier("")
+              }}
+              fullWidth={isSmallScreen}
+            >
+              Réinitialiser
+            </Button>
+          </Stack>
+        </Grid>
+      </Grid>
 
       {/* Affichage des stocks */}
-      {filteredStocks.length > 0 ? (
-        <StocksTable stocks={filteredStocks} />
-      ) : (
-        <Typography>Aucun stock disponible.</Typography>
-      )}
+      <Box
+        sx={{
+          mt: 2,
+          p: { xs: 1, md: 2 },
+          width: "100%",
+          overflowX: "auto", // Permet de scroller sur petits écrans
+        }}
+      >
+        {filteredStocks.length > 0 ? (
+          <StocksTable stocks={filteredStocks} />
+        ) : (
+          <Typography
+            sx={{
+              textAlign: "center",
+              fontSize: { xs: "1rem", md: "1.2rem" },
+              color: "text.secondary",
+            }}
+          >
+            Aucun stock disponible.
+          </Typography>
+        )}
+      </Box>
     </Box>
   )
 }

@@ -8,6 +8,8 @@ import {
 } from "../controllers/productController.js"
 import { protect } from "../middlewares/authMiddleware.js"
 import { checkRole } from "../middlewares/checkRole.js"
+import validate from "../middlewares/validate.js"
+import { productSchema } from "../validations/productValidation.js"
 
 const router = express.Router()
 
@@ -15,9 +17,21 @@ const router = express.Router()
 router.get("/", getAllProducts)
 
 // Récupérer un produit par son ID
-router.get("/:id", getProductById)
-router.post("/", protect, checkRole("Admin", "Gestionnaire"), createProduct)
-router.put("/:id", protect, checkRole("Admin", "Gestionnaire"), updateProduct)
+router.get("/:id", protect, getProductById)
+router.post(
+  "/",
+  protect,
+  validate(productSchema),
+  checkRole("Admin", "Gestionnaire"),
+  createProduct
+)
+router.put(
+  "/:id",
+  protect,
+  validate(productSchema),
+  checkRole("Admin", "Gestionnaire"),
+  updateProduct
+)
 router.delete(
   "/:id",
   protect,
@@ -26,33 +40,3 @@ router.delete(
 )
 
 export default router
-
-// import express from "express"
-// import {
-//   getAllProducts,
-//   getProductById,
-//   addProduct,
-//   updateProduct,
-//   deleteProduct,
-//   updateProductStock,
-// } from "../controllers/productController.js"
-
-// const router = express.Router()
-
-// // Route pour récupérer tous les produits
-// router.get("/", getAllProducts)
-
-// // Route pour récupérer un produit par ID
-// router.get("/:id", getProductById)
-
-// // Route pour ajouter un produit
-// router.post("/", addProduct)
-// router.put("/:id/stock", updateProductStock)
-
-// // Route pour mettre à jour un produit
-// router.put("/:id", updateProduct)
-
-// // Route pour supprimer un produit
-// router.delete("/:id", deleteProduct)
-
-// export default router

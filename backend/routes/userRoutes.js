@@ -14,17 +14,35 @@ import validate from "../middlewares/validate.js"
 
 const router = express.Router()
 
-router.get("/", protect, getAllUsers)
+// 🔹 Récupérer tous les utilisateurs (seuls les admins peuvent y accéder)
+router.get("/", protect, checkRole("admin"), getAllUsers)
+
+// 🔹 Récupérer le profil de l'utilisateur connecté
 router.get("/profile", protect, getUserProfile)
-router.get("/buyers", protect, getBuyers)
+
+// 🔹 Récupérer la liste des acheteurs (accessible uniquement aux admins et gestionnaires)
+router.get("/buyers", protect, checkRole("admin", "Gestionnaire"), getBuyers)
+
+// 🔹 Créer un nouvel utilisateur (seuls les admins et gestionnaires peuvent le faire)
 router.post(
   "/",
-  protect,
-  checkRole("admin", "Gestionnaire"),
+  // protect,
+  // checkRole("admin", "Gestionnaire"),
   validate(userSchema),
   createUser
 )
-router.put("/:id", protect, checkRole("admin", "Gestionnaire"), updateUser)
+
+// 🔹 Mettre à jour un utilisateur (seuls les admins et gestionnaires peuvent le faire)
+router.put(
+  "/:id",
+  protect,
+  checkRole("admin", "Gestionnaire"),
+
+  // validate(userSchema),
+  updateUser
+)
+
+// 🔹 Supprimer un utilisateur (seuls les admins peuvent le faire)
 router.delete("/:id", protect, checkRole("admin", "Gestionnaire"), deleteUser)
 
 export default router

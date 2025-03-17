@@ -12,7 +12,6 @@ import orderShipmentRoutes from "./routes/orderShipmentRoutes.js"
 import authRoutes from "./routes/authRoutes.js"
 import stockRoutes from "./routes/stockRoutes.js"
 import roleRoutes from "./routes/roleRoutes.js"
-import admin from "./config/firebase.js"
 
 import express from "express"
 import cors from "cors"
@@ -22,12 +21,26 @@ import { createServer } from "http"
 import { Server } from "socket.io"
 import connectDB from "./config/db.js"
 import cookieParser from "cookie-parser"
+import helmet from "helmet"
 
 // Charger les variables d’environnement
 dotenv.config()
 
 connectDB()
-const app = express()
+export const app = express()
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"], // Autorise uniquement les ressources du même domaine
+        scriptSrc: ["'self'"], // Bloque les scripts externes (évite les injections XSS)
+        objectSrc: ["'none'"], // Bloque Flash & autres objets
+        upgradeInsecureRequests: [], // Force les requêtes HTTP vers HTTPS si applicable
+      },
+    },
+  })
+)
+
 // Pour lire les JSON
 app.use(cookieParser())
 

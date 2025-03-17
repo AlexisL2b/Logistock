@@ -7,16 +7,17 @@ import {
   Divider,
   Button,
 } from "@mui/material"
+import { createOrder } from "../../../../../redux/slices/orderSlice"
+
 import CloseIcon from "@mui/icons-material/Close"
 import CartCardModal from "./CartCardModal"
 import {
   getFromLocalStorage,
-  loadUserFromLocalStorage,
   removeFromLocalStorage,
 } from "../../../../../utils/localStorage"
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { clearCart } from "../../../../../redux/slices/cartSlice"
-import axiosInstance from "../../../../../axiosConfig"
+import { createOrderDetails } from "../../../../../redux/slices/orderDetailsSlice"
 
 export default function CartDrawer({
   open,
@@ -28,15 +29,14 @@ export default function CartDrawer({
   onRemove,
 }) {
   const user = getFromLocalStorage("user")
-  console.log("user", user)
-  const userId = user.id
+
+  const userId = useSelector((state) => state.auth.user) // Récupération de l'ID utilisateur via Redux
+  const { password, createdAt, updatedAt, __v, ...userInfos } = userId
   const dispatch = useDispatch()
 
   const [orderId, setOrderId] = useState(null)
-  console.log("cartItems from cartDrawer.jsx", cartItems)
-  console.log("userId from cartDrawer.jsx", user._id)
+
   const handleCheckout = async () => {
-    // console.log("🚀 Checkout lancé, userId:", userId, "Total:", total)
     try {
       if (cartItems.length > 0) {
         // 🔥 Étape 1 : Préparer les produits et calculer le montant total
@@ -57,53 +57,42 @@ export default function CartDrawer({
             .toFixed(2)
         )
 
-        // console.log("📤 Envoi des données au backend :", {
-        //   acheteur_id: userId,
-        //   totalAmount: total * 100,
-        // })
+        console.log("📤 Envoi des données au backend :", {
+          buyer_id: userInfos,
+          totalAmount: total,
+          products: productsData, // ✅ Intégration directe des produits dans `orders`
+        })
 
-        // console.log("📤 Envoi des données au backend :", {
-        //   acheteur_id: userId,
-        //   totalAmount: total, // ✅ Vérifie qu'il s'affiche bien ici
-        // })
-
-        // 🔥 Étape 2 : Créer la commande avec paiement Stripe
-        const responseOrder = await axiosInstance.post(
-          "http://localhost:5000/api/orders",
-          {
-            buyer_id: userId,
+        // 🔥 Étape 2 : Dispatch Redux pour créer la commande
+        const newOrder = await dispatch(
+          createOrder({
+            buyer_id: userInfos,
             totalAmount: total,
-          }
-        )
-
-        console.log("✅ Commande créée avec ID :", responseOrder)
-
-        const orderId = responseOrder.data.order._id
-        console.log("orderId /////////", orderId)
-        // const clientSecret = responseOrder.data.clientSecret
-
-        // console.log("✅✅✅ Commande ID :", orderId)
-        // console.log("✅✅✅ ClientSecret :", clientSecret)
-
-        // 🔥 Étape 3 : Ajouter les produits à la commande
-        for (const product of productsData) {
-          await axiosInstance.post("http://localhost:5000/api/order_details", {
-            order_id: orderId,
-            product_id: product.product_id,
-            name: product.name,
-            reference: product.reference,
-            quantity: product.quantity,
-            price: product.price,
+            details: productsData, // ✅ Respecte le modèle OrderModel
+            statut: "en cours",
+            orderedAt: new Date(),
+            // date_order: new Date(),
           })
+        )
+        productsData.map((product) => {
+          dispatch(
+            createOrderDetails({
+              order_id: newOrder.payload.order._id,
+              ...product,
+            })
+          )
+        })
+        if (newOrder.error) {
+          throw new Error(newOrder.error.message)
         }
 
-        console.log("✅ Produits ajoutés à la commande")
-
-        // 🔥 Étape 4 : Sauvegarder l'ID de commande et ouvrir Stripe
-        setOrderId(orderId)
-        dispatch(clearCart())
+        // 🔥 Étape 3 : Nettoyer le panier et fermer la modal
+        setOrderId(newOrder.payload._id)
+        removeFromLocalStorage("cart_" + userInfos._id)
+        dispatch(clearCart()) // Nettoyage Redux du panier
         onClose()
-        // removeFromLocalStorage(`cart_${userId}`)
+      } else {
+        console.warn("🛒 Panier vide, impossible de passer la commande.")
       }
     } catch (error) {
       console.error("❌ Erreur lors du checkout :", error.message)

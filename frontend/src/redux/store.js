@@ -4,9 +4,14 @@ import cartReducer from "./slices/cartSlice"
 import stockReducer from "./slices/stockSlice" // Import du stockSlice
 import authReducer from "./slices/authSlice" // Import du stockSlice
 import ordersReducer from "./slices/orderSlice" // Import du stockSlice
-import transporterSlice from "./slices/transporterSlice"
-import roleSlice from "./slices/roleSlice"
-import salesPointSlice from "./slices/salesPointSlice"
+import transporterReducer from "./slices/transporterSlice"
+import roleReducer from "./slices/roleSlice"
+import salesPointReducer from "./slices/salesPointSlice"
+import userReducer from "./slices/userSlice"
+import orderDetailsReducer from "./slices/orderDetailsSlice"
+import notificationReducer from "./slices/notificationSlice"
+import stockLogsReducer from "./slices/stockLogSlice"
+import orderShipmentsReducer from "./slices/orderShipmentSlice"
 
 export const store = configureStore({
   reducer: {
@@ -15,8 +20,13 @@ export const store = configureStore({
     stocks: stockReducer, // Ajout du stockSlice
     auth: authReducer,
     orders: ordersReducer,
-    transporters: transporterSlice,
-    roles: roleSlice,
-    salesPoints: salesPointSlice,
+    transporters: transporterReducer,
+    roles: roleReducer,
+    salesPoints: salesPointReducer,
+    users: userReducer,
+    orderDetails: orderDetailsReducer,
+    notification: notificationReducer,
+    stockLogs: stockLogsReducer,
+    orderShipments: orderShipmentsReducer,
   },
 })
