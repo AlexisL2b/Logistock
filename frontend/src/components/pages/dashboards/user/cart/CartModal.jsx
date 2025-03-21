@@ -52,10 +52,10 @@ export default function CartModal({
             price: priceUnite,
             reference: reference,
           }
-          const responseOrder = await axiosInstance.post(
-            "http://localhost:5000/api/order_details",
-            orderDetailToAdd
-          )
+          // const responseOrder = await axiosInstance.post(
+          //   "http://localhost:5000/api/order_details",
+          //   orderDetailToAdd
+          // )
           dispatch(clearCart())
           onClose()
         })
