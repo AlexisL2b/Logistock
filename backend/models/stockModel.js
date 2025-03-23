@@ -9,7 +9,7 @@ const stockSchema = new mongoose.Schema(
       unique: true,
     },
 
-    quantity: { type: Number, required: true, default: 0 },
+    quantity: { type: Number, required: true },
   },
   { versionKey: false }
 )

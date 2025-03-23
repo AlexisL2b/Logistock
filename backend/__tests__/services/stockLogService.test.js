@@ -3,6 +3,7 @@ import { MongoMemoryServer } from "mongodb-memory-server"
 import StockLogService from "../../services/stockLogService.js"
 import StockLogDAO from "../../dao/stockLogDAO.js"
 import { jest } from "@jest/globals"
+import stockLogDAO from "../../dao/stockLogDAO.js"
 
 // 📌 Simuler MongoDB en mémoire
 let mongoServer
@@ -62,7 +63,7 @@ describe("StockLogService", () => {
 
     const result = await StockLogService.getStockLogById("log1")
 
-    expect(StockLogDAO.findById).toHaveBeenCalledWith("log1")
+    expect(stockLogDAO.findById).toHaveBeenCalledWith("log1")
     expect(result).toEqual(mockLog)
   })
 
@@ -77,14 +78,21 @@ describe("StockLogService", () => {
   /**
    * ✅ Test : Ajouter un log de stock
    */
+
   test("✅ addStockLog : Ajoute un log de stock", async () => {
-    const newLog = { product_id: "prod1", quantity: 10, event: "ajout" }
-    StockLogDAO.create.mockResolvedValue({ _id: "log1", ...newLog })
+    const validData = {
+      stock_id: new mongoose.Types.ObjectId(),
+      quantity: 10,
+      event: "entrée",
+    }
 
-    const result = await StockLogService.addStockLog(newLog)
+    const mockSaved = { ...validData, _id: "logId1" }
 
-    expect(StockLogDAO.create).toHaveBeenCalledWith(newLog)
-    expect(result).toEqual({ _id: "log1", ...newLog })
+    stockLogDAO.create.mockResolvedValue(mockSaved)
+
+    const result = await StockLogService.addStockLog(validData)
+
+    expect(result).toEqual(mockSaved)
   })
 
   test("❌ addStockLog : Erreur si un champ requis est manquant", async () => {

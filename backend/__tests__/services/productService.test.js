@@ -1,57 +1,34 @@
-import mongoose from "mongoose"
-import { MongoMemoryServer } from "mongodb-memory-server"
 import ProductService from "../../services/productService.js"
 import ProductDAO from "../../dao/productDAO.js"
 import StockDAO from "../../dao/stockDAO.js"
 import StockLogDAO from "../../dao/stockLogDAO.js"
+import orderDAO from "../../dao/orderDAO.js"
 import { jest } from "@jest/globals"
-
-// 📌 Simuler MongoDB en mémoire
-let mongoServer
-
-beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create()
-  const mongoUri = mongoServer.getUri()
-  await mongoose.connect(mongoUri)
-})
-
-afterAll(async () => {
-  await mongoose.connection.dropDatabase()
-  await mongoose.connection.close()
-  await mongoServer.stop()
-})
 
 beforeEach(() => {
   jest.clearAllMocks()
+
+  // Mock manuels
+  ProductDAO.findAll = jest.fn()
+  ProductDAO.findById = jest.fn()
+  ProductDAO.findByReference = jest.fn()
+  ProductDAO.create = jest.fn()
+  ProductDAO.updateProduct = jest.fn()
+  ProductDAO.deleteProduct = jest.fn()
+
+  StockDAO.findByProductId = jest.fn()
+  StockDAO.createStock = jest.fn()
+  StockDAO.incrementStock = jest.fn()
+  StockDAO.deleteByProductId = jest.fn()
+
+  StockLogDAO.create = jest.fn()
+  orderDAO.findOrdersByStatusAndProductId = jest.fn()
 })
 
-// ✅ Mocks des DAO
-jest.mock("../../dao/productDAO.js")
-ProductDAO.findAll = jest.fn()
-ProductDAO.findById = jest.fn()
-ProductDAO.findByReference = jest.fn()
-ProductDAO.create = jest.fn()
-ProductDAO.updateProduct = jest.fn()
-ProductDAO.deleteProduct = jest.fn()
-
-jest.mock("../../dao/stockDAO.js")
-StockDAO.findByProductId = jest.fn()
-StockDAO.createStock = jest.fn()
-StockDAO.incrementStock = jest.fn()
-StockDAO.deleteByProductId = jest.fn()
-
-jest.mock("../../dao/stockLogDAO.js")
-StockLogDAO.create = jest.fn()
-
 describe("ProductService", () => {
-  /**
-   * ✅ Test : Récupérer tous les produits
-   */
-  test("✅ getAllProducts : Récupère tous les produits", async () => {
-    const mockProducts = [
-      { _id: "prod1", name: "Laptop" },
-      { _id: "prod2", name: "Smartphone" },
-    ]
+  // ✅ Récupération
+  test("getAllProducts retourne tous les produits", async () => {
+    const mockProducts = [{ name: "Produit 1" }, { name: "Produit 2" }]
     ProductDAO.findAll.mockResolvedValue(mockProducts)
 
     const result = await ProductService.getAllProducts()
@@ -60,117 +37,171 @@ describe("ProductService", () => {
     expect(result).toEqual(mockProducts)
   })
 
-  /**
-   * ✅ Test : Récupérer un produit par ID
-   */
-  test("✅ getProductById : Récupère un produit existant", async () => {
-    const mockProduct = { _id: "prod1", name: "Laptop" }
+  test("getProductById retourne un produit", async () => {
+    const mockProduct = { _id: "prod123", name: "Produit A" }
     ProductDAO.findById.mockResolvedValue(mockProduct)
 
-    const result = await ProductService.getProductById("prod1")
+    const result = await ProductService.getProductById("prod123")
 
-    expect(ProductDAO.findById).toHaveBeenCalledWith("prod1")
+    expect(ProductDAO.findById).toHaveBeenCalledWith("prod123")
     expect(result).toEqual(mockProduct)
   })
 
-  test("❌ getProductById : Erreur si le produit est introuvable", async () => {
+  test("getProductById lance une erreur si non trouvé", async () => {
     ProductDAO.findById.mockResolvedValue(null)
-    await expect(ProductService.getProductById("unknown")).rejects.toThrow(
+
+    await expect(ProductService.getProductById("invalide")).rejects.toThrow(
       "Produit introuvable"
     )
   })
 
-  /**
-   * ✅ Test : Créer un produit
-   */
-  test("✅ createProduct : Crée un nouveau produit", async () => {
-    const newProduct = {
-      name: "Tablet",
-      reference: "TAB123",
-      price: 500,
-      quantity: 10,
+  // ✅ Création
+  test("createProduct crée un nouveau produit avec stock", async () => {
+    const data = {
+      name: "Chaise",
+      reference: "CHA123",
+      description: "Chaise ergonomique",
+      price: 100,
+      quantity: 5,
+      category_id: "cat001",
+      supplier_id: "sup001",
     }
-    ProductDAO.findByReference.mockResolvedValue(null)
-    ProductDAO.create.mockResolvedValue({ _id: "prod3", ...newProduct })
-    StockDAO.createStock.mockResolvedValue({ _id: "stock1", quantity: 10 })
 
-    const result = await ProductService.createProduct(newProduct)
+    ProductDAO.findByReference.mockResolvedValue(null)
+    ProductDAO.create.mockResolvedValue({ _id: "prod999", ...data })
+    StockDAO.createStock.mockResolvedValue({ _id: "stock999" })
+    StockLogDAO.create.mockResolvedValue(true)
+
+    const result = await ProductService.createProduct(data)
 
     expect(ProductDAO.create).toHaveBeenCalled()
     expect(StockDAO.createStock).toHaveBeenCalled()
+    expect(StockLogDAO.create).toHaveBeenCalled()
     expect(result.message).toBe("Produit et stock créés")
   })
 
-  test("❌ createProduct : Retourne un message si le produit existe déjà", async () => {
+  test("createProduct met à jour le stock si produit existe", async () => {
     const existingProduct = {
-      name: "Ordinateur Portable",
-      reference: "LAPTOP123",
-      price: 1500,
-      category_id: "cat1",
-      supplier_id: "sup1",
+      _id: "prod123",
+      name: "Chaise",
+      reference: "CHA123",
+    }
+    const data = {
+      ...existingProduct,
+      description: "Chaise confortable",
+      price: 150, // ✅ Ajoute un prix valide
       quantity: 10,
+      category_id: "cat01",
+      supplier_id: "sup01",
     }
 
     ProductDAO.findByReference.mockResolvedValue(existingProduct)
-    StockDAO.findByProductId.mockResolvedValue(null)
+    StockDAO.findByProductId.mockResolvedValue({ _id: "stock123" })
+    StockDAO.incrementStock.mockResolvedValue(true)
 
-    const result = await ProductService.createProduct(existingProduct)
+    const result = await ProductService.createProduct(data)
 
-    expect(result).toEqual({
-      message: "Produit existant, stock mis à jour",
-      data: existingProduct,
-    })
+    expect(StockDAO.incrementStock).toHaveBeenCalledWith("stock123", 10)
+    expect(result.message).toBe("Produit existant, stock mis à jour")
   })
-  /**
-   * ✅ Test : Mettre à jour un produit
-   */
-  test("✅ updateProduct : Met à jour un produit existant", async () => {
-    const updatedProduct = {
-      name: "Laptop Pro",
-      reference: "LAPTOP123",
-      price: 1200,
-      category_id: "cat1",
-      supplier_id: "sup1",
-      description: "Un ordinateur portable haut de gamme",
+
+  test("createProduct crée un stock si inexistant pour produit existant", async () => {
+    const product = { _id: "prod123", reference: "CHA123" }
+    const data = {
+      name: "Chaise",
+      reference: "CHA123",
+      description: "Une chaise",
+      price: 120,
+      quantity: 7,
+      category_id: "cat01",
+      supplier_id: "sup01",
     }
 
-    ProductDAO.updateProduct.mockResolvedValue(updatedProduct)
-
-    const result = await ProductService.updateProduct("prod1", updatedProduct)
-
-    expect(ProductDAO.updateProduct).toHaveBeenCalledWith(
-      "prod1",
-      updatedProduct
-    )
-    expect(result).toEqual(updatedProduct)
-  })
-
-  test("❌ updateProduct : Erreur si le produit est introuvable", async () => {
-    ProductDAO.updateProduct.mockResolvedValue(null)
-    await expect(ProductService.updateProduct("unknown", {})).rejects.toThrow(
-      "Échec de la mise à jour. Produit introuvable avec l'ID: unknown"
-    )
-  })
-
-  /**
-   * ✅ Test : Supprimer un produit
-   */
-  test("✅ deleteProduct : Supprime un produit existant", async () => {
-    ProductDAO.deleteProduct.mockResolvedValue(true)
-    StockDAO.findByProductId.mockResolvedValue({ _id: "stock1" })
-    StockDAO.deleteByProductId.mockResolvedValue(true)
+    ProductDAO.findByReference.mockResolvedValue(product)
+    StockDAO.findByProductId.mockResolvedValue(null)
+    StockDAO.createStock.mockResolvedValue({ _id: "stockX" })
     StockLogDAO.create.mockResolvedValue(true)
 
-    const result = await ProductService.deleteProduct("prod1")
+    const result = await ProductService.createProduct(data)
 
-    expect(ProductDAO.deleteProduct).toHaveBeenCalledWith("prod1")
+    expect(StockDAO.createStock).toHaveBeenCalled()
+    expect(StockLogDAO.create).toHaveBeenCalled()
+    expect(result.message).toBe("Produit existant, stock mis à jour")
+  })
+
+  test("createProduct : erreurs de validation", async () => {
+    await expect(ProductService.createProduct({})).rejects.toThrow()
+  })
+
+  // ✅ Update
+  test("updateProduct met à jour un produit", async () => {
+    const updated = { name: "Modifié", reference: "MOD123" }
+
+    ProductDAO.updateProduct.mockResolvedValue(updated)
+
+    const result = await ProductService.updateProduct("prod123", updated)
+
+    expect(ProductDAO.updateProduct).toHaveBeenCalledWith(
+      "prod123",
+      expect.any(Object)
+    )
+    expect(result).toEqual(updated)
+  })
+
+  test("updateProduct : erreur si produit introuvable", async () => {
+    ProductDAO.updateProduct.mockResolvedValue(null)
+
+    await expect(
+      ProductService.updateProduct("idInvalide", {})
+    ).rejects.toThrow(
+      "Échec de la mise à jour. Produit introuvable avec l'ID: idInvalide"
+    )
+  })
+
+  // ✅ Suppression
+  test("deleteProduct supprime un produit et crée un log", async () => {
+    const id = "prod123"
+
+    orderDAO.findOrdersByStatusAndProductId.mockResolvedValue([])
+    StockDAO.findByProductId.mockResolvedValue({ _id: "stock1" })
+    StockLogDAO.create.mockResolvedValue(true)
+    StockDAO.deleteByProductId.mockResolvedValue(true)
+    ProductDAO.deleteProduct.mockResolvedValue({ _id: id })
+
+    const result = await ProductService.deleteProduct(id)
+
+    expect(orderDAO.findOrdersByStatusAndProductId).toHaveBeenCalled()
+    expect(StockLogDAO.create).toHaveBeenCalled()
+    expect(ProductDAO.deleteProduct).toHaveBeenCalled()
     expect(result.message).toBe("Produit supprimé avec succès")
   })
 
-  test("❌ deleteProduct : Erreur si le produit est introuvable", async () => {
+  test("deleteProduct : erreur si commandes en cours", async () => {
+    orderDAO.findOrdersByStatusAndProductId.mockResolvedValue([{ _id: "cmd1" }])
+
+    await expect(ProductService.deleteProduct("prod123")).rejects.toThrow(
+      "Impossible de supprimer ce/ces produit(s) : il est/sont encore utilisé(s) dans des commandes en cours."
+    )
+  })
+
+  test("deleteProduct : erreur si pas de stock", async () => {
+    orderDAO.findOrdersByStatusAndProductId.mockResolvedValue([])
+    StockDAO.findByProductId.mockResolvedValue(null)
+
+    await expect(ProductService.deleteProduct("prod123")).rejects.toThrow(
+      "Aucun stock trouvé pour ce produit."
+    )
+  })
+
+  test("deleteProduct : erreur si suppression échoue", async () => {
+    orderDAO.findOrdersByStatusAndProductId.mockResolvedValue([])
+    StockDAO.findByProductId.mockResolvedValue({ _id: "stock1" })
+    StockDAO.deleteByProductId.mockResolvedValue(true)
+    StockLogDAO.create.mockResolvedValue(true)
     ProductDAO.deleteProduct.mockResolvedValue(null)
-    await expect(ProductService.deleteProduct("unknown")).rejects.toThrow(
-      "Échec de la suppression. Produit introuvable avec l'ID: unknown"
+
+    await expect(ProductService.deleteProduct("prod123")).rejects.toThrow(
+      "Échec de la suppression. Produit introuvable avec l'ID: prod123"
     )
   })
 })

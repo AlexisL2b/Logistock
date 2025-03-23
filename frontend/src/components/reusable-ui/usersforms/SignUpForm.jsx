@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { useForm, Controller } from "react-hook-form"
 import {
   TextField,
@@ -14,10 +14,14 @@ import { useDispatch, useSelector } from "react-redux"
 import { addUser } from "../../../redux/slices/userSlice" // 🔥 Redux
 import CustomSelect from "../selects/CustomSelect"
 import { showNotification } from "../../../redux/slices/notificationSlice"
+import { fetchSalesPointsWithoutUsers } from "../../../redux/slices/salesPointSlice"
 
 const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
   const dispatch = useDispatch()
-
+  const { withoutUsers, status, error } = useSelector(
+    (state) => state.salesPoints
+  )
+  console.log("withoutUsers depuis SignUpForm.jsx", withoutUsers)
   const salesPoints = useSelector((state) => state.salesPoints.list)
   const roles = useSelector((state) => state.roles.list)
 
@@ -88,7 +92,9 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
       )
     }
   }
-
+  useEffect(() => {
+    dispatch(fetchSalesPointsWithoutUsers())
+  }, [])
   return (
     <Box sx={{ maxWidth: 500, margin: "0 auto", mt: 4 }}>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -285,7 +291,7 @@ const FormulaireInscription = ({ admin, onClose, onUserAdded }) => {
                     <CustomSelect
                       inputLabel="Point de Vente"
                       selectLabel="Point de Vente"
-                      menuItems={salesPoints}
+                      menuItems={withoutUsers.data}
                       selectedValue={field.value}
                       onChange={field.onChange}
                     />

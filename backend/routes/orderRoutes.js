@@ -1,12 +1,5 @@
 import express from "express"
-import {
-  getAllOrders,
-  getOrderById,
-  addOrder,
-  updateOrder,
-  deleteOrder,
-  getOrdersByBuyer,
-} from "../controllers/orderController.js"
+import orderController from "../controllers/orderController.js"
 import validate from "../middlewares/validate.js"
 import {
   orderSchemaPost,
@@ -22,7 +15,7 @@ router.get(
   "/",
   protect,
   checkRole("Admin", "Gestionnaire", "Logisticien"),
-  getAllOrders
+  orderController.getAll
 )
 
 // ✅ Récupérer une commande par ID
@@ -30,7 +23,7 @@ router.get(
   "/:id",
   protect,
   checkRole("Admin", "Gestionnaire", "Logisticien", "Acheteur"),
-  getOrderById
+  orderController.getById
 )
 
 // ✅ Ajouter une nouvelle commande (avec détails et expédition)
@@ -39,7 +32,7 @@ router.post(
   protect,
   checkRole("Acheteur"),
   validate(orderSchemaPost),
-  addOrder
+  orderController.create
 )
 
 // ✅ Modifier une commande
@@ -48,7 +41,7 @@ router.put(
   protect,
   checkRole("Admin", "Gestionnaire", "Logisticien", "Acheteur"),
   validate(orderSchemaPut),
-  updateOrder
+  orderController.update
 )
 
 // ✅ Supprimer une commande (uniquement pour Admin, Gestionnaire et Acheteur)
@@ -56,7 +49,7 @@ router.delete(
   "/:id",
   protect,
   checkRole("Admin", "Gestionnaire", "Acheteur"),
-  deleteOrder
+  orderController.remove
 )
 
 // ✅ Récupérer toutes les commandes d'un acheteur donné
@@ -64,7 +57,7 @@ router.get(
   "/user/:buyer_id",
   protect,
   checkRole("Admin", "Gestionnaire", "Acheteur"),
-  getOrdersByBuyer
+  orderController.getByBuyer
 )
 
 export default router

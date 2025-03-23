@@ -25,11 +25,12 @@ class UserDAO {
     return await newUser.save()
   }
   async updateUser(userId, updateData) {
-    if (updateData.role_id) {
-      const role = await Role.findById(updateData.role_id)
-      if (!role) throw new Error("Le rôle spécifié n'existe pas.")
-      updateData.role = role.name
-    }
+    const role = await Role.findById(updateData.role_id)
+    // if (!role) throw new Error("Le rôle spécifié n'existe pas.")
+    // updateData.role = {
+    //   _id: role._id,
+    //   name: role.name,
+    // }
     return await User.findByIdAndUpdate(userId, updateData, { new: true })
   }
   async deleteUser(userId) {

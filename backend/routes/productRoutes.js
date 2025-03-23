@@ -1,11 +1,5 @@
 import express from "express"
-import {
-  getProductById,
-  getAllProducts,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-} from "../controllers/productController.js"
+import productController from "../controllers/productController.js"
 import { protect } from "../middlewares/authMiddleware.js"
 import { checkRole } from "../middlewares/checkRole.js"
 import validate from "../middlewares/validate.js"
@@ -13,30 +7,36 @@ import { productSchema } from "../validations/productValidation.js"
 
 const router = express.Router()
 
-// ✅ Routes des produits
-router.get("/", getAllProducts)
+// 🔹 Récupérer tous les produits (accès public ou selon règles définies)
+router.get("/", productController.getAll)
 
-// Récupérer un produit par son ID
-router.get("/:id", protect, getProductById)
+// 🔹 Récupérer un produit par ID (authentification requise)
+router.get("/:id", protect, productController.getById)
+
+// 🔹 Créer un nouveau produit (réservé à Admin ou Gestionnaire)
 router.post(
   "/",
   protect,
-  validate(productSchema),
   checkRole("Admin", "Gestionnaire"),
-  createProduct
+  validate(productSchema),
+  productController.create
 )
+
+// 🔹 Mettre à jour un produit existant
 router.put(
   "/:id",
   protect,
-  validate(productSchema),
   checkRole("Admin", "Gestionnaire"),
-  updateProduct
+  validate(productSchema),
+  productController.update
 )
+
+// 🔹 Supprimer un produit
 router.delete(
   "/:id",
   protect,
   checkRole("Admin", "Gestionnaire"),
-  deleteProduct
+  productController.remove
 )
 
 export default router

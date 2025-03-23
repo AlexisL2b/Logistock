@@ -11,7 +11,7 @@ export const getSalesPoint = async () => {
 // ✅ 🔹 Récupérer les points de vente sans utilisateur
 export const getSalesPointsWithoutUsers = async () => {
   const response = await axiosInstance.get(
-    `http://localhost:5000/api/sales_points/without-users`
+    `http://localhost:5000/api/sales_points/without_users`
   )
   return response.data
 }

@@ -36,17 +36,12 @@ class OrderDAO {
   async delete(id) {
     return await Order.findByIdAndDelete(id)
   }
-
-  // 🔥 Mettre à jour le statut de paiement Stripe
-  async updateOrderPaymentStatus(orderId, paymentIntentId, status = "pending") {
-    return await Order.findByIdAndUpdate(
-      orderId,
-      {
-        "stripePayment.paymentIntentId": paymentIntentId,
-        "stripePayment.status": status,
-      },
-      { new: true, runValidators: true }
-    )
+  // 🔥 Récupérer les commandes par statut ET contenant un produit spécifique
+  async findOrdersByStatusAndProductId(status, productId) {
+    return await Order.find({
+      statut: status,
+      "details.product_id": productId,
+    })
   }
 }
 

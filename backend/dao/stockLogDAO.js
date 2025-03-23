@@ -1,4 +1,5 @@
 import StockLog from "../models/stockLogModel.js"
+import Stock from "../models/stockModel.js"
 
 class StockLogDAO {
   async findAll() {
@@ -9,11 +10,15 @@ class StockLogDAO {
   }
 
   async findById(id) {
-    return await StockLog.findById(id).populate("product_id", "nom description")
+    return await StockLog.findById(id)
   }
+
   async deleteByProductId(produitId) {
-    return await StockLog.findOneAndDelete({ product_id: produitId })
+    const stock = await Stock.findOne({ product_id: produitId })
+    if (!stock) return null
+    return await StockLog.findOneAndDelete({ stock_id: stock._id })
   }
+
   async create(stockLogData) {
     const newStockLog = new StockLog(stockLogData)
     return await newStockLog.save()

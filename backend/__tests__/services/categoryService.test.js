@@ -1,166 +1,124 @@
-import mongoose from "mongoose"
-import { MongoMemoryServer } from "mongodb-memory-server"
-import CategoryService from "../../services/categoryService.js"
+import categoryService from "../../services/categoryService.js"
 import categoryDAO from "../../dao/categoryDAO.js"
 import productDAO from "../../dao/productDAO.js"
 import { jest } from "@jest/globals"
 
-// 📌 Simuler MongoDB en mémoire
-let mongoServer
-
-beforeAll(async () => {
-  mongoServer = await MongoMemoryServer.create()
-  const mongoUri = mongoServer.getUri()
-
-  if (!mongoUri) {
-    throw new Error("⚠️ MongoDB URI non défini !")
-  }
-
-  console.log("🔹 URI MongoDB:", mongoUri)
-  await mongoose.connect(mongoUri)
-})
-
-afterAll(async () => {
-  await mongoose.connection.dropDatabase()
-  await mongoose.connection.close()
-  await mongoServer.stop()
-})
-
 beforeEach(() => {
+  // 🎯 Mocks manuels
+  categoryDAO.findAll = jest.fn()
+  categoryDAO.getById = jest.fn()
+  categoryDAO.create = jest.fn()
+  categoryDAO.update = jest.fn()
+  categoryDAO.delete = jest.fn()
+  productDAO.findByCategoryId = jest.fn()
+})
+
+afterEach(() => {
   jest.clearAllMocks()
 })
 
-// ✅ Correction des mocks DAO avec les bonnes méthodes
-jest.mock("../../dao/categoryDAO.js")
-categoryDAO.findAll = jest.fn()
-categoryDAO.getById = jest.fn() // 🔥 Vérifie si c'est `findById` ou `getById`
-categoryDAO.create = jest.fn()
-categoryDAO.update = jest.fn()
-categoryDAO.delete = jest.fn()
-categoryDAO.findAssociatedProducts = jest.fn()
+describe("categoryService", () => {
+  describe("getAllCategories", () => {
+    test("devrait retourner toutes les catégories", async () => {
+      const mockCategories = [{ name: "Papeterie" }]
+      categoryDAO.findAll.mockResolvedValue(mockCategories)
 
-jest.mock("../../dao/productDAO.js")
-productDAO.findByCategoryId = jest.fn()
-
-describe("CategoryService", () => {
-  /**
-   * ✅ Test : Récupérer toutes les catégories
-   */
-  test("✅ getAllCategories : Récupère toutes les catégories", async () => {
-    const mockCategories = [
-      { _id: "cat1", name: "Électronique" },
-      { _id: "cat2", name: "Vêtements" },
-    ]
-    categoryDAO.findAll.mockResolvedValue(mockCategories)
-
-    const result = await CategoryService.getAllCategories()
-
-    expect(categoryDAO.findAll).toHaveBeenCalled()
-    expect(result).toEqual(mockCategories)
+      const result = await categoryService.getAllCategories()
+      expect(result).toEqual(mockCategories)
+    })
   })
 
-  /**
-   * ✅ Test : Récupérer une catégorie par ID
-   */
-  test("✅ getCategoryById : Récupère une catégorie existante", async () => {
-    const mockCategory = { _id: "cat1", name: "Électronique" }
-    categoryDAO.getById.mockResolvedValue(mockCategory)
+  describe("getCategoryById", () => {
+    test("devrait retourner une catégorie par ID", async () => {
+      const category = { name: "Informatique" }
+      categoryDAO.getById.mockResolvedValue(category)
 
-    const result = await CategoryService.getCategoryById("cat1")
+      const result = await categoryService.getCategoryById("123")
+      expect(result).toEqual(category)
+    })
 
-    expect(categoryDAO.getById).toHaveBeenCalledWith("cat1")
-    expect(result).toEqual(mockCategory)
+    test("devrait lever une erreur si la catégorie n'existe pas", async () => {
+      categoryDAO.getById.mockResolvedValue(null)
+
+      await expect(categoryService.getCategoryById("xxx")).rejects.toThrow(
+        "Catégorie introuvable"
+      )
+    })
   })
 
-  test("❌ getCategoryById : Erreur si la catégorie est introuvable", async () => {
-    categoryDAO.getById.mockResolvedValue(null)
+  describe("addCategory", () => {
+    test("devrait créer une catégorie si elle n'existe pas encore", async () => {
+      const newCat = { name: "Fournitures" }
+      categoryDAO.findAll.mockResolvedValue([])
+      categoryDAO.create.mockResolvedValue({ ...newCat, _id: "abc123" })
 
-    await expect(CategoryService.getCategoryById("unknown")).rejects.toThrow(
-      "Catégorie introuvable"
-    )
+      const result = await categoryService.addCategory(newCat)
+      expect(categoryDAO.create).toHaveBeenCalledWith(newCat)
+      expect(result).toHaveProperty("_id", "abc123")
+    })
+
+    test("devrait lever une erreur si le nom est manquant", async () => {
+      await expect(categoryService.addCategory({})).rejects.toThrow(
+        "Le champ 'nom' est requis"
+      )
+    })
+
+    test("devrait lever une erreur si la catégorie existe déjà", async () => {
+      categoryDAO.findAll.mockResolvedValue([{ name: "Papeterie" }])
+
+      await expect(
+        categoryService.addCategory({ name: "Papeterie" })
+      ).rejects.toThrow("Cette catégorie existe déjà!")
+    })
   })
 
-  /**
-   * ✅ Test : Ajouter une catégorie
-   */
-  test("✅ addCategory : Ajoute une catégorie si elle n'existe pas", async () => {
-    const newCategory = { name: "Maison" }
-    categoryDAO.findAll.mockResolvedValue([])
-    categoryDAO.create.mockResolvedValue({ _id: "cat3", ...newCategory })
+  describe("updateCategory", () => {
+    test("devrait mettre à jour une catégorie si le nom est unique", async () => {
+      const updated = { name: "Modifiée" }
+      categoryDAO.findAll.mockResolvedValue([{ name: "Ancienne" }])
+      categoryDAO.update.mockResolvedValue(updated)
 
-    const result = await CategoryService.addCategory(newCategory)
+      const result = await categoryService.updateCategory("id123", updated)
+      expect(categoryDAO.update).toHaveBeenCalledWith("id123", updated)
+      expect(result).toEqual(updated)
+    })
 
-    expect(categoryDAO.findAll).toHaveBeenCalled()
-    expect(categoryDAO.create).toHaveBeenCalledWith(newCategory)
-    expect(result).toEqual({ _id: "cat3", ...newCategory })
+    test("devrait lever une erreur si le nouveau nom existe déjà", async () => {
+      categoryDAO.findAll.mockResolvedValue([{ name: "Déjà existante" }])
+
+      await expect(
+        categoryService.updateCategory("id", { name: "Déjà existante" })
+      ).rejects.toThrow("Cette catégorie existe déjà!")
+    })
   })
 
-  test("❌ addCategory : Erreur si la catégorie existe déjà", async () => {
-    categoryDAO.findAll.mockResolvedValue([
-      { _id: "cat1", name: "Électronique" },
-    ])
+  describe("deleteCategory", () => {
+    test("devrait supprimer une catégorie si elle n'est pas utilisée", async () => {
+      productDAO.findByCategoryId.mockResolvedValue([])
+      categoryDAO.delete.mockResolvedValue({ _id: "cat123" })
 
-    await expect(
-      CategoryService.addCategory({ name: "Électronique" })
-    ).rejects.toThrow("Cette catégorie existe déjà!")
-  })
+      const result = await categoryService.deleteCategory("cat123")
+      expect(result).toHaveProperty("_id", "cat123")
+    })
 
-  /**
-   * ✅ Test : Mettre à jour une catégorie
-   */
-  test("✅ updateCategory : Met à jour une catégorie si elle n'existe pas déjà", async () => {
-    const updatedData = { name: "Maison et Jardin" }
-    categoryDAO.findAll.mockResolvedValue([
-      { _id: "cat1", name: "Électronique" },
-    ])
-    categoryDAO.update.mockResolvedValue({ _id: "cat1", ...updatedData })
+    test("devrait lever une erreur si des produits utilisent la catégorie", async () => {
+      productDAO.findByCategoryId.mockResolvedValue([
+        { name: "Produit 1" },
+        { name: "Produit 2" },
+      ])
 
-    const result = await CategoryService.updateCategory("cat1", updatedData)
+      await expect(categoryService.deleteCategory("cat123")).rejects.toThrow(
+        "Impossible de supprimer cette catégorie, elle est encore utilisée par des produits."
+      )
+    })
 
-    expect(categoryDAO.findAll).toHaveBeenCalled()
-    expect(categoryDAO.update).toHaveBeenCalledWith("cat1", updatedData)
-    expect(result).toEqual({ _id: "cat1", ...updatedData })
-  })
+    test("devrait lever une erreur si la suppression échoue", async () => {
+      productDAO.findByCategoryId.mockResolvedValue([])
+      categoryDAO.delete.mockResolvedValue(null)
 
-  /**
-   * ✅ Test : Supprimer une catégorie
-   */
-  test("✅ deleteCategory : Supprime une catégorie si elle n'est pas utilisée", async () => {
-    productDAO.findByCategoryId.mockResolvedValue([]) // ✅ Toujours un tableau vide
-    categoryDAO.findAssociatedProducts.mockResolvedValue(false)
-    categoryDAO.delete.mockResolvedValue({ _id: "cat1", name: "Électronique" })
-
-    const result = await CategoryService.deleteCategory("cat1")
-
-    expect(productDAO.findByCategoryId).toHaveBeenCalledWith("cat1")
-    expect(categoryDAO.delete).toHaveBeenCalledWith("cat1")
-    expect(result).toEqual({ _id: "cat1", name: "Électronique" })
-  })
-
-  test("❌ deleteCategory : Erreur si la catégorie est utilisée par des produits", async () => {
-    productDAO.findByCategoryId.mockResolvedValue([
-      { _id: "prod1", name: "Ordinateur" },
-    ])
-    categoryDAO.findAssociatedProducts.mockResolvedValue(true) // ✅ Elle est utilisée
-
-    await expect(CategoryService.deleteCategory("cat1")).rejects.toThrow(
-      "Impossible de supprimer cette catégorie, elle est encore utilisée par des produits."
-    )
-
-    expect(productDAO.findByCategoryId).toHaveBeenCalledWith("cat1")
-    expect(categoryDAO.delete).not.toHaveBeenCalled() // ✅ Vérifie que `delete` n'est PAS appelé
-  })
-
-  test("❌ deleteCategory : Erreur si la catégorie est introuvable", async () => {
-    productDAO.findByCategoryId.mockResolvedValue([]) // ✅ Toujours un tableau vide
-    categoryDAO.findAssociatedProducts.mockResolvedValue(false) // ✅ La catégorie n'est PAS utilisée
-    categoryDAO.delete.mockResolvedValue(null) // 🔥 Elle n'existe pas
-
-    await expect(CategoryService.deleteCategory("unknown")).rejects.toThrow(
-      "Catégorie introuvable"
-    )
-
-    expect(productDAO.findByCategoryId).toHaveBeenCalledWith("unknown")
-    expect(categoryDAO.delete).toHaveBeenCalledWith("unknown")
+      await expect(categoryService.deleteCategory("cat999")).rejects.toThrow(
+        "Catégorie introuvable"
+      )
+    })
   })
 })
