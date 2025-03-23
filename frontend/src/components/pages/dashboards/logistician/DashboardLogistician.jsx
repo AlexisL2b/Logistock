@@ -11,6 +11,8 @@ import Main from "./main/Main"
 import { useTheme } from "@mui/material/styles"
 import useMediaQuery from "@mui/material/useMediaQuery"
 import Profile from "../user/main/profile/Profile"
+import LocalShippingIcon from "@mui/icons-material/LocalShipping"
+import SupplierOrder from "./main/supplierOrder/SupplierOrder"
 
 export default function DashboardLogistician() {
   const [activeComponent, setActiveComponent] = useState("profile")
@@ -31,6 +33,12 @@ export default function DashboardLogistician() {
       label: "Profile",
       icon: <AccountCircleIcon />,
       component: <Profile />, // Composant à afficher
+    },
+    {
+      path: "supplierOrder",
+      label: "Commande fournisseur",
+      icon: <LocalShippingIcon />,
+      component: <SupplierOrder />, // Composant à afficher
     },
   ]
   const activeElement = links.find(

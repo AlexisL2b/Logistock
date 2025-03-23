@@ -1,11 +1,5 @@
 import express from "express"
-import {
-  getAllStockLogs,
-  getStockLogById,
-  addStockLog,
-  updateStockLog,
-  deleteStockLog,
-} from "../controllers/stockLogController.js"
+import stockLogController from "../controllers/stockLogController.js"
 import validate from "../middlewares/validate.js"
 import { stockLogSchema } from "../validations/stockLogValidation.js"
 import { protect } from "../middlewares/authMiddleware.js"
@@ -13,27 +7,36 @@ import { checkRole } from "../middlewares/checkRole.js"
 
 const router = express.Router()
 
-router.get("/", getAllStockLogs) // GET /api/stock_logs
-router.get("/:id", getStockLogById) // GET /api/stock_logs/:id
+// ✅ Récupérer tous les logs de stock
+router.get("/", stockLogController.getAll)
+
+// ✅ Récupérer un log de stock par ID
+router.get("/:id", stockLogController.getById)
+
+// ✅ Ajouter un log de stock
 router.post(
   "/",
   validate(stockLogSchema),
   protect,
   checkRole("Admin", "Gestionnaire", "Logisticien"),
-  addStockLog
-) // ✅ Validation ajoutée ici
+  stockLogController.create
+)
+
+// ✅ Mettre à jour un log de stock
 router.put(
   "/:id",
   validate(stockLogSchema),
   protect,
   checkRole("Admin", "Gestionnaire", "Logisticien"),
-  updateStockLog
-) // ✅ Validation ajoutée ici
+  stockLogController.update
+)
+
+// ✅ Supprimer un log de stock
 router.delete(
   "/:id",
   protect,
   checkRole("Admin", "Gestionnaire", "Logisticien"),
-  deleteStockLog
-) // DELETE /api/stock_logs/:id
+  stockLogController.remove
+)
 
 export default router

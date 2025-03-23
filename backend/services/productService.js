@@ -1,6 +1,9 @@
+import orderDAO from "../dao/orderDAO.js"
 import ProductDAO from "../dao/productDAO.js"
 import StockDAO from "../dao/stockDAO.js"
 import StockLogDAO from "../dao/stockLogDAO.js"
+import Order from "../models/orderModel.js"
+
 import sanitize from "mongo-sanitize" // 🔹 Évite les injections NoSQL
 import validator from "validator" // 🔹 Vérifie et nettoie les entrées
 
@@ -150,11 +153,21 @@ class ProductService {
     return updatedProduct
   }
 
-  // ✅ Supprimer un produit avec sanitization
   async deleteProduct(productId) {
     const sanitizedId = sanitize(productId)
-    const stockToDelete = await StockDAO.findByProductId(sanitizedId)
 
+    const commandesEnCours = await orderDAO.findOrdersByStatusAndProductId(
+      "en cours",
+      sanitizedId
+    )
+
+    if (commandesEnCours.length > 0) {
+      throw new Error(
+        "Impossible de supprimer ce/ces produit(s) : il est/sont encore utilisé(s) dans des commandes en cours."
+      )
+    }
+
+    const stockToDelete = await StockDAO.findByProductId(sanitizedId)
     if (!stockToDelete) {
       throw new Error("Aucun stock trouvé pour ce produit.")
     }
@@ -173,6 +186,7 @@ class ProductService {
         `Échec de la suppression. Produit introuvable avec l'ID: ${sanitizedId}`
       )
     }
+
     return { message: "Produit supprimé avec succès", deletedProduct }
   }
 }

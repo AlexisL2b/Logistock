@@ -24,6 +24,7 @@ export const fetchSalesPointsWithoutUsers = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await getSalesPointsWithoutUsers()
+      console.log("response depuis salesPointSlice.js", response)
       return response
     } catch (error) {
       console.error(

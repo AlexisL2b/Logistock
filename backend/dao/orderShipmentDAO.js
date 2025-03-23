@@ -2,12 +2,6 @@ import OrderShipment from "../models/orderShipmentModel.js"
 
 class OrderShipmentDAO {
   async findAll() {
-    console.log(
-      "🟢 🟢 🟢 🟢 🟢 🟢 ",
-      OrderShipment.find()
-        .populate("order_id", "statut date_order")
-        .populate("transporter_id", "name phone")
-    )
     return await OrderShipment.find()
       .populate("order_id", "statut date_order")
       .populate("transporter_id", "name phone")
@@ -15,12 +9,12 @@ class OrderShipmentDAO {
 
   async findById(id) {
     return await OrderShipment.findById(id)
-      .populate("commande_id", "statut date_order")
-      .populate("transporteur_id", "name phone")
+      .populate("order_id", "statut date_order")
+      .populate("transporter_id", "name phone")
   }
 
   async findByCommandeId(commandeId) {
-    return await OrderShipment.find({ commande_id: commandeId })
+    return await OrderShipment.find({ order_id: commandeId })
   }
 
   async create(orderShipmentData) {

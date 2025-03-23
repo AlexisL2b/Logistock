@@ -1,66 +1,78 @@
 import express from "express"
 import {
-  decrementStockForOrder,
-  checkStockAvailability,
   getAllStocks,
   getStockById,
+  getStocksWithProducts,
+  checkStockAvailability,
   addStock,
   updateStock,
   updateStockByProductId,
-  deleteStock,
   incrementStock,
-  getStocksWithProducts,
+  decrementStockForOrder,
+  deleteStock,
 } from "../controllers/stockController.js"
+
 import validate from "../middlewares/validate.js"
 import {
-  incrementStockSchema,
   stockSchema,
+  incrementStockSchema,
 } from "../validations/stockValidation.js"
 import { protect } from "../middlewares/authMiddleware.js"
 import { checkRole } from "../middlewares/checkRole.js"
 
 const router = express.Router()
 
-router.post(
-  "/decrement",
-  // validate(stockSchema),
-  protect,
-  checkRole("Admin", "Gestionnaire", "Logisticien"),
-  decrementStockForOrder
-) // ✅ Validation ajoutée ici
-router.put(
-  "/increment/:id",
-  validate(incrementStockSchema),
-  protect,
-  checkRole("Admin", "Gestionnaire", "Logisticien"),
-  incrementStock
-) // ✅ Validation ajoutée ici
-router.get("/stocks-with-products", getStocksWithProducts) // Récupérer un stock par ID
-router.post("/check", validate(stockSchema), checkStockAvailability) // ✅ Validation ajoutée ici
-router.get("/all", getAllStocks) // Récupérer tous les stocks
-router.get("/:id", getStockById) // Récupérer un stock par ID
+// ✅ Lecture
+router.get("/all", getAllStocks)
+router.get("/stocks-with-products", getStocksWithProducts)
+router.get("/:id", getStockById)
+
+// ✅ Vérification de stock avant commande
+router.post("/check", validate(stockSchema), checkStockAvailability)
+
+// ✅ Création
 router.post(
   "/",
   validate(stockSchema),
   protect,
   checkRole("Admin", "Gestionnaire", "Logisticien"),
   addStock
-) // ✅ Validation ajoutée ici
+)
+
+// ✅ Incrémentation
+router.put(
+  "/increment/:id",
+  validate(incrementStockSchema),
+  protect,
+  checkRole("Admin", "Gestionnaire", "Logisticien"),
+  incrementStock
+)
+
+// ✅ Décrémentation via commande
+router.post(
+  "/decrement",
+  protect,
+  checkRole("Admin", "Gestionnaire", "Logisticien"),
+  decrementStockForOrder
+)
+
+// ✅ Mise à jour
 router.put(
   "/:id",
-  // validate(stockSchema),
   protect,
   checkRole("Admin", "Gestionnaire", "Logisticien"),
   updateStock
-) // ✅ Validation ajoutée ici
-// ✅ Validation ajoutée ici
+)
+
 router.put(
   "/update-by-product/:product_id",
   validate(stockSchema),
   protect,
   checkRole("Admin", "Gestionnaire", "Logisticien"),
   updateStockByProductId
-) // ✅ Validation ajoutée ici
-router.delete("/:id", deleteStock) // Supprimer un stock par ID
+)
+
+// ✅ Suppression
+router.delete("/:id", deleteStock)
 
 export default router

@@ -1,20 +1,12 @@
 import Joi from "joi"
 
 export const stockLogSchema = Joi.object({
-  // product_id: Joi.string()
-  //   .regex(/^[0-9a-fA-F]{24}$/)
-  //   .required()
-  //   .messages({
-  //     "string.pattern.base":
-  //       "L'ID du produit doit être un ObjectId MongoDB valide.",
-  //     "any.required": "L'ID du produit est obligatoire.",
-  //   }),
   event: Joi.string()
-    .valid("entrée", "sortie", "suppression", "création")
+    .valid("entrée", "sortie", "suppression", "création", "commandé")
     .required()
     .messages({
       "any.only":
-        "L'événement doit être 'entrée', 'sortie', 'supprssion' ou création.",
+        "L'événement doit être 'entrée', 'sortie', 'supprssion', 'commandé' ou création.",
       "any.required": "L'événement est obligatoire.",
     }),
   quantity: Joi.number().min(1).required().messages({

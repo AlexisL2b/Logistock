@@ -27,10 +27,15 @@ class SalesPointDAO {
   }
   async findWithoutUsers() {
     const salesPointsWithUsers = await User.aggregate([
-      { $match: { "sales_point._id": { $exists: true } } }, // Filtrer ceux qui ont un sales_point
-      { $group: { _id: "$sales_point._id" } }, // Extraire les IDs uniques
-    ]) // Récupère les sales_point utilisés
-    return await SalesPoint.find({ _id: { $nin: salesPointsWithUsers } }) // Exclut ceux qui sont dans User
+      { $match: { "sales_point._id": { $exists: true } } },
+      { $group: { _id: "$sales_point._id" } },
+    ])
+
+    // 👉 Extraire uniquement les IDs
+    const usedIds = salesPointsWithUsers.map((sp) => sp._id)
+
+    // 👉 Retourner les sales points qui ne sont pas utilisés
+    return await SalesPoint.find({ _id: { $nin: usedIds } })
   }
 }
 

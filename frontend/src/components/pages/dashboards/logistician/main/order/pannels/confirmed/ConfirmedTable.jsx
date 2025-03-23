@@ -75,7 +75,10 @@ function ConfirmedRow({ row }) {
           date_shipment: new Date(),
         })
       )
-
+      console.log(
+        "responseShipment depuis ConfirmedTable.jsx",
+        responseShipment
+      )
       dispatch(fetchOrders())
       setModalOpen(false)
     } catch (error) {

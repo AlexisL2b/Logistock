@@ -29,12 +29,14 @@ import { useDispatch } from "react-redux"
 import { incrementStock } from "../../../../../../redux/api/stockApi"
 import { incrementStocks } from "../../../../../../redux/slices/stockSlice"
 import { createLog } from "../../../../../../redux/slices/stockLogSlice"
+import { createSupplierOrder } from "../../../../../../redux/slices/supplierOrderSlice"
 
 const getEventStyle = (event) => {
   const styles = {
     entrée: { color: "green", fontWeight: "bold" },
     sortie: { color: "red", fontWeight: "bold" },
     création: { color: "blue", fontWeight: "bold" },
+    commandé: { color: "orange", fontWeight: "bold" },
   }
   return styles[event.toLowerCase()] || { color: "black", fontWeight: "bold" }
 }
@@ -173,6 +175,7 @@ export default function CollapsibleTable({ stocks }) {
     setSelectedStock(stock)
     setReassortQuantity("")
     setModalOpen(true)
+    console.log(stocks)
   }
 
   const handleCloseModal = () => {
@@ -189,11 +192,32 @@ export default function CollapsibleTable({ stocks }) {
     }
 
     try {
-      await dispatch(
-        incrementStocks({
-          stockId: selectedStock._id,
-          quantity: reassortQuantity,
+      // await dispatch(
+      //   incrementStocks({
+      //     stockId: selectedStock._id,
+      //     quantity: reassortQuantity,
+      //   })
+      // )
+      const responseSupplierOrder = await dispatch(
+        createSupplierOrder({
+          supplier_id: selectedStock.product_id.supplier_id._id, // 👈 À adapter selon ta structure
+          statut: "En attente de traitement",
+          details: [
+            {
+              product_id: selectedStock.product_id._id,
+              name: selectedStock.product_id.name, // 👈 À adapter
+              reference: selectedStock.product_id.reference, // 👈 À adapter
+              quantity: quantity,
+              category: selectedStock.product_id.category_id.name,
+              stock_id: selectedStock._id,
+            },
+          ],
+          orderedAt: new Date(),
         })
+      )
+      console.log(
+        "responseSupplierOrder depuis StocksTable.jsx",
+        responseSupplierOrder
       )
       // await axiosInstance.put(`/stocks/increment/${selectedStock._id}`, {
       //   quantity: quantity,
@@ -202,7 +226,7 @@ export default function CollapsibleTable({ stocks }) {
       await dispatch(
         createLog({
           stock_id: selectedStock._id,
-          event: "entrée",
+          event: "commandé",
           quantity: quantity, // Prend la valeur trouvée ou 0 par défaut
         })
       )
@@ -213,13 +237,13 @@ export default function CollapsibleTable({ stocks }) {
       // })
 
       // ✅ Mise à jour locale du stock sans recharger la page
-      setStocksData((prevStocks) =>
-        prevStocks.map((stock) =>
-          stock._id === selectedStock._id
-            ? { ...stock, quantity: stock.quantity + quantity }
-            : stock
-        )
-      )
+      // setStocksData((prevStocks) =>
+      //   prevStocks.map((stock) =>
+      //     stock._id === selectedStock._id
+      //       ? { ...stock, quantity: stock.quantity + quantity }
+      //       : stock
+      //   )
+      // )
 
       setSnackbarOpen(true) // ✅ Afficher la Snackbar après succès
     } catch (error) {
@@ -276,7 +300,7 @@ export default function CollapsibleTable({ stocks }) {
         onClose={() => setSnackbarOpen(false)}
       >
         <Alert onClose={() => setSnackbarOpen(false)} severity="success">
-          Réassort effectué avec succès !
+          Réassort commandé avec succès !
         </Alert>
       </Snackbar>
     </TableContainer>

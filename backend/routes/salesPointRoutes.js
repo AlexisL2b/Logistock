@@ -1,12 +1,5 @@
 import express from "express"
-import {
-  getAllSalesPoints,
-  getSalesPointById,
-  addSalesPoint,
-  updateSalesPoint,
-  deleteSalesPoint,
-  getSalesPointsWithoutUsers, // ✅ Ajout de la nouvelle méthode
-} from "../controllers/salesPointController.js"
+import salesPointController from "../controllers/salesPointController.js"
 import validate from "../middlewares/validate.js"
 import { salesPointSchema } from "../validations/salesPointValidation.js"
 import { protect } from "../middlewares/authMiddleware.js"
@@ -14,39 +7,44 @@ import { checkRole } from "../middlewares/checkRole.js"
 
 const router = express.Router()
 
+// ✅ Récupérer les points de vente sans utilisateurs
 router.get(
-  "/without-users",
-  protect,
-  checkRole("admin", "Gestionnaire"),
-  getSalesPointsWithoutUsers
+  "/without_users",
+  // protect,
+  // checkRole("admin", "Gestionnaire"),
+  salesPointController.getWithoutUsers
 )
-router.get("/", getAllSalesPoints) // GET /api/sales_points
-router.get("/:id", getSalesPointById) // GET /api/sales_points/:id
 
-// ✅ Ajout de la nouvelle route
-// GET /api/sales_points/without-users (Accès restreint à Admin et Gestionnaire)
+// ✅ Récupérer tous les points de vente
+router.get("/", salesPointController.getAll)
 
+// ✅ Récupérer un point de vente par ID
+router.get("/:id", salesPointController.getById)
+
+// ✅ Ajouter un nouveau point de vente
 router.post(
   "/",
   validate(salesPointSchema),
   protect,
-  checkRole("Admin", "Gestionnaire"),
-  addSalesPoint
-) // ✅ Validation ajoutée ici
+  checkRole("admin", "Gestionnaire"),
+  salesPointController.create
+)
 
+// ✅ Mettre à jour un point de vente
 router.put(
   "/:id",
   validate(salesPointSchema),
   protect,
-  checkRole("Admin", "Gestionnaire"),
-  updateSalesPoint
-) // ✅ Validation ajoutée ici
+  checkRole("admin", "Gestionnaire"),
+  salesPointController.update
+)
 
+// ✅ Supprimer un point de vente
 router.delete(
   "/:id",
   protect,
-  checkRole("Admin", "Gestionnaire"),
-  deleteSalesPoint
-) // DELETE /api/sales_points/:id
+  checkRole("admin", "Gestionnaire"),
+  salesPointController.remove
+)
 
 export default router

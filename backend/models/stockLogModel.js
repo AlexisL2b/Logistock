@@ -14,7 +14,7 @@ const stockLogSchema = new mongoose.Schema(
     },
     event: {
       type: String,
-      enum: ["entrée", "sortie", "création", "suppression"],
+      enum: ["entrée", "sortie", "création", "suppression", "commandé"],
       required: true,
     },
     quantity: {

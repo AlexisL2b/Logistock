@@ -7,7 +7,7 @@ import stockLogRoutes from "./routes/stockLogRoutes.js"
 import transporterRoutes from "./routes/transporterRoutes.js"
 import userRoutes from "./routes/userRoutes.js"
 import orderRoutes from "./routes/orderRoutes.js"
-import orderDetailsRoutes from "./routes/orderDetailsRoutes.js"
+import supplierOrderRoutes from "./routes/supplierOrderRoutes.js"
 import orderShipmentRoutes from "./routes/orderShipmentRoutes.js"
 import authRoutes from "./routes/authRoutes.js"
 import stockRoutes from "./routes/stockRoutes.js"
@@ -103,7 +103,7 @@ app.use("/api/stock_logs", stockLogRoutes)
 app.use("/api/transporters", transporterRoutes)
 app.use("/api/users", userRoutes)
 app.use("/api/orders", orderRoutes)
-app.use("/api/order_details", orderDetailsRoutes)
+app.use("/api/suppliers_orders", supplierOrderRoutes)
 app.use("/api/order_shipments", orderShipmentRoutes)
 app.use("/api/stocks", stockRoutes)
 app.use("/api/roles", roleRoutes)
