@@ -12,6 +12,7 @@ const orderSchemaPost = new mongoose.Schema({
   totalAmount: { type: Number, required: true },
   details: [
     {
+      _id: false,
       product_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product", // à modifier par order_details

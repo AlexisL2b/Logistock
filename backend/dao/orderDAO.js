@@ -19,31 +19,6 @@ class OrderDAO {
   // 🔥 Créer une nouvelle commande avec détails et expédition intégrés
   async createOrder(orderData) {
     const newOrder = new Order(orderData)
-    // const newOrder = new Order({
-    //   buyer: {
-    //     _id: orderData.buyer._id,
-    //     firstname: orderData.buyer.firstname,
-    //     lastname: orderData.buyer.lastname,
-    //     email: orderData.buyer.email,
-    //     address: orderData.buyer.address,
-    //   },
-    //   statut: "en cours",
-    //   totalAmount: orderData.totalAmount,
-    //   date_order: new Date(),
-    //   details: orderData.details.map((detail) => ({
-    //     product_id: detail.product_id,
-    //     name: detail.name,
-    //     reference: detail.reference,
-    //     quantity: detail.quantity,
-    //     price: detail.price,
-    //   })),
-    //   shipment: orderData.shipment
-    //     ? {
-    //         transporter_id: orderData.shipment.transporter_id,
-    //         date_shipment: orderData.shipment.date_shipment,
-    //       }
-    //     : null,
-    // })
 
     await newOrder.save()
     return newOrder

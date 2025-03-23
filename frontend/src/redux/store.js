@@ -12,6 +12,7 @@ import orderDetailsReducer from "./slices/orderDetailsSlice"
 import notificationReducer from "./slices/notificationSlice"
 import stockLogsReducer from "./slices/stockLogSlice"
 import orderShipmentsReducer from "./slices/orderShipmentSlice"
+import supplierOrdersReducer from "./slices/supplierOrderSlice"
 
 export const store = configureStore({
   reducer: {
@@ -28,5 +29,6 @@ export const store = configureStore({
     notification: notificationReducer,
     stockLogs: stockLogsReducer,
     orderShipments: orderShipmentsReducer,
+    supplierOrder: supplierOrdersReducer,
   },
 })
