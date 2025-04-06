@@ -7,9 +7,13 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:5000", // Adresse de votre backend
+        target: "http://localhost:8080", // Adresse de votre backend via Caddy
         changeOrigin: true,
         secure: false,
+      },
+      "/socket.io": {
+        target: "http://localhost:8080",
+        ws: true,
       },
     },
   },

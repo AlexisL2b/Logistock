@@ -23,7 +23,7 @@ import cookieParser from "cookie-parser"
 import helmet from "helmet"
 import csrf from "csurf"
 
-// Charger les variables d’environnement
+// Charger les variables d'environnement
 // ... imports
 
 dotenv.config()
@@ -48,7 +48,7 @@ app.use(
 // 🌐 CORS – à placer AVANT les routes
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "http://localhost:8080"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"],
     credentials: true,
@@ -78,7 +78,7 @@ app.use(csrf({ cookie: true }))
 const server = createServer(app)
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: ["http://localhost:5173", "http://localhost:8080"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
