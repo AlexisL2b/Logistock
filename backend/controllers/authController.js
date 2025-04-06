@@ -17,6 +17,10 @@ export const createUser = async (req, res) => {
     res.status(500).json({ message: error.message })
   }
 }
+export const getCsrfToken = (req, res) => {
+  console.log("req.csrfToken() depuis authController.js", req.csrfToken())
+  res.json({ csrfToken: req.csrfToken() })
+}
 
 /**
  * 🔹 Connexion utilisateur

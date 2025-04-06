@@ -2,17 +2,15 @@ import axios from "axios"
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:5000/api",
-  withCredentials: true,
-  // 🔥 Active l'envoi des cookies automatiquement
+  withCredentials: true, // ✅ Envoie automatiquement les cookies (_csrf)
 })
 
-axiosInstance.interceptors.request.use(
-  (config) => {
-    // Suppression de la récupération du token via localStorage
+// 💡 On garde la possibilité d'injecter dynamiquement le token CSRF
+let csrfToken = null
 
-    return config
-  },
-  (error) => Promise.reject(error)
-)
+export const setCsrfToken = (token) => {
+  csrfToken = token
+  axiosInstance.defaults.headers.common["X-CSRF-Token"] = token
+}
 
 export default axiosInstance
