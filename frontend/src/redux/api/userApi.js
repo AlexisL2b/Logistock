@@ -19,5 +19,5 @@ export const deleteUser = async (userId) => {
   return await axiosInstance.delete(`http://localhost:5000/api/users/${userId}`)
 }
 export const createUser = async (userData) => {
-  return await axios.post("http://localhost:5000/api/users/", userData)
+  return await axiosInstance.post("http://localhost:5000/api/users/", userData)
 }

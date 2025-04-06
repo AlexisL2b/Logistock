@@ -17,8 +17,8 @@ export default function LoginForm() {
     try {
       const response = await axiosInstance.post(
         "http://localhost:5000/api/auth/login",
-        { email, password },
-        { withCredentials: true } // 🔥 Nécessaire pour gérer les cookies HTTPOnly
+        { email, password }
+        // { withCredentials: true } // 🔥 Nécessaire pour gérer les cookies HTTPOnly
       )
 
       saveToLocalStorage("user", response.data.user)
