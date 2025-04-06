@@ -4,7 +4,6 @@ import { protect } from "../middlewares/authMiddleware.js"
 import { checkRole } from "../middlewares/checkRole.js"
 import validate from "../middlewares/validate.js"
 import { productSchema } from "../validations/productValidation.js"
-import { csrfProtection } from "../middlewares/csrfMiddleware.js"
 
 const router = express.Router()
 
@@ -12,7 +11,7 @@ const router = express.Router()
 router.get("/", productController.getAll)
 
 // 🔹 Récupérer un produit par ID (authentification requise)
-router.get("/:id", protect, csrfProtection, productController.getById)
+router.get("/:id", protect, productController.getById)
 
 // 🔹 Créer un nouveau produit (réservé à Admin ou Gestionnaire)
 router.post(
@@ -20,7 +19,7 @@ router.post(
   protect,
   checkRole("Admin", "Gestionnaire"),
   validate(productSchema),
-  csrfProtection,
+
   productController.create
 )
 
@@ -30,7 +29,7 @@ router.put(
   protect,
   checkRole("Admin", "Gestionnaire"),
   validate(productSchema),
-  csrfProtection,
+
   productController.update
 )
 
@@ -38,7 +37,7 @@ router.put(
 router.delete(
   "/:id",
   protect,
-  csrfProtection,
+
   checkRole("Admin", "Gestionnaire"),
   productController.remove
 )

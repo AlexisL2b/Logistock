@@ -4,7 +4,6 @@ import validate from "../middlewares/validate.js"
 import { orderShipmentSchema } from "../validations/orderShipmentValidation.js"
 import { protect } from "../middlewares/authMiddleware.js"
 import { checkRole } from "../middlewares/checkRole.js"
-import { csrfProtection } from "../middlewares/csrfMiddleware.js"
 
 const router = express.Router()
 
@@ -23,7 +22,7 @@ router.post(
   protect,
   checkRole("Admin", "Gestionnaire", "Logisticien"),
   validate(orderShipmentSchema),
-  csrfProtection,
+
   orderShipmentController.create
 )
 
@@ -31,7 +30,7 @@ router.post(
 router.put(
   "/:id",
   protect,
-  csrfProtection,
+
   checkRole("Admin", "Gestionnaire"),
   validate(orderShipmentSchema),
   orderShipmentController.update
@@ -42,7 +41,7 @@ router.delete(
   "/:id",
   protect,
   checkRole("Admin", "Gestionnaire"),
-  csrfProtection,
+
   orderShipmentController.remove
 )
 
